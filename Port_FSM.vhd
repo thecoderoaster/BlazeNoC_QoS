@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    12:37:49 01/08/2012 
+-- Create Date:    08:33:23 01/27/2012 
 -- Design Name: 
--- Module Name:    PE - Behavioral 
+-- Module Name:    Port_FSM - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -33,22 +33,22 @@ use work.router_library.all;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity PE is
-    Port ( clk 					: in  std_logic;
-           reset 					: in  std_logic;
-			  trigger 				: in  std_logic;
-			  tb_data_out			: in 	std_logic_vector (WIDTH downto 0);
-           injection_data 		: out std_logic_vector (WIDTH downto 0);
-           injection_enq 		: out std_logic;
-           injection_status 	: in  std_logic_vector (1 downto 0);	  	-- Buffer status to PE;
-			  ejection_data 		: in  std_logic_vector (WIDTH downto 0);
-			  ejection_deq 		: out std_logic;
-           ejection_status 	: in  std_logic_vector (1 downto 0));		-- Buffer status to PE
-end PE;
+entity Port_FSM is
+	Port(clk 				: in  std_logic;
+        reset 				: in  std_logic;
+		  trigger 			: in  std_logic;
+		  tb_data_out		: in 	std_logic_vector (WIDTH downto 0);   	-- Packet submitted by Testbench (top level)
+		  data_in 			: in 	std_logic_vector (WIDTH downto 0);		-- Datalink from neighbor (to FCU)
+		  din_good			: out std_logic;										-- Data good indicator from neighbor (to FCU)
+		  CTR_in				: out std_logic;										-- CTR indicator from neighbor to arbiter indicating ready to recieve (to RNA) *** need implment in rna
+		  data_out			: out std_logic_vector (WIDTH downto 0);		-- Datalink to neighbor (from SW)
+		  dout_good			: in 	std_logic;										-- Data good indicator to neighbor (from SW)
+		  CTR_out			: in 	std_logic);										-- CTR indicator from FCU to neighbor for accpeting data (from FCU)
+end Port_FSM;
 
-architecture rtl of PE is
+architecture rtl of Port_FSM is
 
-type state_type is (start, wait_state, triggered_state, send, 
+type state_type is (start, wait_state, send, data_good, 
 						  ctr, receive);   --61 State FSM
 
 signal state1, next_state1, state2, next_state2 : state_type;
@@ -80,24 +80,19 @@ begin
 				next_state1 <= wait_state;
 			when wait_state =>
 				--Wait state
-				if(ejection_status = FULL_FIFO) then
+				if(CTR_out = '1') then
 					next_state1 <= ctr;
-				elsif(ejection_status = EMPTY_FIFO) then
-					next_state1 <= wait_state;
-				elsif(ejection_status = NORM_FIFO) then
-					next_state1 <= wait_state;
-				elsif(ejection_status = ERR_FIFO) then
-					next_state1 <= wait_state;
 				else
 					next_state1 <= wait_state;
 				end if;
 			when ctr =>
-				--Dequeue a packet from the FIFO
-				ejection_deq <= '1', '0' after 1 ns;
+				--Notify the FCU that we're ready for the data.
+				CTR_in <= '1', '0' after 1 ns;
 				next_state1 <= receive;
 			when receive =>
 				--Read in the data and notify the FCU that it's good
-				ram_data_rcvd <= ejection_data;
+				ram_data_rcvd <= data_in;
+				din_good <= '1', '0' after 1 ns;
 				next_state1 <= wait_state;
 			when others =>
 				next_state1 <= start;
@@ -113,29 +108,24 @@ begin
 				next_state2 <= wait_state;
 			when wait_state =>
 				if(trigger = '1') then
-					next_state2 <= triggered_state;
+					next_state2 <= send;
 				else
 					next_state2 <= wait_state;
 				end if;
-			when triggered_state =>
-				if(injection_status = FULL_FIFO) then
-					next_state2 <= triggered_state;
-				elsif(injection_status = EMPTY_FIFO) then
-					next_state2 <= send;
-				elsif(injection_status = NORM_FIFO) then
-					next_state2 <= send;
-				elsif(injection_status = ERR_FIFO) then
-					next_state2 <= triggered_state;
-				else
-					next_state2 <= triggered_state;
-				end if;
 			when send =>
-				injection_out <= tb_data_out;
-				injection_enq <= '1', '0' after 1 ns;
-				next_state2 <= wait_state;
+				data_out <= tb_data_out;
+				next_state2 <= data_good;
+			when data_good =>
+				if(dout_good = '1') then
+					next_state2 <= wait_state;
+				else
+					next_state2 <= data_good;
+				end if;
 			when others =>
 				next_state2 <= start;
 		end case;
 	end process;
+
+
 end rtl;
 

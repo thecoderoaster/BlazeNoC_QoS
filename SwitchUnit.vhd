@@ -107,7 +107,7 @@ begin
 	-- control = 7	
 	
 	-- Control packet sense
-	sw_rnaCtFl <= senseOp;
+	sw_rnaCtFl <= '0' when(sw_injctSt ="01") else '1';
 	
 	-- Dmux for injection (injctPkt, rna)
 	sw_rnaCtrl <= sw_injct when (senseOp = '1') else (others => '0');

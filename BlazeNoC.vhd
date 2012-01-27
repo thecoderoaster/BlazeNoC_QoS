@@ -33,10 +33,11 @@ entity BlazeNoC is
 	port ( clk						: in std_logic; 	-- global clock
 			 reset					: in std_logic;
 			 
-			 sm_trigger1			: in std_logic;
-			 sm_trigger2			: in std_logic;
-			 sm_trigger3			: in std_logic;
-			 sm_trigger4			: in std_logic);	-- global reset
+			 sm_triggerN			: in std_logic;
+			 sm_triggerS			: in std_logic;
+			 sm_triggerE			: in std_logic;
+			 sm_triggerW			: in std_logic;
+			 sm_triggerInject		: in std_logic);	-- global reset
 end BlazeNoC;
 
 architecture rtl of BlazeNoC is

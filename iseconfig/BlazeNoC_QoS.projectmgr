@@ -7,20 +7,26 @@
    <ItemView engineview="SynthesisOnly" guiview="Source" compilemode="AutoCompile" >
       <ClosedNodes>
          <ClosedNodesVersion>2</ClosedNodesVersion>
-         <ClosedNode>/BlazeRouter - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeRouter.vhd/flowCtrl - fcu - fcu_4</ClosedNode>
+         <ClosedNode>/BlazeNoC - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC.vhd/Router - BlazeRouter - rtl</ClosedNode>
+         <ClosedNode>/BlazeNoC - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC.vhd/Router - BlazeRouter - rtl/ar - Arbiter - rtl</ClosedNode>
+         <ClosedNode>/BlazeNoC - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC.vhd/Router - BlazeRouter - rtl/flowCtrl - fcu - fcu_4</ClosedNode>
+         <ClosedNode>/BlazeNoC - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC.vhd/Router - BlazeRouter - rtl/vcEast - virtual_channel - vc_4</ClosedNode>
+         <ClosedNode>/BlazeNoC - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC.vhd/Router - BlazeRouter - rtl/vcNorth - virtual_channel - vc_4</ClosedNode>
+         <ClosedNode>/BlazeNoC - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC.vhd/Router - BlazeRouter - rtl/vcSouth - virtual_channel - vc_4</ClosedNode>
+         <ClosedNode>/BlazeNoC - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC.vhd/Router - BlazeRouter - rtl/vcWest - virtual_channel - vc_4</ClosedNode>
          <ClosedNode>/BlazeRouter - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeRouter.vhd/vcEast - virtual_channel - vc_4</ClosedNode>
          <ClosedNode>/BlazeRouter - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeRouter.vhd/vcNorth - virtual_channel - vc_4</ClosedNode>
          <ClosedNode>/BlazeRouter - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeRouter.vhd/vcSouth - virtual_channel - vc_4</ClosedNode>
          <ClosedNode>/BlazeRouter - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeRouter.vhd/vcWest - virtual_channel - vc_4</ClosedNode>
       </ClosedNodes>
       <SelectedItems>
-         <SelectedItem>Control - ControlUnit - Behavioral (C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd)</SelectedItem>
+         <SelectedItem>BlazeNoC - rtl (C:/Users/kor/Documents/BlazeNoC_QoS/BlazeNoC.vhd)</SelectedItem>
       </SelectedItems>
       <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
       <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
-      <ViewHeaderState orientation="horizontal" >000000ff000000000000000100000001000000000000000000000000000000000202000000010000000100000064000001ba000000020000000000000000000000000000000064ffffffff000000810000000000000002000001ba0000000100000000000000000000000100000000</ViewHeaderState>
+      <ViewHeaderState orientation="horizontal" >000000ff0000000000000001000000010000000000000000000000000000000002020000000100000001000000640000014d000000020000000000000000000000000000000064ffffffff0000008100000000000000020000014d0000000100000000000000000000000100000000</ViewHeaderState>
       <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
-      <CurrentItem>Control - ControlUnit - Behavioral (C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd)</CurrentItem>
+      <CurrentItem>BlazeNoC - rtl (C:/Users/kor/Documents/BlazeNoC_QoS/BlazeNoC.vhd)</CurrentItem>
    </ItemView>
    <ItemView engineview="SynthesisOnly" sourcetype="DESUT_VHDL_ARCHITECTURE" guiview="Process" >
       <ClosedNodes>
@@ -32,24 +38,26 @@
          <ClosedNode>User Constraints</ClosedNode>
       </ClosedNodes>
       <SelectedItems>
-         <SelectedItem></SelectedItem>
+         <SelectedItem>Design Summary/Reports</SelectedItem>
       </SelectedItems>
       <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
       <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
-      <ViewHeaderState orientation="horizontal" >000000ff000000000000000100000001000000000000000000000000000000000000000000000000f8000000010000000100000000000000000000000064ffffffff000000810000000000000001000000f80000000100000000</ViewHeaderState>
+      <ViewHeaderState orientation="horizontal" >000000ff000000000000000100000001000000000000000000000000000000000000000000000000e7000000010000000100000000000000000000000064ffffffff000000810000000000000001000000e70000000100000000</ViewHeaderState>
       <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
-      <CurrentItem></CurrentItem>
+      <CurrentItem>Design Summary/Reports</CurrentItem>
    </ItemView>
    <ItemView guiview="File" >
       <ClosedNodes>
          <ClosedNodesVersion>1</ClosedNodesVersion>
       </ClosedNodes>
-      <SelectedItems/>
+      <SelectedItems>
+         <SelectedItem>ControlUnit.vhd</SelectedItem>
+      </SelectedItems>
       <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
       <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
       <ViewHeaderState orientation="horizontal" >000000ff00000000000000010000000000000000010000000000000000000000000000000000000263000000040101000100000000000000000000000064ffffffff000000810000000000000004000000910000000100000000000000440000000100000000000000660000000100000000000001280000000100000000</ViewHeaderState>
       <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
-      <CurrentItem>AddressLUT.vhd</CurrentItem>
+      <CurrentItem>ControlUnit.vhd</CurrentItem>
    </ItemView>
    <ItemView guiview="Library" >
       <ClosedNodes>
@@ -83,4 +91,48 @@
    </ItemView>
    <SourceProcessView>000000ff00000000000000020000011b0000011b01000000050100000002</SourceProcessView>
    <CurrentView>Implementation</CurrentView>
+   <ItemView engineview="BehavioralSim" guiview="Source" compilemode="AutoCompile" >
+      <ClosedNodes>
+         <ClosedNodesVersion>2</ClosedNodesVersion>
+         <ClosedNode>/BlazeNoC - rtl C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC.vhd/Router - BlazeRouter - rtl</ClosedNode>
+         <ClosedNode>/BlazeNoC_QoS_TB - behavior C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC_QoS_TB.vhd/uut - BlazeNoC - rtl/Router - BlazeRouter - rtl</ClosedNode>
+         <ClosedNode>/BlazeRouter_TB - behavior C:|Users|kor|Documents|BlazeNoC_QoS|BlazeRouter_TB.vhd</ClosedNode>
+         <ClosedNode>/testbench - behavior C:|Users|kor|Documents|BlazeNoC_QoS|BlazeNoC_QoS_TB.vhd</ClosedNode>
+      </ClosedNodes>
+      <SelectedItems>
+         <SelectedItem>Unassigned User Library Modules</SelectedItem>
+      </SelectedItems>
+      <ScrollbarPosition orientation="vertical" >5</ScrollbarPosition>
+      <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
+      <ViewHeaderState orientation="horizontal" >000000ff00000000000000010000000100000000000000000000000000000000020200000001000000010000006400000161000000020000000000000000000000000000000064ffffffff000000810000000000000002000001610000000100000000000000000000000100000000</ViewHeaderState>
+      <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
+      <CurrentItem>Unassigned User Library Modules</CurrentItem>
+   </ItemView>
+   <ItemView engineview="BehavioralSim" sourcetype="" guiview="Process" >
+      <ClosedNodes>
+         <ClosedNodesVersion>1</ClosedNodesVersion>
+         <ClosedNode>Design Utilities</ClosedNode>
+      </ClosedNodes>
+      <SelectedItems>
+         <SelectedItem></SelectedItem>
+      </SelectedItems>
+      <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
+      <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
+      <ViewHeaderState orientation="horizontal" >000000ff000000000000000100000001000000000000000000000000000000000000000000000000f8000000010000000100000000000000000000000064ffffffff000000810000000000000001000000f80000000100000000</ViewHeaderState>
+      <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
+      <CurrentItem></CurrentItem>
+   </ItemView>
+   <ItemView engineview="BehavioralSim" sourcetype="DESUT_VHDL_ARCHITECTURE" guiview="Process" >
+      <ClosedNodes>
+         <ClosedNodesVersion>1</ClosedNodesVersion>
+      </ClosedNodes>
+      <SelectedItems>
+         <SelectedItem></SelectedItem>
+      </SelectedItems>
+      <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
+      <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
+      <ViewHeaderState orientation="horizontal" >000000ff000000000000000100000001000000000000000000000000000000000000000000000000f8000000010000000100000000000000000000000064ffffffff000000810000000000000001000000f80000000100000000</ViewHeaderState>
+      <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
+      <CurrentItem></CurrentItem>
+   </ItemView>
 </Project>

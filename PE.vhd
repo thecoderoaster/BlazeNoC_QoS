@@ -130,7 +130,7 @@ begin
 					next_state2 <= triggered_state;
 				end if;
 			when send =>
-				injection_out <= tb_data_out;
+				injection_data <= tb_data_out;
 				injection_enq <= '1', '0' after 1 ns;
 				next_state2 <= wait_state;
 			when others =>

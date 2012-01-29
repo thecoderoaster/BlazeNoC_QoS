@@ -105,12 +105,135 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      -- hold reset state for 100 ns.
-      wait for 100 ns;	
-
+       -- hold reset state for 100 ns.
+      reset <= '0';
+		
+		--Initiate a Reset		
+		wait for clk_period*2;
+		reset <= '1', '0' after clk_period;
+	
       wait for clk_period*10;
 
       -- insert stimulus here 
+		--PAYLOAD = 0x0001 (PORT - West) : GID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000111" & "0000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0007 (PORT - North) : GID = 0x01 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000001" & "0001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0001 (PORT - East) : GID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000011" & "0010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0002 (PORT - East) : GID = 0x03 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000011" & "0011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0003 (PORT - West) : GID = 0x04 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000111" & "0100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0002 (PORT - Ejection) : GID = 0x05 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000001111" & "0101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0003 (PORT - East) : GID = 0x06 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000011" & "0110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x07 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000011" & "0111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0001 (PORT - South) : GID = 0x08	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000101" & "1000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0002 (PORT - South) : GID = 0x09	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000101" & "1001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x0A	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000011" & "1010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0001 (PORT - South) : GID = 0x0B	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000101" & "1011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0002 (PORT - West) : GID = 0x0C	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000111" & "1100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0003 (PORT - South) : GID = 0x0D	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000101" & "1101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0002 (PORT - East) : GID = 0x0E	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000011" & "1110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000011" & "1111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*20;
+		
+		--***STEP 2: Update Router Address***
+		
+		--PAYLOAD = 0x0101 (Address - 5) : GID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_IPort <= "0000000000000101" & "0001" & "0001" & "000" & "0000" & "01" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		wait for clk_period*30;
+		
+		--***STEP 3: Inject a control packet*** (#1)
+		
+		--PAYLOAD = 1200 Cycles (TID) : GID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0x010 (SOUTH) : ADDR = 0x05 (ROUTER ADDRESS) : COND = 0x00
+		data_inject_IPort <= "0000010010110000" & "0001" & "0001" & "010" & "0101" & "00" & "1";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
+		--wait until north_CTR_out = '1';
+		--north_din_good <= '0';
+		wait for clk_period*5;
+		
+		--Inject a data packet (LEGIT PACKET #1)
+		--PAYLOAD = DON'T CARE (ANYTHING) : GID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH) : ADDR = 0x05 (ROUTER ADDRESS) : COND = 0x00
+		data_inject_IPort <= "0101010101010101" & "0001" & "0001" & "011" & "0101" & "00" & "0";
+		sm_triggerIPort <= '1', '0' after 1 ns;
+		
 
       wait;
    end process;

@@ -72,7 +72,7 @@ begin
 	end process;
 
 	--Handles incoming packets to FSM
-	receive_process: process(state1)
+	receive_process: process(clk)
 	begin
 		case state1 is
 			when start =>
@@ -100,7 +100,7 @@ begin
 	end process;
 	
 	--Processes outgoing packets
-	send_process: process(state2)
+	send_process: process(clk)
 	begin
 		case state2 is
 			when start =>

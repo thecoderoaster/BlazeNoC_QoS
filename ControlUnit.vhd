@@ -122,13 +122,13 @@ architecture Behavioral of ControlUnit is
 							  south1, south2, south3, south4, south5, south6, south7,
 							  west1, west2, west3, west4, west5, west6, west7,
 							  injection1, injection2, injection3, injection4, injection5,
-							  injection6, injection7, injection8, injection9, injection10,
+							  injection6, injection7, injection8,
 							  timer_check1, timer_check2, timer_check3, timer_check4,
 							  departure1,
 							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6,
-							  dp_arrivedOnEast1, dp_arrivedOnEast2, dp_arrivedOnEast3, dp_arrivedOnEast4,
-							  dp_arrivedOnSouth1, dp_arrivedOnSouth2, dp_arrivedOnSouth3, dp_arrivedOnSouth4,
-							  dp_arrivedOnWest1, dp_arrivedOnWest2, dp_arrivedOnWest3, dp_arrivedOnWest4);   --61 State FSM
+							  dp_arrivedOnEast1, dp_arrivedOnEast2, dp_arrivedOnEast3, dp_arrivedOnEast4, dp_arrivedOnEast5, dp_arrivedOnEast6,
+							  dp_arrivedOnSouth1, dp_arrivedOnSouth2, dp_arrivedOnSouth3, dp_arrivedOnSouth4, dp_arrivedOnSouth5, dp_arrivedOnSouth6,
+							  dp_arrivedOnWest1, dp_arrivedOnWest2, dp_arrivedOnWest3, dp_arrivedOnWest4, dp_arrivedOnWest5, dp_arrivedOnWest6);   --61 State FSM
 	signal state, next_state : state_type;
 	
 	signal router_address 	: std_logic_vector(PID_WIDTH-1 downto 0);
@@ -478,6 +478,19 @@ begin
 					next_state <= west7;
 				when west6 =>
 					--Configure the switch
+--					case rte_data_in(2 downto 0) is
+--						when "000" =>
+--							sw_nSel <= "111";			-- "00" North FIFO								
+--						when "001" =>
+--							sw_eSel <= "111";			-- "01" East FIFO
+--						when "010" =>
+--							sw_sSel <= "111";			-- "10" South FIFO
+--						when "011" =>
+--							sw_wSel <= "111";			-- "11" Ejection FIFO
+--						when others =>												-- TO DO: Handle Ejection
+--							null;
+--					end case;
+					
 					sw_wSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= w_rnaCtrl;
@@ -506,81 +519,56 @@ begin
 						next_state <= timer_check1;
 					end if;
 				when injection2 =>
-					if(injt_ctrlPkt(6 downto 3) = router_address) then
-						next_state <= injection3;	--It's for me!
+					if(injt_ctrlPkt(0) = '1') then
+						next_state <= injection3;	--Control Packet
 					else
-						next_state <= injection7;	--Forward the control packet.
+						next_state <= injection6;	--Data Packet
 					end if;
 				when injection3 =>
 					case injt_ctrlPkt(2 downto 1) is
 						when "00" =>
-							next_state <= injection4;	-- Condition: Normal Packet
+							next_state <= injection6;	-- Condition: Normal Packet
 						when "01" =>
-							next_state <= injection5;	-- Condition: PE is re/assigning addresses
+							next_state <= injection4;	-- Condition: PE is re/assigning addresses
 						when "10" =>
-							next_state <= injection6;	-- Condition: PE is updating Routing Table
+							next_state <= injection5;	-- Condition: PE is updating Routing Table
 						when others =>
 							sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-							next_state <= timer_check1;	-- Condition: Unknown, move to next state.
+							next_state <= injection1;	-- Condition: Unknown, move to next state. (was timer_check1)
 					end case;
 				when injection4 =>
-					if(table_full = '0') then
-						next_state <= injection8;
-					else
-						next_state <= timer_check1;
-					end if;
-				when injection5 =>
 					router_address <= injt_ctrlPkt(21 downto 18);
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= timer_check1;
-				when injection6 =>
+					next_state <= injection1;								-- (was timer_check1)
+				when injection5 =>
 					address <= injt_ctrlPkt(17 downto 14);
 					rte_data_out <= injt_ctrlPkt(21 downto 19);
 					rte_en <= '1';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= timer_check1;
-				when injection7 =>
+					next_state <= injection1;							-- (was timer_check1)
+				when injection6 =>
 					--Forward the Packet by checking routing table first
 					address <= injt_ctrlPkt(6 downto 3);
 					rte_en <= '0';
-					next_state <= injection9;
-				when injection8 =>	
-					--Reserve and schedule the incoming control packet
-					--Ack!
-					--Write bits to rsv_data_out
-					rsv_data_out <= "111" & injt_ctrlPkt(9 downto 7);
-					--Write bits to sch_data_out
-					sch_data_out <= (globaltime + injt_ctrlPkt(cp_size-1 downto 18));
-					--Store GID/PID in location w_address
-					adr_data_out <= injt_ctrlPkt(17 downto 10);
-					--Send to reservation table
-					address <= w_address;
-					rsv_en <= '1';
-					sch_en <= '1';
-					adr_en <= '1';
-					next_state <= injection10;
-				when injection9 =>
-					--Configure the switch
-					sw_nSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
-					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= injt_ctrlPkt;
-					next_state <= timer_check1;
-				when injection10 =>
-					w_address := w_address + 1;
-					reserved_cnt := reserved_cnt + 1;
+					--sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+					next_state <= injection7;
+				when injection7 =>
+					--Configure the switch for CONTROL PACKETS
+					case rte_data_in(2 downto 0) is
+						when "000" =>
+							sw_nSel <= "101";			-- "00" North FIFO								
+						when "001" =>
+							sw_eSel <= "101";			-- "01" East FIFO
+						when "010" =>
+							sw_sSel <= "101";			-- "10" South FIFO
+						when "011" =>
+							sw_wSel <= "101";			-- "11" West FIFO
+						when others =>
+							null;
+					end case;
+					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+					next_state <= injection1;					-- (was timer_check1);
 					
-					--Check table space
-					if(reserved_cnt <= "1110") then
-						table_full := '0';
-					else
-						table_full := '1';
-					end if;
-					
-					rsv_en <= '0';
-					sch_en <= '0';
-					adr_en <= '0';
-					sw_rnaCtDeq <= '1', '0' after 1 ns;				-- dequeue from FIFO
-					next_state <= timer_check1;	
 	--*TIMER_CHECK*--
 				when timer_check1 =>
 					--Check scheduled job and determine if departure is necessary.
@@ -706,17 +694,30 @@ begin
 					adr_search <= '1';
 					adr_data_out <= e_rnaCtrl(17 downto 10);
 					next_state <= dp_arrivedOnEast3;
-				when dp_arrivedOnEast3 =>
+				when dp_arrivedOnEast3 =>	
+					if(adr_nf = '1') then
+						next_state <= dp_arrivedOnEast4;
+					else
+						next_state <= dp_arrivedOnEast5;
+					end if;
+				when dp_arrivedOnEast4 =>
+					--Acknowledge back (discarding packet)
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					e_CTRflg <= '1', '0' after 1 ns;
+					next_state <= dp_arrivedOnSouth1;
+				when dp_arrivedOnEast5 =>
 					address <= adr_result;			--should be the address found above
 					adr_search <= '0';
 					rsv_en <= '0';
-					next_state <= dp_arrivedOnEast4;
-				when dp_arrivedOnEast4 =>
+					next_state <= dp_arrivedOnEast6;
+				when dp_arrivedOnEast6 =>
 					--Control VCC
-					e_vc_rnaSelI <= rsv_data_in(1 downto 0);
+					e_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
-					--Acknowledge? 
+					--Acknowledge
 					e_CTRflg <= '1', '0' after 1 ns;
+					e_arbEnq <= '1', '0' after 1 ns;
 					next_state <= dp_arrivedOnSouth1;
 	--*SOUTH ARRIVALS*--
 				when dp_arrivedOnSouth1 =>
@@ -732,16 +733,29 @@ begin
 					adr_data_out <= s_rnaCtrl(17 downto 10);
 					next_state <= dp_arrivedOnSouth3;
 				when dp_arrivedOnSouth3 =>	
+					if(adr_nf = '1') then
+						next_state <= dp_arrivedOnSouth4;
+					else
+						next_state <= dp_arrivedOnSouth5;
+					end if;
+				when dp_arrivedOnSouth4 =>
+					--Acknowledge back (discarding packet)
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					s_CTRflg <= '1', '0' after 1 ns;
+					next_state <= dp_arrivedOnWest1;
+				when dp_arrivedOnSouth5 =>
 					address <= adr_result;			--should be the address found above
 					adr_search <= '0';
 					rsv_en <= '0';
-					next_state <= dp_arrivedOnSouth4;
-				when dp_arrivedOnSouth4 =>
+					next_state <= dp_arrivedOnSouth6;
+				when dp_arrivedOnSouth6 =>
 					--Control VCC
-					s_vc_rnaSelI <= rsv_data_in(1 downto 0);
+					s_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
-					--Acknowledge? 
+					--Acknowledge
 					s_CTRflg <= '1', '0' after 1 ns;
+					s_arbEnq <= '1', '0' after 1 ns;
 					next_state <= dp_arrivedOnWest1;
 	--*WEST ARRIVALS*--
 				when dp_arrivedOnWest1 =>
@@ -757,16 +771,29 @@ begin
 					adr_data_out <= w_rnaCtrl(17 downto 10);
 					next_state <= dp_arrivedOnWest3;
 				when dp_arrivedOnWest3 =>	
+					if(adr_nf = '1') then
+						next_state <= dp_arrivedOnWest4;
+					else
+						next_state <= dp_arrivedOnWest5;
+					end if;
+				when dp_arrivedOnWest4 =>
+					--Acknowledge back (discarding packet)
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					w_CTRflg <= '1', '0' after 1 ns;
+					next_state <= north1;
+				when dp_arrivedOnWest5 =>
 					address <= adr_result;			--should be the address found above
 					adr_search <= '0';
 					rsv_en <= '0';
-					next_state <= dp_arrivedOnWest4;
-				when dp_arrivedOnWest4 =>			
+					next_state <= dp_arrivedOnWest6;
+				when dp_arrivedOnWest6 =>
 					--Control VCC
-					w_vc_rnaSelI <= rsv_data_in(1 downto 0);
+					w_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
-					--Acknowledge? 
+					--Acknowledge
 					w_CTRflg <= '1', '0' after 1 ns;
+					w_arbEnq <= '1', '0' after 1 ns;
 					next_state <= north1;
 				when others =>
 					next_state <= north1;

@@ -121,34 +121,71 @@ architecture rtl of BlazeNoC is
 
 	-- Signal Definitions
 		
-	-- Router 1
-	signal router1_north_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router1_north_din_good		: std_logic;
-	signal router1_north_CTR_in		: std_logic;
-	signal router1_north_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router1_north_dout_good	: std_logic;
-	signal router1_north_CTR_out		: std_logic;
+	-- Router 0
+	signal router0_north_to_south_data_in		: std_logic_vector (WIDTH downto 0);
+	signal router0_north_to_south_din_good		: std_logic;
+	signal router0_north_to_south_CTR_in		: std_logic;
+	signal router0_north_to_south_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0_north_to_south_dout_good	: std_logic;
+	signal router0_north_to_south_CTR_out		: std_logic;
 
-	signal router1_east_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router1_east_din_good		: std_logic;
-	signal router1_east_CTR_in			: std_logic;
-	signal router1_east_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router1_east_dout_good		: std_logic;
-	signal router1_east_CTR_out		: std_logic;
+	signal router0_east_to_west_data_in			: std_logic_vector (WIDTH downto 0);
+	signal router0_east_to_west_din_good		: std_logic;
+	signal router0_east_to_west_CTR_in			: std_logic;
+	signal router0_east_to_west_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0_east_to_west_dout_good		: std_logic;
+	signal router0_east_to_west_CTR_out			: std_logic;
 	
-	signal router1_south_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router1_south_din_good		: std_logic;
-	signal router1_south_CTR_in		: std_logic;
-	signal router1_south_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router1_south_dout_good	: std_logic;
-	signal router1_south_CTR_out		: std_logic;
+	signal router0_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);
+	signal router0_south_to_north_din_good		: std_logic;
+	signal router0_south_to_north_CTR_in		: std_logic;
+	signal router0_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0_south_to_north_dout_good	: std_logic;
+	signal router0_south_to_north_CTR_out		: std_logic;
 	
-	signal router1_west_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router1_west_din_good		: std_logic;
-	signal router1_west_CTR_in			: std_logic;
-	signal router1_west_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router1_west_dout_good		: std_logic;
-	signal router1_west_CTR_out		: std_logic;
+	signal router0_west_to_east_data_in			: std_logic_vector (WIDTH downto 0);
+	signal router0_west_to_east_din_good		: std_logic;
+	signal router0_west_to_east_CTR_in			: std_logic;
+	signal router0_west_to_east_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0_west_to_east_dout_good		: std_logic;
+	signal router0_west_to_east_CTR_out			: std_logic;
+	
+	signal router0_injection_data		: std_logic_vector (WIDTH downto 0);
+	signal router0_injection_enq		: std_logic;
+	signal router0_injection_status	: std_logic_vector (1 downto 0);
+	
+	signal router0_ejection_data		: std_logic_vector (WIDTH downto 0);
+	signal router0_ejection_deq		: std_logic;
+	signal router0_ejection_status	: std_logic_vector (1 downto 0);
+
+	-- Router 1
+	signal router1_north_to_south_data_in		: std_logic_vector (WIDTH downto 0);
+	signal router1_north_to_south_din_good		: std_logic;
+	signal router1_north_to_south_CTR_in		: std_logic;
+	signal router1_north_to_south_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router1_north_to_south_dout_good	: std_logic;
+	signal router1_north_to_south_CTR_out		: std_logic;
+
+	signal router1_east_to_west_data_in			: std_logic_vector (WIDTH downto 0);
+	signal router1_east_to_west_din_good		: std_logic;
+	signal router1_east_to_west_CTR_in			: std_logic;
+	signal router1_east_to_west_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router1_east_to_west_dout_good		: std_logic;
+	signal router1_east_to_west_CTR_out			: std_logic;
+	
+	signal router1_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);
+	signal router1_south_to_north_din_good		: std_logic;
+	signal router1_south_to_north_CTR_in		: std_logic;
+	signal router1_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router1_south_to_north_dout_good	: std_logic;
+	signal router1_south_to_north_CTR_out		: std_logic;
+	
+	signal router1_west_to_east_data_in		: std_logic_vector (WIDTH downto 0);
+	signal router1_west_to_east_din_good		: std_logic;
+	signal router1_west_to_east_CTR_in			: std_logic;
+	signal router1_west_to_east_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router1_west_to_east_dout_good		: std_logic;
+	signal router1_west_to_east_CTR_out		: std_logic;
 	
 	signal router1_injection_data		: std_logic_vector (WIDTH downto 0);
 	signal router1_injection_enq		: std_logic;
@@ -157,8 +194,8 @@ architecture rtl of BlazeNoC is
 	signal router1_ejection_data		: std_logic_vector (WIDTH downto 0);
 	signal router1_ejection_deq		: std_logic;
 	signal router1_ejection_status	: std_logic_vector (1 downto 0);
-
-	-- Router 2
+--	
+--	-- Router 3
 --	signal router2_north_data_in		: std_logic_vector (WIDTH downto 0);
 --	signal router2_north_din_good		: std_logic;
 --	signal router2_north_CTR_in		: std_logic;
@@ -195,7 +232,7 @@ architecture rtl of BlazeNoC is
 --	signal router2_ejection_deq		: std_logic;
 --	signal router2_ejection_status	: std_logic_vector (1 downto 0);
 --	
---	-- Router 3
+--	-- Router 4
 --	signal router3_north_data_in		: std_logic_vector (WIDTH downto 0);
 --	signal router3_north_din_good		: std_logic;
 --	signal router3_north_CTR_in		: std_logic;
@@ -231,71 +268,68 @@ architecture rtl of BlazeNoC is
 --	signal router3_ejection_data		: std_logic_vector (WIDTH downto 0);
 --	signal router3_ejection_deq		: std_logic;
 --	signal router3_ejection_status	: std_logic_vector (1 downto 0);
---	
---	-- Router 4
---	signal router4_north_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router4_north_din_good		: std_logic;
---	signal router4_north_CTR_in		: std_logic;
---	signal router4_north_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router4_north_dout_good	: std_logic;
---	signal router4_north_CTR_out		: std_logic;
---
---	signal router4_east_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router4_east_din_good		: std_logic;
---	signal router4_east_CTR_in			: std_logic;
---	signal router4_east_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router4_east_dout_good		: std_logic;
---	signal router4_east_CTR_out		: std_logic;
---	
---	signal router4_south_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router4_south_din_good		: std_logic;
---	signal router4_south_CTR_in		: std_logic;
---	signal router4_south_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router4_south_dout_good	: std_logic;
---	signal router4_south_CTR_out		: std_logic;
---	
---	signal router4_west_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router4_west_din_good		: std_logic;
---	signal router4_west_CTR_in			: std_logic;
---	signal router4_west_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router4_west_dout_good		: std_logic;
---	signal router4_west_CTR_out		: std_logic;
---	
---	signal router4_injection_data		: std_logic_vector (WIDTH downto 0);
---	signal router4_injection_enq		: std_logic;
---	signal router4_injection_status	: std_logic_vector (1 downto 0);
---	
---	signal router4_ejection_data		: std_logic_vector (WIDTH downto 0);
---	signal router4_ejection_deq		: std_logic;
---	signal router4_ejection_status	: std_logic_vector (1 downto 0);
 	
 begin
 
-		Router : BlazeRouter
-		port map(router1_north_data_in, 					--North Port
-					router1_north_din_good,
-					router1_north_CTR_in,
-					router1_north_data_out,
-					router1_north_dout_good,
-					router1_north_CTR_out,
-					router1_east_data_in,					--East Port
-					router1_east_din_good,
-					router1_east_CTR_in,	
-					router1_east_data_out,
-					router1_east_dout_good,
-					router1_east_CTR_out,
-					router1_south_data_in,					--South Port
-					router1_south_din_good,
-					router1_south_CTR_in,
-					router1_south_data_out,
-					router1_south_dout_good,
-					router1_south_CTR_out,
-					router1_west_data_in,					--West Port
-					router1_west_din_good,
-					router1_west_CTR_in,
-					router1_west_data_out,
-					router1_west_dout_good,	
-					router1_west_CTR_out,
+		Router0 : BlazeRouter
+		port map(router0_north_to_south_data_in, 					--North Port
+					router0_north_to_south_din_good,
+					router0_north_to_south_CTR_in,
+					router0_north_to_south_data_out,
+					router0_north_to_south_dout_good,
+					router0_north_to_south_CTR_out,
+					router0_east_to_west_data_in,					--East Port [Connected to Router1 WEST PORT]
+					router0_east_to_west_din_good,
+					router0_east_to_west_CTR_in,	
+					router0_east_to_west_data_out,
+					router0_east_to_west_dout_good,
+					router0_east_to_west_CTR_out,
+					router0_south_to_north_data_in,					--South Port
+					router0_south_to_north_din_good,
+					router0_south_to_north_CTR_in,
+					router0_south_to_north_data_out,
+					router0_south_to_north_dout_good,
+					router0_south_to_north_CTR_out,
+					router0_west_to_east_data_in,					--West Port
+					router0_west_to_east_din_good,
+					router0_west_to_east_CTR_in,
+					router0_west_to_east_data_out,
+					router0_west_to_east_dout_good,	
+					router0_west_to_east_CTR_out,
+					router0_injection_data,					--Injection
+					router0_injection_enq,
+					router0_injection_status,
+					router0_ejection_data,					--Ejection
+					router0_ejection_deq,
+					router0_ejection_status,
+					clk,
+					reset);
+					
+		Router1 : BlazeRouter
+		port map(router1_north_to_south_data_in, 					--North Port
+					router1_north_to_south_din_good,
+					router1_north_to_south_CTR_in,
+					router1_north_to_south_data_out,
+					router1_north_to_south_dout_good,
+					router1_north_to_south_CTR_out,
+					router1_east_to_west_data_in,					--East Port
+					router1_east_to_west_din_good,
+					router1_east_to_west_CTR_in,	
+					router1_east_to_west_data_out,
+					router1_east_to_west_dout_good,
+					router1_east_to_west_CTR_out,
+					router1_south_to_north_data_in,					--South Port
+					router1_south_to_north_din_good,
+					router1_south_to_north_CTR_in,
+					router1_south_to_north_data_out,
+					router1_south_to_north_dout_good,
+					router1_south_to_north_CTR_out,
+					router0_east_to_west_data_out,					--West Port [Connected to Router0 EAST PORT]
+					router0_east_to_west_dout_good,
+					router0_east_to_west_CTR_out,
+					router0_east_to_west_data_in,
+					router0_east_to_west_din_good,	
+					router0_east_to_west_CTR_in,
 					router1_injection_data,					--Injection
 					router1_injection_enq,
 					router1_injection_status,
@@ -304,67 +338,66 @@ begin
 					router1_ejection_status,
 					clk,
 					reset);
-					
 
 		Processing_Element: PE
 		port map(clk,
 					reset,
 					sm_triggerIPort,
 					data_inject_IPort,
-					router1_injection_data,
-					router1_injection_enq,
-					router1_injection_status,
-					router1_ejection_data,
-					router1_ejection_deq,
-					router1_ejection_status);
+					router0_injection_data,
+					router0_injection_enq,
+					router0_injection_status,
+					router0_ejection_data,
+					router0_ejection_deq,
+					router0_ejection_status);
 								
-		NorthPort_FSM: Port_FSM
-		port map(clk,
-					reset,
-					sm_triggerNPort,
-					data_inject_NPort,
-					router1_north_data_out,
-					router1_north_din_good,
-					router1_north_CTR_in,
-					router1_north_data_in,
-					router1_north_dout_good,
-					router1_north_CTR_out);
-		
-		EastPort_FSM: Port_FSM
-		port map(clk,
-					reset,
-					sm_triggerEPort,
-					data_inject_EPort,
-					router1_east_data_out,
-					router1_east_din_good,
-					router1_east_CTR_in,
-					router1_east_data_in,
-					router1_east_dout_good,
-					router1_east_CTR_out);
-		
-		SouthPort_FSM: Port_FSM
-		port map(clk,
-					reset,
-					sm_triggerSPort,
-					data_inject_SPort,
-					router1_south_data_out,
-					router1_south_din_good,
-					router1_south_CTR_in,
-					router1_south_data_in,
-					router1_south_dout_good,
-					router1_south_CTR_out);
-					
-		WestPort_FSM: Port_FSM
-		port map(clk,
-					reset,
-					sm_triggerWPort,
-					data_inject_WPort,
-					router1_west_data_out,
-					router1_west_din_good,
-					router1_west_CTR_in,
-					router1_west_data_in,
-					router1_west_dout_good,
-					router1_west_CTR_out);
+--		NorthPort_FSM: Port_FSM
+--		port map(clk,
+--					reset,
+--					sm_triggerNPort,
+--					data_inject_NPort,
+--					router1_north_data_out,
+--					router1_north_din_good,
+--					router1_north_CTR_in,
+--					router1_north_data_in,
+--					router1_north_dout_good,
+--					router1_north_CTR_out);
+--		
+--		EastPort_FSM: Port_FSM
+--		port map(clk,
+--					reset,
+--					sm_triggerEPort,
+--					data_inject_EPort,
+--					router1_east_data_out,
+--					router1_east_din_good,
+--					router1_east_CTR_in,
+--					router1_east_data_in,
+--					router1_east_dout_good,
+--					router1_east_CTR_out);
+--		
+--		SouthPort_FSM: Port_FSM
+--		port map(clk,
+--					reset,
+--					sm_triggerSPort,
+--					data_inject_SPort,
+--					router1_south_data_out,
+--					router1_south_din_good,
+--					router1_south_CTR_in,
+--					router1_south_data_in,
+--					router1_south_dout_good,
+--					router1_south_CTR_out);
+--					
+--		WestPort_FSM: Port_FSM
+--		port map(clk,
+--					reset,
+--					sm_triggerWPort,
+--					data_inject_WPort,
+--					router1_west_data_out,
+--					router1_west_din_good,
+--					router1_west_CTR_in,
+--					router1_west_data_in,
+--					router1_west_dout_good,
+--					router1_west_CTR_out);
 					
 					
 

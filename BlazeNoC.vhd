@@ -45,6 +45,10 @@ entity BlazeNoC is
 			 full_PE1				: out std_logic;
 			 full_PE2				: out std_logic;
 			 full_PE3				: out std_logic;
+			 done_PE0				: out std_logic;
+			 done_PE1				: out std_logic;
+			 done_PE2				: out std_logic;
+			 done_PE3				: out std_logic;
 			 data_inject_PE0		: in std_logic_vector (WIDTH downto 0);
 			 data_inject_PE1		: in std_logic_vector (WIDTH downto 0);
 			 data_inject_PE2		: in std_logic_vector (WIDTH downto 0);
@@ -100,6 +104,7 @@ architecture rtl of BlazeNoC is
 				reset 				: in  std_logic;
 				trigger 				: in  std_logic;
 				full					: out std_logic;
+				done					: out std_logic;
 				tb_data_out			: in 	std_logic_vector (WIDTH downto 0);
 				injection_data 	: out std_logic_vector (WIDTH downto 0);
 				injection_enq 		: out std_logic;
@@ -334,6 +339,7 @@ begin
 					reset,
 					sm_triggerPE0,
 					full_PE0,
+					done_PE0,
 					data_inject_PE0,
 					router0_injection_data,
 					router0_injection_enq,
@@ -347,6 +353,7 @@ begin
 					reset,
 					sm_triggerPE1,
 					full_PE1,
+					done_PE1,
 					data_inject_PE1,
 					router1_injection_data,
 					router1_injection_enq,

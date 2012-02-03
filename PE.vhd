@@ -37,6 +37,7 @@ entity PE is
     Port ( clk 					: in  std_logic;
            reset 					: in  std_logic;
 			  trigger 				: in  std_logic;
+			  full					: out std_logic;
 			  tb_data_out			: in 	std_logic_vector (WIDTH downto 0);
            injection_data 		: out std_logic_vector (WIDTH downto 0);
            injection_enq 		: out std_logic;
@@ -119,14 +120,13 @@ begin
 				end if;
 			when triggered_state =>
 				if(injection_status = FULL_FIFO) then
+					full <= '1';
 					next_state2 <= triggered_state;
 				elsif(injection_status = EMPTY_FIFO) then
+					full <= '0';
 					next_state2 <= send;
-				elsif(injection_status = NORM_FIFO) then
-					next_state2 <= send;
-				elsif(injection_status = ERR_FIFO) then
-					next_state2 <= triggered_state;
 				else
+					full <= '1';
 					next_state2 <= triggered_state;
 				end if;
 			when send =>

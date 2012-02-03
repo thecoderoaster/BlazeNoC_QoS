@@ -2,7 +2,7 @@
 -- Company: 
 -- Engineer:
 --
--- Create Date:   16:31:08 01/27/2012
+-- Create Date:   16:08:23 02/02/2012
 -- Design Name:   
 -- Module Name:   C:/Users/kor/Documents/BlazeNoC_QoS/BlazeNoC_QoS_TB.vhd
 -- Project Name:  BlazeNoC_QoS
@@ -43,16 +43,18 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
     PORT(
          clk : IN  std_logic;
          reset : IN  std_logic;
-         sm_triggerNPort : IN  std_logic;
-         sm_triggerEPort : IN  std_logic;
-         sm_triggerSPort : IN  std_logic;
-         sm_triggerWPort : IN  std_logic;
-         sm_triggerIPort : IN  std_logic;
-         data_inject_NPort : IN  std_logic_vector(33 downto 0);
-         data_inject_EPort : IN  std_logic_vector(33 downto 0);
-         data_inject_SPort : IN  std_logic_vector(33 downto 0);
-         data_inject_WPort : IN  std_logic_vector(33 downto 0);
-         data_inject_IPort : IN  std_logic_vector(33 downto 0)
+         sm_triggerPE0 : IN  std_logic;
+         sm_triggerPE1 : IN  std_logic;
+         sm_triggerPE2 : IN  std_logic;
+         sm_triggerPE3 : IN  std_logic;
+         full_PE0 : OUT  std_logic;
+         full_PE1 : OUT  std_logic;
+         full_PE2 : OUT  std_logic;
+         full_PE3 : OUT  std_logic;
+         data_inject_PE0 : IN  std_logic_vector(33 downto 0);
+         data_inject_PE1 : IN  std_logic_vector(33 downto 0);
+         data_inject_PE2 : IN  std_logic_vector(33 downto 0);
+         data_inject_PE3 : IN  std_logic_vector(33 downto 0)
         );
     END COMPONENT;
     
@@ -60,16 +62,20 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
    --Inputs
    signal clk : std_logic := '0';
    signal reset : std_logic := '0';
-   signal sm_triggerNPort : std_logic := '0';
-   signal sm_triggerEPort : std_logic := '0';
-   signal sm_triggerSPort : std_logic := '0';
-   signal sm_triggerWPort : std_logic := '0';
-   signal sm_triggerIPort : std_logic := '0';
-   signal data_inject_NPort : std_logic_vector(33 downto 0) := (others => '0');
-   signal data_inject_EPort : std_logic_vector(33 downto 0) := (others => '0');
-   signal data_inject_SPort : std_logic_vector(33 downto 0) := (others => '0');
-   signal data_inject_WPort : std_logic_vector(33 downto 0) := (others => '0');
-   signal data_inject_IPort : std_logic_vector(33 downto 0) := (others => '0');
+   signal sm_triggerPE0 : std_logic := '0';
+   signal sm_triggerPE1 : std_logic := '0';
+   signal sm_triggerPE2 : std_logic := '0';
+   signal sm_triggerPE3 : std_logic := '0';
+   signal data_inject_PE0 : std_logic_vector(33 downto 0) := (others => '0');
+   signal data_inject_PE1 : std_logic_vector(33 downto 0) := (others => '0');
+   signal data_inject_PE2 : std_logic_vector(33 downto 0) := (others => '0');
+   signal data_inject_PE3 : std_logic_vector(33 downto 0) := (others => '0');
+
+ 	--Outputs
+   signal full_PE0 : std_logic;
+   signal full_PE1 : std_logic;
+   signal full_PE2 : std_logic;
+   signal full_PE3 : std_logic;
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -80,16 +86,18 @@ BEGIN
    uut: BlazeNoC PORT MAP (
           clk => clk,
           reset => reset,
-          sm_triggerNPort => sm_triggerNPort,
-          sm_triggerEPort => sm_triggerEPort,
-          sm_triggerSPort => sm_triggerSPort,
-          sm_triggerWPort => sm_triggerWPort,
-          sm_triggerIPort => sm_triggerIPort,
-          data_inject_NPort => data_inject_NPort,
-          data_inject_EPort => data_inject_EPort,
-          data_inject_SPort => data_inject_SPort,
-          data_inject_WPort => data_inject_WPort,
-          data_inject_IPort => data_inject_IPort
+          sm_triggerPE0 => sm_triggerPE0,
+          sm_triggerPE1 => sm_triggerPE1,
+          sm_triggerPE2 => sm_triggerPE2,
+          sm_triggerPE3 => sm_triggerPE3,
+          full_PE0 => full_PE0,
+          full_PE1 => full_PE1,
+          full_PE2 => full_PE2,
+          full_PE3 => full_PE3,
+          data_inject_PE0 => data_inject_PE0,
+          data_inject_PE1 => data_inject_PE1,
+          data_inject_PE2 => data_inject_PE2,
+          data_inject_PE3 => data_inject_PE3
         );
 
    -- Clock process definitions
@@ -114,128 +122,274 @@ BEGIN
 	
       wait for clk_period*10;
 
-      -- insert stimulus here 
-		--PAYLOAD = 0x0001 (PORT - West) : GID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000111" & "0000" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+--**ROUTER 0 INFORMATION**--
+		--PAYLOAD = 0x0001 (PORT - Ejection) : GID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE0 <= "0000000000001111" & "0000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
-		--PAYLOAD = 0x0007 (PORT - North) : GID = 0x01 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000001" & "0001" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		--PAYLOAD = 0x0001 (PORT - East) : GID = 0x01 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE0 <= "0000000000000011" & "0001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0001 (PORT - East) : GID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000011" & "0010" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000011" & "0010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0002 (PORT - East) : GID = 0x03 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000011" & "0011" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000011" & "0011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0003 (PORT - West) : GID = 0x04 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000111" & "0100" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000111" & "0100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0002 (PORT - Ejection) : GID = 0x05 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000001111" & "0101" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000001111" & "0101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0003 (PORT - East) : GID = 0x06 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000011" & "0110" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000011" & "0110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x07 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000011" & "0111" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000011" & "0111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0001 (PORT - South) : GID = 0x08	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000101" & "1000" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000101" & "1000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0002 (PORT - South) : GID = 0x09	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000101" & "1001" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000101" & "1001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x0A	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000011" & "1010" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000011" & "1010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0001 (PORT - South) : GID = 0x0B	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000101" & "1011" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000101" & "1011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0002 (PORT - West) : GID = 0x0C	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000111" & "1100" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000111" & "1100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0003 (PORT - South) : GID = 0x0D	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000101" & "1101" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000101" & "1101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0002 (PORT - East) : GID = 0x0E	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000011" & "1110" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000011" & "1110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000011" & "1111" & "0001" & "000" & "0000" & "10" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000000000000011" & "1111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
 		
 		--***STEP 2: Update Router Address***
 		
-		--PAYLOAD = 0x0101 (Address - 5) : GID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_IPort <= "0000000000000101" & "0001" & "0001" & "000" & "0000" & "01" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		--PAYLOAD = 0x0101 (Address - 0) : GID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE0 <= "0000000000000000" & "0001" & "0001" & "000" & "0000" & "01" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
-		wait for clk_period*5;
+		--wait for clk_period*5;
+		wait until full_PE0 = '0';
+		
+		
+--**ROUTER 1 INFORMATION**--
+		
+		--PAYLOAD = 0x0001 (PORT - West) : GID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000111" & "0000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0007 (PORT - North) : GID = 0x01 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000001" & "0001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0001 (PORT - East) : GID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000011" & "0010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0002 (PORT - East) : GID = 0x03 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000011" & "0011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0003 (PORT - West) : GID = 0x04 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000111" & "0100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0002 (PORT - Ejection) : GID = 0x05 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000001111" & "0101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0003 (PORT - East) : GID = 0x06 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000011" & "0110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x07 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000011" & "0111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0001 (PORT - South) : GID = 0x08	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000101" & "1000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0002 (PORT - South) : GID = 0x09	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000101" & "1001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x0A	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000011" & "1010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0001 (PORT - South) : GID = 0x0B	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000101" & "1011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0002 (PORT - West) : GID = 0x0C	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000111" & "1100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0003 (PORT - South) : GID = 0x0D	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000101" & "1101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0002 (PORT - East) : GID = 0x0E	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000011" & "1110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--PAYLOAD = 0x0000 (PORT - East) : GID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000011" & "1111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
+		--***STEP 2: Update Router Address***
+		
+		--PAYLOAD = 0x0101 (Address - 1) : GID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000001" & "0001" & "0001" & "000" & "0000" & "01" & "1";
+		sm_triggerPE1 <= '1', '0' after 1 ns;
+		
+		--wait for clk_period*5;
+		wait until full_PE1 = '0';
+		
 		
 		--***STEP 3: Inject a control packet*** (#1)
 		
 		--PAYLOAD = 1200 Cycles (TID) : GID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0x010 (RESERVE SOUTH) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_IPort <= "0000010010110000" & "0001" & "0001" & "010" & "0110" & "00" & "1";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0000010010110000" & "0001" & "0001" & "010" & "0001" & "00" & "1";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
 		
 		--wait until north_CTR_out = '1';
 		--north_din_good <= '0';
-		wait for clk_period*5;
+		--wait for clk_period*50;
+		wait until full_PE0 = '0';
 		
 		--Inject a data packet (LEGIT PACKET #1)
 		--PAYLOAD = DON'T CARE (ANYTHING) : GID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_IPort <= "0101010101010101" & "0001" & "0001" & "011" & "0110" & "00" & "0";
-		sm_triggerIPort <= '1', '0' after 1 ns;
+		data_inject_PE0 <= "0101010101010101" & "0001" & "0001" & "010" & "0001" & "00" & "0";
+		sm_triggerPE0 <= '1', '0' after 1 ns;
+		
+		wait until full_PE0 = '0';
 		
 
       wait;
    end process;
+
 
 END;

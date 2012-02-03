@@ -247,6 +247,25 @@ begin
 							
 					sw_rnaCtDeq <= '0';
 					
+					--Drive signals to initial state
+					n_vc_deq <= '0';
+					n_vc_strq <= '0';
+					e_vc_deq <= '0';
+					e_vc_strq <= '0';
+					s_vc_deq <= '0';
+					s_vc_strq <= '0';
+					w_vc_deq <= '0';
+					w_vc_strq <= '0';
+					
+					n_CTRflg <= '0';
+					n_arbEnq <= '0';
+					e_CTRflg <= '0';
+					e_arbEnq <= '0';
+					s_CTRflg <= '0';
+					s_arbEnq <= '0';
+					w_CTRflg <= '0';
+					w_arbEnq <= '0';
+					
 					next_state <= north1;
 	--*NORTH*--
 				when north1 =>
@@ -527,6 +546,7 @@ begin
 				when injection3 =>
 					case injt_ctrlPkt(2 downto 1) is
 						when "00" =>
+							rna_ctrlPkt <= injt_ctrlPkt;
 							next_state <= injection6;	-- Condition: Normal Packet
 						when "01" =>
 							next_state <= injection4;	-- Condition: PE is re/assigning addresses
@@ -550,10 +570,29 @@ begin
 					--Forward the Packet by checking routing table first
 					address <= injt_ctrlPkt(6 downto 3);
 					rte_en <= '0';
-					--sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection7;
+					if(injt_ctrlPkt(0) = '1') then
+						next_state <= injection7;
+					else
+						next_state <= injection8;
+					end if;
 				when injection7 =>
 					--Configure the switch for CONTROL PACKETS
+					case rte_data_in(2 downto 0) is
+						when "000" =>
+							sw_nSel <= "111";			-- "00" North FIFO								
+						when "001" =>
+							sw_eSel <= "111";			-- "01" East FIFO
+						when "010" =>
+							sw_sSel <= "111";			-- "10" South FIFO
+						when "011" =>
+							sw_wSel <= "111";			-- "11" West FIFO
+						when others =>
+							null;
+					end case;
+					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+					next_state <= injection1;					-- (was timer_check1);
+				when injection8 =>
+					--Configure the switch for DATA PACKETS
 					case rte_data_in(2 downto 0) is
 						when "000" =>
 							sw_nSel <= "101";			-- "00" North FIFO								
@@ -567,8 +606,7 @@ begin
 							null;
 					end case;
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection1;					-- (was timer_check1);
-					
+					next_state <= injection1;					-- (was timer_check1);	
 	--*TIMER_CHECK*--
 				when timer_check1 =>
 					--Check scheduled job and determine if departure is necessary.

@@ -322,8 +322,8 @@ begin
 					router0_east_to_west_data_out,					--West Port [Connected to Router0 EAST PORT]
 					router0_east_to_west_dout_good,
 					router0_east_to_west_CTR_out,
-					router0_east_to_west_data_in,
-					router0_east_to_west_din_good,	
+					router0_east_to_west_data_in,	
+					router0_east_to_west_din_good,
 					router0_east_to_west_CTR_in,
 					router1_injection_data,					--Injection
 					router1_injection_enq,

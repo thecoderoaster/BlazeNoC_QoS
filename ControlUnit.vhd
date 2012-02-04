@@ -606,7 +606,7 @@ begin
 							null;
 					end case;
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection1;					-- (was timer_check1);	
+					next_state <= injection1;					-- (was timer_check1);
 	--*TIMER_CHECK*--
 				when timer_check1 =>
 					--Check scheduled job and determine if departure is necessary.

@@ -159,7 +159,7 @@ begin
 	-- Clock insensitive processing (output stuff)
 	
 	-- output front of fifo buffer - first flit in queue is always put on the output	
-	FIFO_qout <= fifoReg(conv_integer(hdCnt));
+	FIFO_qout <= fifoReg(conv_integer(hdCnt)) when (empty_flag = '0') else (others => '0');
 
 	-- check and update the full and empty flags anytime something changes
 	-- The buffer will still report full until the need_tlInc flag is cleared

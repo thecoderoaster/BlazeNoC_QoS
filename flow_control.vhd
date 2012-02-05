@@ -75,8 +75,8 @@ dStrbInd <= fc_dStrb when (senseOp = '0') else '0';
 fc_rnaDataStrb <= '1' when (senseOp = '0' and (CTRInd = '0' and fc_dStrb = '1')) else '0';
 
 -- Clear to recieve handler
-CTRInd <= (not fc_vcFull) and fc_CTRflg;
-fc_CTR <= CTRInd;
+--CTRInd <= (not fc_vcFull) and fc_CTRflg;
+fc_CTR <= fc_CTRflg; -- direct communication between recv rna and sending rna
 
 -- VC Data strobe handler
 -- arbiter will have direct control to enqueue actions, but the data must be good and 

@@ -117,32 +117,32 @@ begin
 	sw_northOut <= sw_eastIn when(sw_northSel = "001") else
 						sw_southIn when(sw_northSel = "010") else
 						sw_westIn when(sw_northSel = "011") else
-						injctPkt when(sw_northSel = "101") else
-						sw_ctrlPkt when(sw_northSel = "111") else
+						injctPkt when(sw_northSel = "101" and senseOp = '0') else
+						sw_ctrlPkt when(sw_northSel = "111" and rnaSens = '0') else
 						(others => '0');
 	
 	-- east switch (mux s, w, n, in, rna)
 	sw_eastOut <=	sw_southIn when(sw_eastSel = "010") else
 						sw_westIn when(sw_eastSel = "011") else
 						sw_northIn when(sw_eastSel = "000") else
-						injctPkt when(sw_eastSel = "101") else
-						sw_ctrlPkt when(sw_eastSel = "111") else
+						injctPkt when(sw_eastSel = "101" and senseOp = '0') else
+						sw_ctrlPkt when(sw_eastSel = "111"  and rnaSens = '0') else
 						(others => '0');
 	
 	-- south switch (w, n, e, in, rna)
 	sw_southOut <=	sw_westIn when(sw_southSel = "011") else
 						sw_northIn when(sw_southSel = "000") else
 						sw_eastIn when(sw_southSel = "001") else
-						injctPkt when(sw_southSel = "101") else
-						sw_ctrlPkt when(sw_southSel = "111") else
+						injctPkt when(sw_southSel = "101" and senseOp = '0') else
+						sw_ctrlPkt when(sw_southSel = "111"  and rnaSens = '0') else
 						(others => '0');
 	
 	-- west switch (n, e, s, in, rna)
 	sw_westOut <=	sw_northIn when(sw_westSel = "000") else
 						sw_eastIn when(sw_westSel = "001") else
 						sw_southIn when(sw_westSel = "010") else
-						injctPkt when(sw_westSel = "101") else
-						sw_ctrlPkt when(sw_westSel = "111") else
+						injctPkt when(sw_westSel = "101" and senseOp = '0') else -- filter out control packets from going directly to a neighbor
+						sw_ctrlPkt when(sw_westSel = "111"  and rnaSens = '0') else -- rna sets the last bit of a generated control packet to low to indicate stale data
 						(others => '0');
 			
 	-- ejection switch (n, e, s, w)

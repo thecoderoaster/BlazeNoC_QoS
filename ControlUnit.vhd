@@ -84,21 +84,25 @@ entity ControlUnit is
 			w_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			w_vc_strq 			: out std_logic;
 			w_vc_status 		: in 	std_logic_vector (1 downto 0);
+			n_CTRinFlg			: in  std_logic;
 			n_CTRflg				: out std_logic;
 			n_CtrlFlg			: in 	std_logic;
 			n_DataFlg			: in  std_logic;
 			n_arbEnq				: out std_logic;
 			n_rnaCtrl			: in 	std_logic_vector(cp_size-1 downto 0);
+			e_CTRinFlg			: in  std_logic;
 			e_CTRflg				: out std_logic;
 			e_CtrlFlg			: in 	std_logic;
 			e_DataFlg			: in  std_logic;
 			e_arbEnq				: out std_logic;
 			e_rnaCtrl			: in 	std_logic_vector(cp_size-1 downto 0);
+			s_CTRinFlg			: in  std_logic;
 			s_CTRflg				: out std_logic;
 			s_CtrlFlg			: in 	std_logic;
 			s_DataFlg			: in  std_logic;
 			s_arbEnq				: out std_logic;
 			s_rnaCtrl			: in 	std_logic_vector(cp_size-1 downto 0);
+			w_CTRinFlg			: in  std_logic;
 			w_CTRflg				: out std_logic;
 			w_CtrlFlg			: in 	std_logic;
 			w_DataFlg			: in  std_logic;
@@ -128,7 +132,7 @@ architecture Behavioral of ControlUnit is
 							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6,
 							  dp_arrivedOnEast1, dp_arrivedOnEast2, dp_arrivedOnEast3, dp_arrivedOnEast4, dp_arrivedOnEast5, dp_arrivedOnEast6,
 							  dp_arrivedOnSouth1, dp_arrivedOnSouth2, dp_arrivedOnSouth3, dp_arrivedOnSouth4, dp_arrivedOnSouth5, dp_arrivedOnSouth6,
-							  dp_arrivedOnWest1, dp_arrivedOnWest2, dp_arrivedOnWest3, dp_arrivedOnWest4, dp_arrivedOnWest5, dp_arrivedOnWest6);   --61 State FSM
+							  dp_arrivedOnWest1, dp_arrivedOnWest2, dp_arrivedOnWest3, dp_arrivedOnWest4, dp_arrivedOnWest5, dp_arrivedOnWest6, dp_arrivedOnWest7);   --61 State FSM
 	signal state, next_state : state_type;
 	
 	signal router_address 	: std_logic_vector(PID_WIDTH-1 downto 0);
@@ -157,6 +161,7 @@ architecture Behavioral of ControlUnit is
 	signal w_rst				: std_logic;
 	signal w_data_flg_set	: std_logic;
 	signal w_ctrl_flg_set	: std_logic;
+	signal w_ctrl_in_flg_set : std_logic;
 	signal w_buffer			: std_logic_vector(cp_size-1 downto 0);
 	
 begin
@@ -471,7 +476,6 @@ begin
 				when west1 =>
 					--Check flag
 					if(w_ctrl_flg_set = '1') then
-						w_rst <= '1', '0' after 1 ns;
 						next_state <= west2;
 					else
 						next_state <= injection1;
@@ -498,8 +502,7 @@ begin
 				when west5 =>	
 					--Reserve and schedule the incoming control packet
 					--Ack!
-					--w_CTRflg <= '1', '0' after 1 ns;
-					w_CTRflg <= '1';
+					w_CTRflg <= '1', '0' after 1 ns;
 					--Write bits to rsv_data_out
 					--rsv_data_out <= "011" & w_rnaCtrl(9 downto 7);
 					rsv_data_out <= "011" & w_buffer(9 downto 7);
@@ -549,6 +552,7 @@ begin
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
+					w_rst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= injection1;
 	--*INJECTION*--
 				when injection1 =>
@@ -568,7 +572,7 @@ begin
 					case injt_ctrlPkt(2 downto 1) is
 						when "00" =>
 							rna_ctrlPkt <= injt_ctrlPkt;
-							next_state <= injection11;	-- Condition: Normal Packet
+							next_state <= injection9;	-- Condition: Normal Packet
 						when "01" =>
 							next_state <= injection4;	-- Condition: PE is re/assigning addresses
 						when "10" =>
@@ -627,15 +631,17 @@ begin
 							null;
 					end case;
 					--sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection9;					-- (was timer_check1);
+					next_state <= injection11;					-- (was timer_check1);
 				when injection9 =>
-					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+					--sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 					next_state <= injection11;					-- (was timer_check1);
 				when injection10 =>
 					next_state <= injection11;
 				when injection11 =>
-					if(e_CtrlFlg = '1') then
+					if(w_ctrl_in_flg_set = '1') then
 						rna_CtrlPkt(0) <= '0';
+						w_rst <= '1', '0' after 1 ns;			--Reset signals
+						sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 						next_state <= injection1;
 					else
 						next_state <= injection10;
@@ -866,19 +872,24 @@ begin
 					w_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
 					--Acknowledge
-					w_CTRflg <= '1', '0' after 1 ns;
-					w_arbEnq <= '1', '0' after 1 ns;
+					w_CTRflg <= '1'; --'0' after 1 ns;
+					w_arbEnq <= '1'; --'0' after 1 ns;
+					next_state <= dp_arrivedOnWest7;
+				when dp_arrivedOnWest7 =>
+					w_CTRflg <= '0';
+					w_arbEnq <= '0';
 					next_state <= north1;
 				when others =>
 					next_state <= north1;
 			end case;
 	end process;
 	
-	west_monitor_process: process(w_rst, w_CtrlFlg, w_DataFlg)
+	west_monitor_process: process(w_rst, w_CtrlFlg, w_DataFlg, e_CTRinFlg)
 	begin
 		if(w_rst = '1') then
 			w_data_flg_set <= '0';
 			w_ctrl_flg_set <= '0';
+			w_ctrl_in_flg_set <= '0';
 		end if;
 		
 		if(w_DataFlg = '1') then
@@ -890,6 +901,11 @@ begin
 			w_ctrl_flg_set <= '1';
 			w_buffer <= w_rnaCtrl;
 		end if;
+		
+		if(e_CTRinFlg = '1') then
+			w_ctrl_in_flg_set <= '1';
+		end if;
+		
 	end process;
 	
 end Behavioral;

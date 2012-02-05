@@ -706,25 +706,25 @@ BEGIN
 		end if;
 		
 		--wait for clk_period*100;
-		wait for clk_period*2;
+		wait for clk_period*40;
 		
---		--Inject a data packet (LEGIT PACKET #1)
---		--PAYLOAD = DON'T CARE (ANYTHING) : GID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
---		data_inject_PE0 <= "0101010101010101" & "0001" & "0001" & "010" & "0001" & "00" & "0";
---		sm_triggerPE0 <= '1';
---		
---		if(done_PE0 = '0') then					--Handshaking
---			wait until done_PE0 = '1';
---		end if;
---		
---		sm_triggerPE0 <= '0';
---			
---		wait for clk_period*2;
---	
---		if(full_PE0 = '1') then
---			wait until full_PE0 = '0';
---		end if;
---		
+		--Inject a data packet (LEGIT PACKET #1)
+		--PAYLOAD = DON'T CARE (ANYTHING) : GID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+		data_inject_PE0 <= "0101010101010101" & "0001" & "0001" & "010" & "0001" & "00" & "0";
+		sm_triggerPE0 <= '1';
+		
+		if(done_PE0 = '0') then					--Handshaking
+			wait until done_PE0 = '1';
+		end if;
+		
+		sm_triggerPE0 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE0 = '1') then
+			wait until full_PE0 = '0';
+		end if;
+		
 
       wait;
    end process;

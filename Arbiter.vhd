@@ -78,6 +78,11 @@ entity Arbiter is
 				w_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
 			
 				--FCU Related
+				n_CTRinFlg			: in std_logic;
+				e_CTRinFlg			: in std_logic;
+				s_CTRinFlg			: in std_logic;
+				w_CTRinFlg			: in std_logic;
+				
 				n_CTRflg				: out std_logic;						-- Send a CTR to neighbor for packet
 				e_CTRflg				: out std_logic;													
 				s_CTRflg				: out std_logic;
@@ -218,21 +223,25 @@ architecture rtl of Arbiter is
 			w_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			w_vc_strq 			: out  std_logic;
 			w_vc_status 		: in std_logic_vector (1 downto 0);
+			n_CTRinFlg			: in std_logic;
 			n_CTRflg				: out std_logic;
 			n_CtrlFlg			: in std_logic;
 			n_DataFlg			: in std_logic;
 			n_arbEnq				: out std_logic;
 			n_rnaCtrl			: in std_logic_vector(cp_size-1 downto 0);
+			e_CTRinFlg			: in std_logic;
 			e_CTRflg				: out std_logic;
 			e_CtrlFlg			: in std_logic;
 			e_DataFlg			: in std_logic;
 			e_arbEnq				: out std_logic;
 			e_rnaCtrl			: in std_logic_vector(cp_size-1 downto 0);
+			s_CTRinFlg			: in std_logic;
 			s_CTRflg				: out std_logic;
 			s_CtrlFlg			: in std_logic;
 			s_DataFlg			: in std_logic;
 			s_arbEnq				: out std_logic;
 			s_rnaCtrl			: in std_logic_vector(cp_size-1 downto 0);
+			w_CTRinFlg			: in std_logic;
 			w_CTRflg				: out std_logic;
 			w_CtrlFlg			: in std_logic;
 			w_DataFlg			: in std_logic;
@@ -298,10 +307,10 @@ begin
 					e_vc_deq, e_vc_rnaSelI, e_vc_rnaSelO, e_vc_rnaSelS, e_vc_strq, e_vc_status,
 					s_vc_deq, s_vc_rnaSelI, s_vc_rnaSelO, s_vc_rnaSelS, s_vc_strq, s_vc_status,
 					w_vc_deq, w_vc_rnaSelI, w_vc_rnaSelO, w_vc_rnaSelS, w_vc_strq, w_vc_status,
-					n_CTRFlg, n_CtrlFlg, n_DataFlg, n_arbEnq, n_rnaCtrl, 
-					e_CTRFlg, e_CtrlFlg, e_DataFlg, e_arbEnq, e_rnaCtrl, 
-					s_CTRFlg, s_CtrlFlg, s_DataFlg, s_arbEnq, s_rnaCtrl,
-					w_CTRFlg, w_CtrlFlg, w_DataFlg, w_arbEnq, w_rnaCtrl, 
+					n_CTRinFlg, n_CTRFlg, n_CtrlFlg, n_DataFlg, n_arbEnq, n_rnaCtrl, 
+					e_CTRinFlg, e_CTRFlg, e_CtrlFlg, e_DataFlg, e_arbEnq, e_rnaCtrl, 
+					s_CTRinFlg, s_CTRFlg, s_CtrlFlg, s_DataFlg, s_arbEnq, s_rnaCtrl,
+					w_CTRinFlg, w_CTRFlg, w_CtrlFlg, w_DataFlg, w_arbEnq, w_rnaCtrl, 
 					sw_nSel, sw_eSel, sw_sSel, sw_wSel, sw_ejectSel, sw_rnaCtFl, 
 					sw_rnaCtDeq, rna_ctrlPkt, injt_ctrlPkt);
 	

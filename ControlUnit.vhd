@@ -122,7 +122,7 @@ architecture Behavioral of ControlUnit is
 							  south1, south2, south3, south4, south5, south6, south7,
 							  west1, west2, west3, west4, west5, west6, west7,
 							  injection1, injection2, injection3, injection4, injection5,
-							  injection6, injection7, injection8, injection9,
+							  injection6, injection7, injection8, injection9, injection10, injection11,
 							  timer_check1, timer_check2, timer_check3, timer_check4,
 							  departure1,
 							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6,
@@ -157,6 +157,7 @@ architecture Behavioral of ControlUnit is
 	signal w_rst				: std_logic;
 	signal w_data_flg_set	: std_logic;
 	signal w_ctrl_flg_set	: std_logic;
+	signal w_buffer			: std_logic_vector(cp_size-1 downto 0);
 	
 begin
 
@@ -476,7 +477,8 @@ begin
 						next_state <= injection1;
 					end if;
 				when west2 =>
-					if(w_rnaCtrl(6 downto 3) = router_address) then
+					--if(w_rnaCtrl(6 downto 3) = router_address) then
+					if(w_buffer(6 downto 3) = router_address) then
 						next_state <= west3;	--It's for me!
 					else
 						next_state <= west4;	--Forward the control packet.
@@ -489,19 +491,24 @@ begin
 					end if;
 				when west4 =>
 					--Forward the Packet by checking routing table first
-					address <= w_rnaCtrl(6 downto 3);
+					--address <= w_rnaCtrl(6 downto 3);
+					address <= w_buffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= west6;
 				when west5 =>	
 					--Reserve and schedule the incoming control packet
 					--Ack!
-					w_CTRflg <= '1', '0' after 1 ns;
+					--w_CTRflg <= '1', '0' after 1 ns;
+					w_CTRflg <= '1';
 					--Write bits to rsv_data_out
-					rsv_data_out <= "011" & w_rnaCtrl(9 downto 7);
+					--rsv_data_out <= "011" & w_rnaCtrl(9 downto 7);
+					rsv_data_out <= "011" & w_buffer(9 downto 7);
 					--Write bits to sch_packet
-					sch_data_out <= (globaltime + w_rnaCtrl(cp_size-1 downto 18));
+					--sch_data_out <= (globaltime + w_rnaCtrl(cp_size-1 downto 18));
+					sch_data_out <= (globaltime + w_buffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					adr_data_out <= w_rnaCtrl(17 downto 10);
+					--adr_data_out <= w_rnaCtrl(17 downto 10);
+					adr_data_out <= w_buffer(17 downto 10);
 					--Send to reservation table
 					address <= w_address;
 					rsv_en <= '1';
@@ -525,7 +532,8 @@ begin
 					
 					sw_wSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= w_rnaCtrl;
+					--rna_ctrlPkt <= w_rnaCtrl;
+					rna_ctrlPkt <= w_buffer;
 					next_state <= injection1;
 				when west7 =>
 					w_address := w_address + 1;
@@ -560,7 +568,7 @@ begin
 					case injt_ctrlPkt(2 downto 1) is
 						when "00" =>
 							rna_ctrlPkt <= injt_ctrlPkt;
-							next_state <= injection6;	-- Condition: Normal Packet
+							next_state <= injection11;	-- Condition: Normal Packet
 						when "01" =>
 							next_state <= injection4;	-- Condition: PE is re/assigning addresses
 						when "10" =>
@@ -622,7 +630,17 @@ begin
 					next_state <= injection9;					-- (was timer_check1);
 				when injection9 =>
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection1;					-- (was timer_check1);
+					next_state <= injection11;					-- (was timer_check1);
+				when injection10 =>
+					next_state <= injection11;
+				when injection11 =>
+					if(e_CtrlFlg = '1') then
+						rna_CtrlPkt(0) <= '0';
+						next_state <= injection1;
+					else
+						next_state <= injection10;
+					end if;
+				
 	--*TIMER_CHECK*--
 				when timer_check1 =>
 					--Check scheduled job and determine if departure is necessary.
@@ -823,7 +841,8 @@ begin
 				when dp_arrivedOnWest2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= w_rnaCtrl(17 downto 10);
+					--adr_data_out <= w_rnaCtrl(17 downto 10);
+					adr_data_out <= w_buffer(17 downto 10);
 					next_state <= dp_arrivedOnWest3;
 				when dp_arrivedOnWest3 =>	
 					if(adr_nf = '1') then
@@ -864,10 +883,12 @@ begin
 		
 		if(w_DataFlg = '1') then
 			w_data_flg_set <= '1';
+			w_buffer <= w_rnaCtrl;
 		end if;
 		
 		if(w_CtrlFlg = '1') then
 			w_ctrl_flg_set <= '1';
+			w_buffer <= w_rnaCtrl;
 		end if;
 	end process;
 	

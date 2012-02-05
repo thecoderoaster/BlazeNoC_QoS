@@ -153,6 +153,11 @@ architecture rtl of BlazeRouter is
 				w_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
 			
 				--FCU Related
+				n_CTRinFlg			:in std_logic;				
+				e_CTRinFlg			:in std_logic;	
+				s_CTRinFlg			:in std_logic;	
+				w_CTRinFlg			:in std_logic;	
+
 				n_CTRflg				: out std_logic;										-- Send a CTR to neighbor for packet
 				e_CTRflg				: out std_logic;													
 				s_CTRflg				: out std_logic;
@@ -415,6 +420,10 @@ begin
 									vcRnaWestStat,
 									
 									--FCU Related
+									north_CTR_in, -- get CTR from neighbor to know its ok to send
+									east_CTR_in,
+									south_CTR_in,
+									west_CTR_in,
 									rnaFcNorthCtrFlg, -- Send a CTR to neighbor for packet
 									rnaFcEastCtrFlg,
 									rnaFcSouthCtrFlg,

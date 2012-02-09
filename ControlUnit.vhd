@@ -129,10 +129,10 @@ architecture Behavioral of ControlUnit is
 							  injection6, injection7, injection8, injection9, injection10, injection11,
 							  timer_check1, timer_check2, timer_check3, timer_check4,
 							  departure1,
-							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6,
-							  dp_arrivedOnEast1, dp_arrivedOnEast2, dp_arrivedOnEast3, dp_arrivedOnEast4, dp_arrivedOnEast5, dp_arrivedOnEast6,
-							  dp_arrivedOnSouth1, dp_arrivedOnSouth2, dp_arrivedOnSouth3, dp_arrivedOnSouth4, dp_arrivedOnSouth5, dp_arrivedOnSouth6,
-							  dp_arrivedOnWest1, dp_arrivedOnWest2, dp_arrivedOnWest3, dp_arrivedOnWest4, dp_arrivedOnWest5, dp_arrivedOnWest6, dp_arrivedOnWest7);   --61 State FSM
+							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6, dp_arrivedOnNorth7,
+							  dp_arrivedOnEast1, dp_arrivedOnEast2, dp_arrivedOnEast3, dp_arrivedOnEast4, dp_arrivedOnEast5, dp_arrivedOnEast6, dp_arrivedOnEast7,
+							  dp_arrivedOnSouth1, dp_arrivedOnSouth2, dp_arrivedOnSouth3, dp_arrivedOnSouth4, dp_arrivedOnSouth5, dp_arrivedOnSouth6, dp_arrivedOnSouth7,
+							  dp_arrivedOnWest1, dp_arrivedOnWest2, dp_arrivedOnWest3, dp_arrivedOnWest4, dp_arrivedOnWest5, dp_arrivedOnWest6, dp_arrivedOnWest7);   --73 State FSM
 	signal state, next_state : state_type;
 	
 	signal router_address 	: std_logic_vector(PID_WIDTH-1 downto 0);
@@ -158,11 +158,30 @@ architecture Behavioral of ControlUnit is
 	signal w_DpFlg				: std_logic;
 	
 	--Monitoring
+	signal n_rst				: std_logic;
+	signal n_data_flg_set	: std_logic;
+	signal n_ctrl_flg_set	: std_logic;
+	signal n_ctrl_in_flg_set : std_logic;
+	signal n_buffer			: std_logic_vector(cp_size-1 downto 0);
+	
+	signal e_rst				: std_logic;
+	signal e_data_flg_set	: std_logic;
+	signal e_ctrl_flg_set	: std_logic;
+	signal e_ctrl_in_flg_set : std_logic;
+	signal e_buffer			: std_logic_vector(cp_size-1 downto 0);
+	
+	signal s_rst				: std_logic;
+	signal s_data_flg_set	: std_logic;
+	signal s_ctrl_flg_set	: std_logic;
+	signal s_ctrl_in_flg_set : std_logic;
+	signal s_buffer			: std_logic_vector(cp_size-1 downto 0);
+
 	signal w_rst				: std_logic;
 	signal w_data_flg_set	: std_logic;
 	signal w_ctrl_flg_set	: std_logic;
 	signal w_ctrl_in_flg_set : std_logic;
 	signal w_buffer			: std_logic_vector(cp_size-1 downto 0);
+
 	
 begin
 
@@ -282,19 +301,22 @@ begin
 					sw_sSel <= "111";
 					sw_wSel <= "111";
 					
+					n_rst <= '1', '0' after 1 ns;
+					e_rst <= '1', '0' after 1 ns;
+					s_rst <= '1', '0' after 1 ns;
 					w_rst <= '1', '0' after 1 ns;
 					
 					next_state <= north1;
 	--*NORTH*--
 				when north1 =>
 					--Check flag
-					if(n_CtrlFlg = '1') then
+					if(n_ctrl_flg_set = '1') then
 						next_state <= north2;
 					else
 						next_state <= east1;
 					end if;
 				when north2 =>
-					if(n_rnaCtrl(6 downto 3) = router_address) then
+					if(n_buffer(6 downto 3) = router_address) then
 						next_state <= north3;	--It's for me!
 					else
 						next_state <= north4;	--Forward the control packet.
@@ -307,7 +329,7 @@ begin
 					end if;
 				when north4 =>
 					--Forward the Packet by checking routing table first
-					address <= n_rnaCtrl(6 downto 3);
+					address <= n_buffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= north6;
 				when north5 =>	
@@ -315,11 +337,11 @@ begin
 					--Ack!
 					n_CTRflg <= '1', '0' after 1 ns;
 					--Write bits to rsv_data_out
-					rsv_data_out <= "000" & n_rnaCtrl(9 downto 7);
+					rsv_data_out <= "000" & n_buffer(9 downto 7);
 					--Write bits to sch_data_out
-					sch_data_out <= (globaltime + n_rnaCtrl(cp_size-1 downto 18));
+					sch_data_out <= (globaltime + n_buffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					adr_data_out <= n_rnaCtrl(17 downto 10);
+					adr_data_out <= n_buffer(17 downto 10);
 					
 					--Send to reservation/scheduler/address tables
 					address <= w_address;
@@ -331,7 +353,7 @@ begin
 					--Configure the switch
 					sw_nSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= n_rnaCtrl;
+					rna_ctrlPkt <= n_buffer;
 					next_state <= east1;
 				when north7 =>
 					w_address := w_address + 1;
@@ -351,13 +373,13 @@ begin
 	--*EAST*--				
 				when east1 =>
 					--Check flag
-					if(e_CtrlFlg = '1') then
+					if(e_ctrl_flg_set = '1') then
 						next_state <= east2;
 					else
 						next_state <= south1;
 					end if;
 				when east2 =>
-					if(e_rnaCtrl(6 downto 3) = router_address) then
+					if(e_buffer(6 downto 3) = router_address) then
 						next_state <= east3;	--It's for me!
 					else
 						next_state <= east4;	--Forward the control packet.
@@ -370,7 +392,7 @@ begin
 					end if;
 				when east4 =>
 					--Forward the Packet by checking routing table first
-					address <= e_rnaCtrl(6 downto 3);
+					address <= e_buffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= east6;
 				when east5 =>	
@@ -378,11 +400,11 @@ begin
 					--Ack!
 					e_CTRflg <= '1', '0' after 1 ns;
 					--Write bits to rsv_data_out
-					rsv_data_out <= "001" & e_rnaCtrl(9 downto 7);
+					rsv_data_out <= "001" & e_buffer(9 downto 7);
 					--Write bits to sch_data_out
-					sch_data_out <= (globaltime + e_rnaCtrl(cp_size-1 downto 18));
+					sch_data_out <= (globaltime + e_buffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					adr_data_out <= e_rnaCtrl(17 downto 10);
+					adr_data_out <= e_buffer(17 downto 10);
 					--Send to reservation table
 					address <= w_address;
 					rsv_en <= '1';
@@ -393,7 +415,7 @@ begin
 					--Configure the switch
 					sw_eSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= e_rnaCtrl;
+					rna_ctrlPkt <= e_buffer;
 					next_state <= south1;
 				when east7 =>
 					w_address := w_address + 1;
@@ -413,13 +435,13 @@ begin
 	--*SOUTH*--
 				when south1 =>
 					--Check flag
-					if(s_CtrlFlg = '1') then
+					if(s_ctrl_flg_set = '1') then
 						next_state <= south2;
 					else
 						next_state <= west1;
 					end if;
 				when south2 =>
-					if(s_rnaCtrl(6 downto 3) = router_address) then
+					if(s_buffer(6 downto 3) = router_address) then
 						next_state <= south3;	--It's for me!
 					else
 						next_state <= south4;	--Forward the control packet.
@@ -432,7 +454,7 @@ begin
 					end if;
 				when south4 =>
 					--Forward the Packet by checking routing table first
-					address <= s_rnaCtrl(6 downto 3);
+					address <= s_buffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= south6;
 				when south5 =>	
@@ -440,11 +462,11 @@ begin
 					--Ack!
 					s_CTRflg <= '1', '0' after 1 ns;
 					--Write bits to rsv_data_out
-					rsv_data_out <= "010" & s_rnaCtrl(9 downto 7);
+					rsv_data_out <= "010" & s_buffer(9 downto 7);
 					--Write bits to sch_data_out
-					sch_data_out <= (globaltime + s_rnaCtrl(cp_size-1 downto 18));
+					sch_data_out <= (globaltime + s_buffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					adr_data_out <= s_rnaCtrl(17 downto 10);
+					adr_data_out <= s_buffer(17 downto 10);
 					--Send to reservation table
 					address <= w_address;
 					rsv_en <= '1';
@@ -455,7 +477,7 @@ begin
 					--Configure the switch
 					sw_sSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= s_rnaCtrl;
+					rna_ctrlPkt <= s_buffer;
 					next_state <= west1;
 				when south7 =>
 					w_address := w_address + 1;
@@ -630,23 +652,53 @@ begin
 						when others =>
 							null;
 					end case;
-					--sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 					next_state <= injection11;					-- (was timer_check1);
 				when injection9 =>
-					--sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 					next_state <= injection11;					-- (was timer_check1);
 				when injection10 =>
 					next_state <= injection11;
 				when injection11 =>
-					if(w_ctrl_in_flg_set = '1') then
-						rna_CtrlPkt(0) <= '0';
-						w_rst <= '1', '0' after 1 ns;			--Reset signals
-						sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-						next_state <= injection1;
-					else
-						next_state <= injection10;
-					end if;
-				
+					case rte_data_in(2 downto 0) is
+						when "000" =>							
+							if(s_ctrl_in_flg_set = '1') then				-- "10" South
+								rna_CtrlPkt(0) <= '0';
+								s_rst <= '1', '0' after 1 ns;				--Reset signals
+								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								next_state <= injection1;
+							else
+								next_state <= injection10;
+							end if;						
+						when "001" =>
+							if(w_ctrl_in_flg_set = '1') then				-- "11" West
+								rna_CtrlPkt(0) <= '0';
+								w_rst <= '1', '0' after 1 ns;				--Reset signals
+								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								next_state <= injection1;
+							else
+								next_state <= injection10;
+							end if;			
+						when "010" =>
+							if(n_ctrl_in_flg_set = '1') then				-- "00" North 
+								rna_CtrlPkt(0) <= '0';
+								n_rst <= '1', '0' after 1 ns;				--Reset signals
+								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								next_state <= injection1;
+							else
+								next_state <= injection10;
+							end if;						
+						when "011" =>
+							if(e_ctrl_in_flg_set = '1') then				-- "01" East
+								rna_CtrlPkt(0) <= '0';
+								e_rst <= '1', '0' after 1 ns;				--Reset signals
+								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								next_state <= injection1;
+							else
+								next_state <= injection10;
+							end if;			
+						when others =>
+							null;
+					end case;
+					
 	--*TIMER_CHECK*--
 				when timer_check1 =>
 					--Check scheduled job and determine if departure is necessary.
@@ -756,8 +808,12 @@ begin
 					n_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
 					--Acknowledge
-					n_CTRflg <= '1', '0' after 1 ns;
-					n_arbEnq <= '1', '0' after 1 ns;
+					n_CTRflg <= '1';
+					n_arbEnq <= '1';
+					next_state <= dp_arrivedOnNorth7;
+				when dp_arrivedOnNorth7 =>
+					n_CTRflg <= '0';
+					n_arbEnq <= '0';
 					next_state <= dp_arrivedOnEast1;
 	--*EAST ARRIVALS*--
 				when dp_arrivedOnEast1 =>
@@ -794,8 +850,12 @@ begin
 					e_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
 					--Acknowledge
-					e_CTRflg <= '1', '0' after 1 ns;
-					e_arbEnq <= '1', '0' after 1 ns;
+					e_CTRflg <= '1';
+					e_arbEnq <= '1';
+					next_state <= dp_arrivedOnEast7;
+				when dp_arrivedOnEast7 =>
+					e_CTRflg <= '0';
+					e_arbEnq <= '0';
 					next_state <= dp_arrivedOnSouth1;
 	--*SOUTH ARRIVALS*--
 				when dp_arrivedOnSouth1 =>
@@ -832,8 +892,12 @@ begin
 					s_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
 					--Acknowledge
-					s_CTRflg <= '1', '0' after 1 ns;
-					s_arbEnq <= '1', '0' after 1 ns;
+					s_CTRflg <= '1'; 
+					s_arbEnq <= '1';
+					next_state <= dp_arrivedOnSouth7;
+				when dp_arrivedOnSouth7 =>
+					s_CTRflg <= '0';
+					s_arbEnq <= '0';
 					next_state <= dp_arrivedOnWest1;
 	--*WEST ARRIVALS*--
 				when dp_arrivedOnWest1 =>
@@ -884,6 +948,82 @@ begin
 			end case;
 	end process;
 	
+	--Monitors signal activity on NORTH port
+	north_monitor_process: process(n_rst, n_CtrlFlg, n_DataFlg, s_CTRinFlg)
+	begin
+		if(n_rst = '1') then
+			n_data_flg_set <= '0';
+			n_ctrl_flg_set <= '0';
+			n_ctrl_in_flg_set <= '0';
+		end if;
+		
+		if(n_DataFlg = '1') then
+			n_data_flg_set <= '1';
+			n_buffer <= n_rnaCtrl;
+		end if;
+		
+		if(n_CtrlFlg = '1') then
+			n_ctrl_flg_set <= '1';
+			n_buffer <= w_rnaCtrl;
+		end if;
+		
+		if(s_CTRinFlg = '1') then
+			n_ctrl_in_flg_set <= '1';
+		end if;
+		
+	end process;
+	
+	--Monitors signal activity on EAST port
+	east_monitor_process: process(e_rst, e_CtrlFlg, e_DataFlg, w_CTRinFlg)
+	begin
+		if(e_rst = '1') then
+			e_data_flg_set <= '0';
+			e_ctrl_flg_set <= '0';
+			e_ctrl_in_flg_set <= '0';
+		end if;
+		
+		if(e_DataFlg = '1') then
+			e_data_flg_set <= '1';
+			e_buffer <= e_rnaCtrl;
+		end if;
+		
+		if(e_CtrlFlg = '1') then
+			e_ctrl_flg_set <= '1';
+			e_buffer <= e_rnaCtrl;
+		end if;
+		
+		if(w_CTRinFlg = '1') then
+			e_ctrl_in_flg_set <= '1';
+		end if;
+		
+	end process;
+	
+	--Monitors signal activity on SOUTH port
+	south_monitor_process: process(s_rst, s_CtrlFlg, s_DataFlg, n_CTRinFlg)
+	begin
+		if(s_rst = '1') then
+			s_data_flg_set <= '0';
+			s_ctrl_flg_set <= '0';
+			s_ctrl_in_flg_set <= '0';
+		end if;
+		
+		if(s_DataFlg = '1') then
+			s_data_flg_set <= '1';
+			s_buffer <= s_rnaCtrl;
+		end if;
+		
+		if(s_CtrlFlg = '1') then
+			s_ctrl_flg_set <= '1';
+			s_buffer <= s_rnaCtrl;
+		end if;
+		
+		if(n_CTRinFlg = '1') then
+			s_ctrl_in_flg_set <= '1';
+		end if;
+		
+	end process;
+	
+	--Monitors signal activity on WEST port
 	west_monitor_process: process(w_rst, w_CtrlFlg, w_DataFlg, e_CTRinFlg)
 	begin
 		if(w_rst = '1') then

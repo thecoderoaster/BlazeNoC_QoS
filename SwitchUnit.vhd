@@ -110,7 +110,7 @@ begin
 	sw_rnaCtFl <= '0' when(sw_injctSt ="01") else '1';
 	
 	-- Dmux for injection (injctPkt, rna)
-	sw_rnaCtrl <= sw_injct; -- when (senseOp = '1') else (others => '0');
+	sw_rnaCtrl <= sw_injct; --when (senseOp = '1') else (others => '0');
 	injctPkt <= sw_injct when (senseOp = '0') else (others => '0');
 	
 	-- north switch (mux e, s, w, in, rna)

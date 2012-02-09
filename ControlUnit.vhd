@@ -126,7 +126,7 @@ architecture Behavioral of ControlUnit is
 							  south1, south2, south3, south4, south5, south6, south7,
 							  west1, west2, west3, west4, west5, west6, west7,
 							  injection1, injection2, injection3, injection4, injection5,
-							  injection6, injection7, injection8, injection9, injection10, injection11,
+							  injection6, injection7, injection8, injection9, injection10,
 							  timer_check1, timer_check2, timer_check3, timer_check4,
 							  departure1,
 							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6, dp_arrivedOnNorth7,
@@ -593,8 +593,7 @@ begin
 				when injection3 =>
 					case injt_ctrlPkt(2 downto 1) is
 						when "00" =>
-							rna_ctrlPkt <= injt_ctrlPkt;
-							next_state <= injection9;	-- Condition: Normal Packet
+							next_state <= injection6;	-- Condition: Normal Packet
 						when "01" =>
 							next_state <= injection4;	-- Condition: PE is re/assigning addresses
 						when "10" =>
@@ -614,7 +613,7 @@ begin
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 					next_state <= injection1;							-- (was timer_check1)
 				when injection6 =>
-					--Forward the Packet by checking routing table first
+					--Forward the Data Packet by checking routing table first
 					address <= injt_ctrlPkt(6 downto 3);
 					rte_en <= '0';
 					if(injt_ctrlPkt(0) = '1') then
@@ -623,6 +622,7 @@ begin
 						next_state <= injection8;
 					end if;
 				when injection7 =>
+					rna_ctrlPkt <= injt_ctrlPkt;
 					--Configure the switch for CONTROL PACKETS
 					case rte_data_in(2 downto 0) is
 						when "000" =>
@@ -636,8 +636,7 @@ begin
 						when others =>
 							null;
 					end case;
-					--sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection9;					-- (was timer_check1);
+					next_state <= injection10;		--Determine if the packet registered
 				when injection8 =>
 					--Configure the switch for DATA PACKETS
 					case rte_data_in(2 downto 0) is
@@ -652,53 +651,54 @@ begin
 						when others =>
 							null;
 					end case;
-					next_state <= injection11;					-- (was timer_check1);
+					next_state <= injection10;		--Determine if the packet registered
 				when injection9 =>
-					next_state <= injection11;					-- (was timer_check1);
+					next_state <= injection10;					--NOP
 				when injection10 =>
-					next_state <= injection11;
-				when injection11 =>
 					case rte_data_in(2 downto 0) is
 						when "000" =>							
 							if(s_ctrl_in_flg_set = '1') then				-- "10" South
 								rna_CtrlPkt(0) <= '0';
+								sw_sSel <= "000";
 								s_rst <= '1', '0' after 1 ns;				--Reset signals
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								next_state <= injection1;
 							else
-								next_state <= injection10;
+								next_state <= injection9;
 							end if;						
 						when "001" =>
 							if(w_ctrl_in_flg_set = '1') then				-- "11" West
 								rna_CtrlPkt(0) <= '0';
+								sw_wSel <= "000";
 								w_rst <= '1', '0' after 1 ns;				--Reset signals
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								next_state <= injection1;
 							else
-								next_state <= injection10;
+								next_state <= injection9;
 							end if;			
 						when "010" =>
 							if(n_ctrl_in_flg_set = '1') then				-- "00" North 
 								rna_CtrlPkt(0) <= '0';
+								sw_nSel <= "000";
 								n_rst <= '1', '0' after 1 ns;				--Reset signals
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								next_state <= injection1;
 							else
-								next_state <= injection10;
+								next_state <= injection9;
 							end if;						
 						when "011" =>
 							if(e_ctrl_in_flg_set = '1') then				-- "01" East
 								rna_CtrlPkt(0) <= '0';
+								sw_eSel <= "000";
 								e_rst <= '1', '0' after 1 ns;				--Reset signals
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								next_state <= injection1;
 							else
-								next_state <= injection10;
+								next_state <= injection9;
 							end if;			
 						when others =>
-							null;
-					end case;
-					
+							next_state <= injection1;
+					end case;				
 	--*TIMER_CHECK*--
 				when timer_check1 =>
 					--Check scheduled job and determine if departure is necessary.
@@ -924,7 +924,7 @@ begin
 					--Acknowledge back (discarding packet)
 					adr_search <= '0';
 					adr_nf_ack <= '1', '0' after 1 ns;
-					w_CTRflg <= '1', '0' after 1 ns;
+					--w_CTRflg <= '1', '0' after 1 ns;
 					next_state <= north1;
 				when dp_arrivedOnWest5 =>
 					address <= adr_result;			--should be the address found above

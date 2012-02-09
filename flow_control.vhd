@@ -68,6 +68,7 @@ fc_rnaCtrl <= fc_dataIn;
 
 -- Dmux for control packet sense
 fc_rnaCtrlStrb <= fc_dStrb when (senseOp = '1') else '0';
+--fc_rnaCtrlStrb <= '1' when (senseOp = '1' and (CTRInd = '0' and fc_dStrb = '1')) else '0';
 dStrbInd <= fc_dStrb when (senseOp = '0') else '0';
 
 -- Data indicator for RNA 

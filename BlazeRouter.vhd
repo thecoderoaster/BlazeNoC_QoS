@@ -72,8 +72,8 @@ entity BlazeRouter is
 			  -- arb needs to support ejection and injection fifos but no required for simulation if bypassed
 			  injection_data		: in  std_logic_vector (WIDTH downto 0); -- Datalink from PE
 			  injection_enq		: in  std_logic;								  -- Buffer enqueue from PE
-			  injection_status	: out std_logic_vector (1 downto 0);	  -- Buffer status to PE
-			  
+			  injection_status	: out std_logic_vector (1 downto 0);	  -- Buffer status to PE			  
+
 			  ejection_data		: out std_logic_vector (WIDTH downto 0); -- Datalink to PE
 			  ejection_deq			: in std_logic;								  -- Buffer dequeue from PE
 			  ejection_status		: out std_logic_vector (1 downto 0);	  -- Buffer status to PE
@@ -193,7 +193,8 @@ architecture rtl of BlazeRouter is
 				sw_rnaCtFl			: in std_logic;										-- Flag from Switch for injection packet
 				sw_rnaCtDeq			: out std_logic;										-- Signal to dequeue injection FIFO.
 				rna_ctrlPkt			: out std_logic_vector (WIDTH downto 0);		-- Control packet generator output				
-				injt_ctrlPkt		: in std_logic_vector (WIDTH downto 0)			-- coming from switch control packet from PE	
+				injt_ctrlPkt		: in std_logic_vector (WIDTH downto 0);			-- coming from switch control packet from PE	
+				injt_dataGood		: out std_logic -- data good control for injection
 				);
 		end component;
 
@@ -268,6 +269,7 @@ architecture rtl of BlazeRouter is
 				sw_dGEast	: in std_logic;
 				sw_dGSouth	: in std_logic;
 				sw_dGWest	: in std_logic;
+				sw_arbdGInjct	: in std_logic;
 				sw_rst		: in std_logic;										-- Switch reset for data good
 				sw_injctSt	: in std_logic_vector (1 downto 0);
 				
@@ -369,7 +371,8 @@ architecture rtl of BlazeRouter is
 	signal rnaSwEjectSel : std_logic_vector (2 downto 0);
 	signal rnaSwCtrlPktO	: std_logic_vector (WIDTH downto 0); -- Control packet from RNA to Switch (to outside)
 	signal swRnaCtrlPktI	: std_logic_vector (WIDTH downto 0); -- Control packet from Switch to RNA (from PE)
-	
+	signal rnaSwDataGI	: std_logic;	
+
 	-- signals between switch and PE FIFOs (routed)
 	signal fifoSwInjct	: std_logic_vector (WIDTH downto 0); -- Packet data from injection FIFO to Switch
 	signal swFifoEject	: std_logic_vector (WIDTH downto 0); -- Packet data from Switch to ejection FIFO 
@@ -456,8 +459,8 @@ begin
 									swRnaCtrlFlg,
 									rnaiFifoDeq,
 									rnaSwCtrlPktO, -- Control packet generator output
-									swRnaCtrlPktI); -- Control packet from PE
-									
+									swRnaCtrlPktI, -- Control packet from PE
+									rnaSwDataGI);
 	
 	--Flow Control Unit (Routed except for TLM ports)
 	-- *** denotes a connection to the TLM entity port.
@@ -608,6 +611,7 @@ begin
 										vcSwDGEast,
 										vcSwDGSouth,
 										vcSwDGWest,
+										rnaSwDataGI,		-- Data good control for injection
 										reset,				-- Switch reset for data good ***
 										iFifoaStat,			
 										-- Need signal here for 

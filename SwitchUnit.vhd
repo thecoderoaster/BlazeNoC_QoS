@@ -57,6 +57,7 @@ entity SwitchUnit is
 				sw_dGEast	: in std_logic;
 				sw_dGSouth	: in std_logic;
 				sw_dGWest	: in std_logic;
+				sw_arbdGInjct	: in std_logic;
 				sw_rst		: in std_logic;										-- Switch reset for data good
 				sw_injctSt	: in std_logic_vector (1 downto 0);
 				
@@ -171,7 +172,7 @@ begin
 	-- arbiter case (control packet from rna to switch to neighbor):
 	-- arbiter will need to generate a data good unless ouput is normally zero then switch can detect for it.
 	-- normal rules from general case apply.
-	dataGI <= '1' when (sw_injctSt = "00" or sw_injctSt = "10") else '0'; -- injection data good generator
+	dataGI <= '1' when (sw_injctSt = "00" or sw_injctSt = "10" and sw_arbdGInjct = '1') else '0'; -- injection data good generator
 	dataGA <= '1' when (rnaSens = '1') else '0'; -- Arbiter data good generator 
 	
 	-- data good output control

@@ -124,15 +124,15 @@ architecture Behavioral of ControlUnit is
 	type state_type is (start, north1, north2, north3, north4, north5, north6, north7,
 							  east1, east2, east3, east4, east5, east6, east7,
 							  south1, south2, south3, south4, south5, south6, south7,
-							  west1, west2, west3, west4, west5, west6, west7,
+							  west1, west2, west3, west4, west5, west6, west7, west8, west9,
 							  injection1, injection2, injection3, injection4, injection5,
-							  injection6, injection7, injection8, injection9, injection10,
+							  injection6, injection7, injection8, injection9, injection10, injection11, injection12, injection13,
 							  timer_check1, timer_check2, timer_check3, timer_check4,
 							  departure1,
 							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6, dp_arrivedOnNorth7,
 							  dp_arrivedOnEast1, dp_arrivedOnEast2, dp_arrivedOnEast3, dp_arrivedOnEast4, dp_arrivedOnEast5, dp_arrivedOnEast6, dp_arrivedOnEast7,
 							  dp_arrivedOnSouth1, dp_arrivedOnSouth2, dp_arrivedOnSouth3, dp_arrivedOnSouth4, dp_arrivedOnSouth5, dp_arrivedOnSouth6, dp_arrivedOnSouth7,
-							  dp_arrivedOnWest1, dp_arrivedOnWest2, dp_arrivedOnWest3, dp_arrivedOnWest4, dp_arrivedOnWest5, dp_arrivedOnWest6, dp_arrivedOnWest7);   --73 State FSM
+							  dp_arrivedOnWest1, dp_arrivedOnWest2, dp_arrivedOnWest3, dp_arrivedOnWest4, dp_arrivedOnWest5, dp_arrivedOnWest6, dp_arrivedOnWest7, dp_arrivedOnWest8, dp_arrivedOnWest9);   --73 State FSM
 	signal state, next_state : state_type;
 	
 	signal router_address 	: std_logic_vector(PID_WIDTH-1 downto 0);
@@ -523,8 +523,7 @@ begin
 					next_state <= west6;
 				when west5 =>	
 					--Reserve and schedule the incoming control packet
-					--Ack!
-					w_CTRflg <= '1', '0' after 1 ns;
+					w_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
 					--rsv_data_out <= "011" & w_rnaCtrl(9 downto 7);
 					rsv_data_out <= "011" & w_buffer(9 downto 7);
@@ -559,7 +558,8 @@ begin
 					--Write to rna_ctrlPkt
 					--rna_ctrlPkt <= w_rnaCtrl;
 					rna_ctrlPkt <= w_buffer;
-					next_state <= injection1;
+					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+					next_state <= west9;
 				when west7 =>
 					w_address := w_address + 1;
 					reserved_cnt := reserved_cnt + 1;
@@ -570,10 +570,13 @@ begin
 					else
 						table_full := '1';
 					end if;
-					
+					next_state <= west8;
+				when west8 =>	
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
+					next_state <= west9;
+				when west9 =>
 					w_rst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= injection1;
 	--*INJECTION*--
@@ -651,7 +654,7 @@ begin
 						when others =>
 							null;
 					end case;
-					next_state <= injection10;		--Determine if the packet registered
+					next_state <= injection12;		--Determine if the packet registered
 				when injection9 =>
 					next_state <= injection10;					--NOP
 				when injection10 =>
@@ -659,46 +662,92 @@ begin
 						when "000" =>							
 							if(s_ctrl_in_flg_set = '1') then				-- "10" South
 								rna_CtrlPkt(0) <= '0';
-								sw_sSel <= "000";
-								s_rst <= '1', '0' after 1 ns;				--Reset signals
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-								next_state <= injection1;
+								next_state <= injection13;
 							else
 								next_state <= injection9;
 							end if;						
 						when "001" =>
 							if(w_ctrl_in_flg_set = '1') then				-- "11" West
 								rna_CtrlPkt(0) <= '0';
-								sw_wSel <= "000";
-								w_rst <= '1', '0' after 1 ns;				--Reset signals
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-								next_state <= injection1;
+								next_state <= injection13;
 							else
 								next_state <= injection9;
 							end if;			
 						when "010" =>
 							if(n_ctrl_in_flg_set = '1') then				-- "00" North 
 								rna_CtrlPkt(0) <= '0';
-								sw_nSel <= "000";
-								n_rst <= '1', '0' after 1 ns;				--Reset signals
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-								next_state <= injection1;
+								next_state <= injection13;
 							else
 								next_state <= injection9;
 							end if;						
 						when "011" =>
 							if(e_ctrl_in_flg_set = '1') then				-- "01" East
 								rna_CtrlPkt(0) <= '0';
-								sw_eSel <= "000";
-								e_rst <= '1', '0' after 1 ns;				--Reset signals
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-								next_state <= injection1;
+								next_state <= injection13;
 							else
 								next_state <= injection9;
 							end if;			
 						when others =>
 							next_state <= injection1;
-					end case;				
+					end case;
+				when injection11 =>
+					next_state <= injection12;
+				when injection12 =>
+					case rte_data_in(2 downto 0) is
+						when "000" =>							
+							if(s_ctrl_in_flg_set = '1') then				-- "10" South
+								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								next_state <= injection13;
+							else
+								next_state <= injection11;
+							end if;						
+						when "001" =>
+							if(w_ctrl_in_flg_set = '1') then				-- "11" West
+								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								next_state <= injection13;
+							else
+								next_state <= injection11;
+							end if;			
+						when "010" =>
+							if(n_ctrl_in_flg_set = '1') then				-- "00" North 
+								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								next_state <= injection13;
+							else
+								next_state <= injection11;
+							end if;						
+						when "011" =>
+							if(e_ctrl_in_flg_set = '1') then				-- "01" East
+								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								next_state <= injection13;
+							else
+								next_state <= injection11;
+							end if;			
+						when others =>
+							next_state <= injection1;
+					end case;
+				
+				when injection13 =>
+					case rte_data_in(2 downto 0) is
+						when "000" =>							
+								s_rst <= '1', '0' after 1 ns;				--Reset signals
+								next_state <= injection1;						
+						when "001" =>
+								w_rst <= '1', '0' after 1 ns;				--Reset signals
+								next_state <= injection1;
+						when "010" =>
+								n_rst <= '1', '0' after 1 ns;				--Reset signals
+								next_state <= injection1;					
+						when "011" =>
+								e_rst <= '1', '0' after 1 ns;				--Reset signals
+								next_state <= injection1;			
+						when others =>
+							next_state <= injection1;
+					end case;
+					
 	--*TIMER_CHECK*--
 				when timer_check1 =>
 					--Check scheduled job and determine if departure is necessary.
@@ -903,7 +952,6 @@ begin
 				when dp_arrivedOnWest1 =>
 					--Any new data packets?
 					if(w_data_flg_set = '1') then
-						w_rst <= '1', '0' after 1 ns;
 						next_state <= dp_arrivedOnWest2;
 					else
 						next_state <= north1;
@@ -925,7 +973,7 @@ begin
 					adr_search <= '0';
 					adr_nf_ack <= '1', '0' after 1 ns;
 					--w_CTRflg <= '1', '0' after 1 ns;
-					next_state <= north1;
+					next_state <= dp_arrivedOnWest7;
 				when dp_arrivedOnWest5 =>
 					address <= adr_result;			--should be the address found above
 					adr_search <= '0';
@@ -942,6 +990,7 @@ begin
 				when dp_arrivedOnWest7 =>
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
+					w_rst <= '1', '0' after 1 ns;
 					next_state <= north1;
 				when others =>
 					next_state <= north1;
@@ -1026,25 +1075,27 @@ begin
 	--Monitors signal activity on WEST port
 	west_monitor_process: process(w_rst, w_CtrlFlg, w_DataFlg, e_CTRinFlg)
 	begin
-		if(w_rst = '1') then
-			w_data_flg_set <= '0';
-			w_ctrl_flg_set <= '0';
-			w_ctrl_in_flg_set <= '0';
-		end if;
+		--if(rising_edge(clk)) then
+			if(w_rst = '1') then
+				w_data_flg_set <= '0';
+				w_ctrl_flg_set <= '0';
+				w_ctrl_in_flg_set <= '0';
+			end if;
 		
-		if(w_DataFlg = '1') then
-			w_data_flg_set <= '1';
-			w_buffer <= w_rnaCtrl;
-		end if;
+			if(w_DataFlg = '1') then
+				w_data_flg_set <= '1';
+				w_buffer <= w_rnaCtrl;
+			end if;
+	
+			if(w_CtrlFlg = '1') then
+				w_ctrl_flg_set <= '1';
+				w_buffer <= w_rnaCtrl;
+			end if;
 		
-		if(w_CtrlFlg = '1') then
-			w_ctrl_flg_set <= '1';
-			w_buffer <= w_rnaCtrl;
-		end if;
-		
-		if(e_CTRinFlg = '1') then
-			w_ctrl_in_flg_set <= '1';
-		end if;
+			if(e_CTRinFlg = '1') then
+				w_ctrl_in_flg_set <= '1';
+			end if;
+		--end if;
 		
 	end process;
 	

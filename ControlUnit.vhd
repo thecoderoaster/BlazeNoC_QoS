@@ -116,7 +116,8 @@ entity ControlUnit is
 			sw_rnaCtFl			: in 	std_logic;
 			sw_rnaCtDeq			: out std_logic;
 			rna_ctrlPkt			: out std_logic_vector(cp_size-1 downto 0);
-			injt_ctrlPkt		: in 	std_logic_vector (cp_size-1 downto 0)
+			injt_ctrlPkt		: in 	std_logic_vector (cp_size-1 downto 0);
+			injt_dataGood		: out std_logic
 		);
 end ControlUnit;
 
@@ -654,6 +655,7 @@ begin
 						when others =>
 							null;
 					end case;
+					injt_dataGood <= '1'; 			 --Set data good high until transmission ends
 					next_state <= injection12;		--Determine if the packet registered
 				when injection9 =>
 					next_state <= injection10;					--NOP
@@ -708,6 +710,7 @@ begin
 						when "001" =>
 							if(w_ctrl_in_flg_set = '1') then				-- "11" West
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								injt_dataGood <= '0';
 								next_state <= injection13;
 							else
 								next_state <= injection11;
@@ -972,7 +975,7 @@ begin
 					--Acknowledge back (discarding packet)
 					adr_search <= '0';
 					adr_nf_ack <= '1', '0' after 1 ns;
-					--w_CTRflg <= '1', '0' after 1 ns;
+					w_CTRflg <= '1';							-- ACK
 					next_state <= dp_arrivedOnWest7;
 				when dp_arrivedOnWest5 =>
 					address <= adr_result;			--should be the address found above
@@ -1082,17 +1085,17 @@ begin
 				w_ctrl_in_flg_set <= '0';
 			end if;
 		
-			if(w_DataFlg = '1') then
+			if(w_DataFlg = '1' and w_rst = '0') then
 				w_data_flg_set <= '1';
 				w_buffer <= w_rnaCtrl;
 			end if;
 	
-			if(w_CtrlFlg = '1') then
+			if(w_CtrlFlg = '1' and w_rst = '0') then
 				w_ctrl_flg_set <= '1';
 				w_buffer <= w_rnaCtrl;
 			end if;
 		
-			if(e_CTRinFlg = '1') then
+			if(e_CTRinFlg = '1' and w_rst = '0') then
 				w_ctrl_in_flg_set <= '1';
 			end if;
 		--end if;

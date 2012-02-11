@@ -798,6 +798,58 @@ BEGIN
 			wait until full_PE0 = '0';
 		end if;
 
+		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+		data_inject_PE0 <= "0000011111010000" & "0000" & "0100" & "000" & "0001" & "00" & "1";
+		sm_triggerPE0 <= '1';
+		
+		if(done_PE0 = '0') then					--Handshaking
+			wait until done_PE0 = '1';
+		end if;
+		
+		sm_triggerPE0 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE0 = '1') then
+			wait until full_PE0 = '0';
+		end if;
+		
+		wait for clk_period*10;
+		
+		--Inject a data packet (LEGIT PACKET #4)
+		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+		data_inject_PE0 <= "1111111101111111" & "0000" & "0100" & "000" & "0001" & "00" & "0";
+		sm_triggerPE0 <= '1';
+		
+		if(done_PE0 = '0') then					--Handshaking
+			wait until done_PE0 = '1';
+		end if;
+		
+		sm_triggerPE0 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE0 = '1') then
+			wait until full_PE0 = '0';
+		end if;
+
+		--Inject a data packet (INVALID PACKET #4)
+		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+		data_inject_PE0 <= "1111111111111100" & "0000" & "0101" & "001" & "0001" & "00" & "0";
+		sm_triggerPE0 <= '1';
+		
+		if(done_PE0 = '0') then					--Handshaking
+			wait until done_PE0 = '1';
+		end if;
+		
+		sm_triggerPE0 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE0 = '1') then
+			wait until full_PE0 = '0';
+		end if;
+
       wait;
    end process;
 

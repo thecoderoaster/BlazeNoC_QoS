@@ -366,7 +366,7 @@ begin
 					sw_nSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= n_buffer;
-					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+					n_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= north9;
 				when north7 =>
 					w_address := w_address + 1;
@@ -445,7 +445,7 @@ begin
 					sw_eSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= e_buffer;
-					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+					e_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= east9;
 				when east7 =>
 					w_address := w_address + 1;
@@ -524,7 +524,7 @@ begin
 					sw_sSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= s_buffer;
-					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+					s_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= south9;
 				when south7 =>
 					w_address := w_address + 1;
@@ -603,7 +603,7 @@ begin
 					sw_wSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= w_buffer;
-					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+					w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= west9;
 				when west7 =>
 					w_address := w_address + 1;

@@ -122,9 +122,9 @@ entity ControlUnit is
 end ControlUnit;
 
 architecture Behavioral of ControlUnit is
-	type state_type is (start, north1, north2, north3, north4, north5, north6, north7,
-							  east1, east2, east3, east4, east5, east6, east7,
-							  south1, south2, south3, south4, south5, south6, south7,
+	type state_type is (start, north1, north2, north3, north4, north5, north6, north7, north8, north9,
+							  east1, east2, east3, east4, east5, east6, east7, east8, east9,
+							  south1, south2, south3, south4, south5, south6, south7, south8, south9,
 							  west1, west2, west3, west4, west5, west6, west7, west8, west9,
 							  injection1, injection2, injection3, injection4, injection5,
 							  injection6, injection7, injection8, injection9, injection10, injection11, injection12, injection13,
@@ -335,16 +335,14 @@ begin
 					next_state <= north6;
 				when north5 =>	
 					--Reserve and schedule the incoming control packet
-					--Ack!
-					n_CTRflg <= '1', '0' after 1 ns;
+					n_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
 					rsv_data_out <= "000" & n_buffer(9 downto 7);
-					--Write bits to sch_data_out
+					--Write bits to sch_packet
 					sch_data_out <= (globaltime + n_buffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
 					adr_data_out <= n_buffer(17 downto 10);
-					
-					--Send to reservation/scheduler/address tables
+					--Send to reservation table
 					address <= w_address;
 					rsv_en <= '1';
 					sch_en <= '1';
@@ -352,10 +350,24 @@ begin
 					next_state <= north7;
 				when north6 =>
 					--Configure the switch
+--					case rte_data_in(2 downto 0) is
+--						when "000" =>
+--							sw_nSel <= "111";			-- "00" North FIFO								
+--						when "001" =>
+--							sw_eSel <= "111";			-- "01" East FIFO
+--						when "010" =>
+--							sw_sSel <= "111";			-- "10" South FIFO
+--						when "011" =>
+--							sw_wSel <= "111";			-- "11" Ejection FIFO
+--						when others =>												-- TO DO: Handle Ejection
+--							null;
+--					end case;
+					
 					sw_nSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= n_buffer;
-					next_state <= east1;
+					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+					next_state <= north9;
 				when north7 =>
 					w_address := w_address + 1;
 					reserved_cnt := reserved_cnt + 1;
@@ -366,10 +378,14 @@ begin
 					else
 						table_full := '1';
 					end if;
-					
+					next_state <= north8;
+				when north8 =>	
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
+					next_state <= north9;
+				when north9 =>
+					n_rst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= east1;
 	--*EAST*--				
 				when east1 =>
@@ -398,11 +414,10 @@ begin
 					next_state <= east6;
 				when east5 =>	
 					--Reserve and schedule the incoming control packet
-					--Ack!
-					e_CTRflg <= '1', '0' after 1 ns;
+					e_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
 					rsv_data_out <= "001" & e_buffer(9 downto 7);
-					--Write bits to sch_data_out
+					--Write bits to sch_packet
 					sch_data_out <= (globaltime + e_buffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
 					adr_data_out <= e_buffer(17 downto 10);
@@ -414,10 +429,24 @@ begin
 					next_state <= east7;
 				when east6 =>
 					--Configure the switch
+--					case rte_data_in(2 downto 0) is
+--						when "000" =>
+--							sw_nSel <= "111";			-- "00" North FIFO								
+--						when "001" =>
+--							sw_eSel <= "111";			-- "01" East FIFO
+--						when "010" =>
+--							sw_sSel <= "111";			-- "10" South FIFO
+--						when "011" =>
+--							sw_wSel <= "111";			-- "11" Ejection FIFO
+--						when others =>												-- TO DO: Handle Ejection
+--							null;
+--					end case;
+					
 					sw_eSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= e_buffer;
-					next_state <= south1;
+					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+					next_state <= east9;
 				when east7 =>
 					w_address := w_address + 1;
 					reserved_cnt := reserved_cnt + 1;
@@ -428,10 +457,14 @@ begin
 					else
 						table_full := '1';
 					end if;
-					
+					next_state <= east8;
+				when east8 =>	
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
+					next_state <= east9;
+				when east9 =>
+					e_rst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= south1;	
 	--*SOUTH*--
 				when south1 =>
@@ -460,11 +493,10 @@ begin
 					next_state <= south6;
 				when south5 =>	
 					--Reserve and schedule the incoming control packet
-					--Ack!
-					s_CTRflg <= '1', '0' after 1 ns;
+					s_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
 					rsv_data_out <= "010" & s_buffer(9 downto 7);
-					--Write bits to sch_data_out
+					--Write bits to sch_packet
 					sch_data_out <= (globaltime + s_buffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
 					adr_data_out <= s_buffer(17 downto 10);
@@ -476,10 +508,24 @@ begin
 					next_state <= south7;
 				when south6 =>
 					--Configure the switch
+--					case rte_data_in(2 downto 0) is
+--						when "000" =>
+--							sw_nSel <= "111";			-- "00" North FIFO								
+--						when "001" =>
+--							sw_eSel <= "111";			-- "01" East FIFO
+--						when "010" =>
+--							sw_sSel <= "111";			-- "10" South FIFO
+--						when "011" =>
+--							sw_wSel <= "111";			-- "11" Ejection FIFO
+--						when others =>												-- TO DO: Handle Ejection
+--							null;
+--					end case;
+					
 					sw_sSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= s_buffer;
-					next_state <= west1;
+					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+					next_state <= south9;
 				when south7 =>
 					w_address := w_address + 1;
 					reserved_cnt := reserved_cnt + 1;
@@ -490,11 +536,15 @@ begin
 					else
 						table_full := '1';
 					end if;
-					
+					next_state <= south8;
+				when south8 =>	
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
-					next_state <= west1;	
+					next_state <= south9;
+				when south9 =>
+					s_rst <= '1', '0' after 1 ns;						--Reset flags
+					next_state <= west1;
 	--*WEST*--
 				when west1 =>
 					--Check flag
@@ -504,7 +554,6 @@ begin
 						next_state <= injection1;
 					end if;
 				when west2 =>
-					--if(w_rnaCtrl(6 downto 3) = router_address) then
 					if(w_buffer(6 downto 3) = router_address) then
 						next_state <= west3;	--It's for me!
 					else
@@ -518,7 +567,6 @@ begin
 					end if;
 				when west4 =>
 					--Forward the Packet by checking routing table first
-					--address <= w_rnaCtrl(6 downto 3);
 					address <= w_buffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= west6;
@@ -526,13 +574,10 @@ begin
 					--Reserve and schedule the incoming control packet
 					w_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
-					--rsv_data_out <= "011" & w_rnaCtrl(9 downto 7);
 					rsv_data_out <= "011" & w_buffer(9 downto 7);
 					--Write bits to sch_packet
-					--sch_data_out <= (globaltime + w_rnaCtrl(cp_size-1 downto 18));
 					sch_data_out <= (globaltime + w_buffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					--adr_data_out <= w_rnaCtrl(17 downto 10);
 					adr_data_out <= w_buffer(17 downto 10);
 					--Send to reservation table
 					address <= w_address;
@@ -557,7 +602,6 @@ begin
 					
 					sw_wSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
-					--rna_ctrlPkt <= w_rnaCtrl;
 					rna_ctrlPkt <= w_buffer;
 					--w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= west9;
@@ -609,13 +653,13 @@ begin
 				when injection4 =>
 					router_address <= injt_ctrlPkt(21 downto 18);
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection1;								-- (was timer_check1)
+					next_state <= injection1;					
 				when injection5 =>
 					address <= injt_ctrlPkt(17 downto 14);
 					rte_data_out <= injt_ctrlPkt(21 downto 19);
 					rte_en <= '1';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection1;							-- (was timer_check1)
+					next_state <= injection1;			
 				when injection6 =>
 					--Forward the Data Packet by checking routing table first
 					address <= injt_ctrlPkt(6 downto 3);
@@ -655,10 +699,10 @@ begin
 						when others =>
 							null;
 					end case;
-					injt_dataGood <= '1'; 			 --Set data good high until transmission ends
+					injt_dataGood <= '1'; 			--Set data good high until transmission ends
 					next_state <= injection12;		--Determine if the packet registered
 				when injection9 =>
-					next_state <= injection10;					--NOP
+					next_state <= injection10;								--NOP
 				when injection10 =>
 					case rte_data_in(2 downto 0) is
 						when "000" =>							
@@ -825,10 +869,11 @@ begin
 						table_full := '1';
 					end if;
 					next_state <= dp_arrivedOnNorth1;
+					
 	--*NORTH ARRIVALS*--
 				when dp_arrivedOnNorth1 =>
 					--Any new data packets?
-					if(n_DataFlg = '1') then
+					if(n_data_flg_set = '1') then
 						next_state <= dp_arrivedOnNorth2;
 					else
 						next_state <= dp_arrivedOnEast1;
@@ -836,7 +881,7 @@ begin
 				when dp_arrivedOnNorth2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= n_rnaCtrl(17 downto 10);
+					adr_data_out <= n_buffer(17 downto 10);
 					next_state <= dp_arrivedOnNorth3;
 				when dp_arrivedOnNorth3 =>	
 					if(adr_nf = '1') then
@@ -848,8 +893,8 @@ begin
 					--Acknowledge back (discarding packet)
 					adr_search <= '0';
 					adr_nf_ack <= '1', '0' after 1 ns;
-					n_CTRflg <= '1', '0' after 1 ns;
-					next_state <= dp_arrivedOnEast1;
+					n_CTRflg <= '1';							-- ACK
+					next_state <= dp_arrivedOnNorth7;
 				when dp_arrivedOnNorth5 =>
 					address <= adr_result;			--should be the address found above
 					adr_search <= '0';
@@ -866,11 +911,13 @@ begin
 				when dp_arrivedOnNorth7 =>
 					n_CTRflg <= '0';
 					n_arbEnq <= '0';
+					n_rst <= '1', '0' after 1 ns;
 					next_state <= dp_arrivedOnEast1;
+				
 	--*EAST ARRIVALS*--
 				when dp_arrivedOnEast1 =>
 					--Any new data packets?
-					if(e_DataFlg = '1') then
+					if(e_data_flg_set = '1') then
 						next_state <= dp_arrivedOnEast2;
 					else
 						next_state <= dp_arrivedOnSouth1;
@@ -878,7 +925,7 @@ begin
 				when dp_arrivedOnEast2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= e_rnaCtrl(17 downto 10);
+					adr_data_out <= e_buffer(17 downto 10);
 					next_state <= dp_arrivedOnEast3;
 				when dp_arrivedOnEast3 =>	
 					if(adr_nf = '1') then
@@ -890,10 +937,10 @@ begin
 					--Acknowledge back (discarding packet)
 					adr_search <= '0';
 					adr_nf_ack <= '1', '0' after 1 ns;
-					e_CTRflg <= '1', '0' after 1 ns;
-					next_state <= dp_arrivedOnSouth1;
+					e_CTRflg <= '1';											-- ACK
+					next_state <= dp_arrivedOnEast7;
 				when dp_arrivedOnEast5 =>
-					address <= adr_result;			--should be the address found above
+					address <= adr_result;									--should be the address found above
 					adr_search <= '0';
 					rsv_en <= '0';
 					next_state <= dp_arrivedOnEast6;
@@ -908,11 +955,13 @@ begin
 				when dp_arrivedOnEast7 =>
 					e_CTRflg <= '0';
 					e_arbEnq <= '0';
+					e_rst <= '1', '0' after 1 ns;
 					next_state <= dp_arrivedOnSouth1;
+				
 	--*SOUTH ARRIVALS*--
 				when dp_arrivedOnSouth1 =>
 					--Any new data packets?
-					if(s_DataFlg = '1') then
+					if(s_data_flg_set = '1') then
 						next_state <= dp_arrivedOnSouth2;
 					else
 						next_state <= dp_arrivedOnWest1;
@@ -920,7 +969,7 @@ begin
 				when dp_arrivedOnSouth2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= s_rnaCtrl(17 downto 10);
+					adr_data_out <= s_buffer(17 downto 10);
 					next_state <= dp_arrivedOnSouth3;
 				when dp_arrivedOnSouth3 =>	
 					if(adr_nf = '1') then
@@ -932,10 +981,10 @@ begin
 					--Acknowledge back (discarding packet)
 					adr_search <= '0';
 					adr_nf_ack <= '1', '0' after 1 ns;
-					s_CTRflg <= '1', '0' after 1 ns;
-					next_state <= dp_arrivedOnWest1;
+					s_CTRflg <= '1';											-- ACK
+					next_state <= dp_arrivedOnSouth7;
 				when dp_arrivedOnSouth5 =>
-					address <= adr_result;			--should be the address found above
+					address <= adr_result;									--should be the address found above
 					adr_search <= '0';
 					rsv_en <= '0';
 					next_state <= dp_arrivedOnSouth6;
@@ -944,13 +993,15 @@ begin
 					s_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
 					--Acknowledge
-					s_CTRflg <= '1'; 
+					s_CTRflg <= '1';
 					s_arbEnq <= '1';
 					next_state <= dp_arrivedOnSouth7;
 				when dp_arrivedOnSouth7 =>
 					s_CTRflg <= '0';
 					s_arbEnq <= '0';
+					s_rst <= '1', '0' after 1 ns;
 					next_state <= dp_arrivedOnWest1;
+					
 	--*WEST ARRIVALS*--
 				when dp_arrivedOnWest1 =>
 					--Any new data packets?
@@ -962,7 +1013,6 @@ begin
 				when dp_arrivedOnWest2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					--adr_data_out <= w_rnaCtrl(17 downto 10);
 					adr_data_out <= w_buffer(17 downto 10);
 					next_state <= dp_arrivedOnWest3;
 				when dp_arrivedOnWest3 =>	
@@ -975,10 +1025,10 @@ begin
 					--Acknowledge back (discarding packet)
 					adr_search <= '0';
 					adr_nf_ack <= '1', '0' after 1 ns;
-					w_CTRflg <= '1';							-- ACK
+					w_CTRflg <= '1';											-- ACK
 					next_state <= dp_arrivedOnWest7;
 				when dp_arrivedOnWest5 =>
-					address <= adr_result;			--should be the address found above
+					address <= adr_result;									--should be the address found above
 					adr_search <= '0';
 					rsv_en <= '0';
 					next_state <= dp_arrivedOnWest6;
@@ -987,8 +1037,8 @@ begin
 					w_vc_rnaSelI <= rsv_data_in(1 downto 0);			--Value from RSV TABLE (PATH)
 					
 					--Acknowledge
-					w_CTRflg <= '1'; --'0' after 1 ns;
-					w_arbEnq <= '1'; --'0' after 1 ns;
+					w_CTRflg <= '1';
+					w_arbEnq <= '1';
 					next_state <= dp_arrivedOnWest7;
 				when dp_arrivedOnWest7 =>
 					w_CTRflg <= '0';
@@ -1009,17 +1059,17 @@ begin
 			n_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(n_DataFlg = '1') then
+		if(n_DataFlg = '1' and n_rst = '0') then
 			n_data_flg_set <= '1';
 			n_buffer <= n_rnaCtrl;
 		end if;
 		
-		if(n_CtrlFlg = '1') then
+		if(n_CtrlFlg = '1' and n_rst = '0') then
 			n_ctrl_flg_set <= '1';
 			n_buffer <= w_rnaCtrl;
 		end if;
 		
-		if(s_CTRinFlg = '1') then
+		if(s_CTRinFlg = '1' and n_rst = '0') then
 			n_ctrl_in_flg_set <= '1';
 		end if;
 		
@@ -1034,17 +1084,17 @@ begin
 			e_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(e_DataFlg = '1') then
+		if(e_DataFlg = '1' and e_rst = '0') then
 			e_data_flg_set <= '1';
 			e_buffer <= e_rnaCtrl;
 		end if;
 		
-		if(e_CtrlFlg = '1') then
+		if(e_CtrlFlg = '1' and e_rst = '0') then
 			e_ctrl_flg_set <= '1';
 			e_buffer <= e_rnaCtrl;
 		end if;
 		
-		if(w_CTRinFlg = '1') then
+		if(w_CTRinFlg = '1' and e_rst = '0') then
 			e_ctrl_in_flg_set <= '1';
 		end if;
 		
@@ -1059,17 +1109,17 @@ begin
 			s_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(s_DataFlg = '1') then
+		if(s_DataFlg = '1' and s_rst = '0') then
 			s_data_flg_set <= '1';
 			s_buffer <= s_rnaCtrl;
 		end if;
 		
-		if(s_CtrlFlg = '1') then
+		if(s_CtrlFlg = '1' and s_rst = '0') then
 			s_ctrl_flg_set <= '1';
 			s_buffer <= s_rnaCtrl;
 		end if;
 		
-		if(n_CTRinFlg = '1') then
+		if(n_CTRinFlg = '1' and s_rst = '0') then
 			s_ctrl_in_flg_set <= '1';
 		end if;
 		

@@ -132,6 +132,9 @@ begin
 				elsif(injection_status = EMPTY_FIFO) then
 					full <= '0';
 					next_state2 <= send_state;
+				elsif(injection_status = NORM_FIFO) then
+					full <= '0';
+					next_state2 <= send_state;
 				else
 					full <= '1';
 					next_state2 <= full_state;

@@ -273,28 +273,33 @@ begin
 					router0_north_to_south_data_out,
 					router0_north_to_south_dout_good,
 					router0_north_to_south_CTR_out,
-					router0_east_to_west_data_in,					--East Port [Connected to Router1 WEST PORT]
+					
+					router0_east_to_west_data_in,						--East Port [Connected to Router1 WEST PORT]
 					router0_east_to_west_din_good,
 					router0_east_to_west_CTR_in,	
 					router0_east_to_west_data_out,
 					router0_east_to_west_dout_good,
 					router0_east_to_west_CTR_out,
+					
 					router0_south_to_north_data_in,					--South Port
 					router0_south_to_north_din_good,
 					router0_south_to_north_CTR_in,
 					router0_south_to_north_data_out,
 					router0_south_to_north_dout_good,
 					router0_south_to_north_CTR_out,
-					router0_west_to_east_data_in,					--West Port
+					
+					router0_west_to_east_data_in,						--West Port [Connected to Router1 EAST PORT]
 					router0_west_to_east_din_good,
 					router0_west_to_east_CTR_in,
 					router0_west_to_east_data_out,
 					router0_west_to_east_dout_good,	
 					router0_west_to_east_CTR_out,
-					router0_injection_data,					--Injection
+					
+					router0_injection_data,								--Injection
 					router0_injection_enq,
 					router0_injection_status,
-					router0_ejection_data,					--Ejection
+					
+					router0_ejection_data,								--Ejection
 					router0_ejection_deq,
 					router0_ejection_status,
 					clk,
@@ -307,28 +312,33 @@ begin
 					router1_north_to_south_data_out,
 					router1_north_to_south_dout_good,
 					router1_north_to_south_CTR_out,
-					router1_east_to_west_data_in,					--East Port
+					
+					router1_east_to_west_data_in,						--East Port
 					router1_east_to_west_din_good,
 					router1_east_to_west_CTR_in,	
-					router1_east_to_west_data_out,
+					router1_east_to_west_data_out,					
 					router1_east_to_west_dout_good,
 					router1_east_to_west_CTR_out,
+					
 					router1_south_to_north_data_in,					--South Port
 					router1_south_to_north_din_good,
 					router1_south_to_north_CTR_in,
 					router1_south_to_north_data_out,
 					router1_south_to_north_dout_good,
 					router1_south_to_north_CTR_out,
+					
 					router0_east_to_west_data_out,					--West Port [Connected to Router0 EAST PORT]
 					router0_east_to_west_dout_good,
 					router0_east_to_west_CTR_out,
 					router0_east_to_west_data_in,	
 					router0_east_to_west_din_good,
 					router0_east_to_west_CTR_in,
-					router1_injection_data,					--Injection
+					
+					router1_injection_data,								--Injection
 					router1_injection_enq,
 					router1_injection_status,
-					router1_ejection_data,					--Ejection
+					
+					router1_ejection_data,								--Ejection
 					router1_ejection_deq,
 					router1_ejection_status,
 					clk,

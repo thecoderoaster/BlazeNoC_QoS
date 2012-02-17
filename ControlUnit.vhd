@@ -182,6 +182,12 @@ architecture Behavioral of ControlUnit is
 	signal w_ctrl_flg_set	: std_logic;
 	signal w_ctrl_in_flg_set : std_logic;
 	signal w_buffer			: std_logic_vector(cp_size-1 downto 0);
+	
+	--WDT Related
+	signal wdt_counter1 		: std_logic_vector(15 downto 0);
+	signal wdt_elapsed 		: std_logic_vector(15 downto 0);
+	signal wdt_expired 		: std_logic;
+	signal start_wdt_timer	: std_logic;
 
 	
 begin
@@ -232,6 +238,31 @@ begin
 		end if;
 	end process;
 	
+	--wdt_process: This process is an exclusive timer that executes up to 1000 times the period
+	wdt_process: process(clk, start_wdt_timer)
+	begin
+	
+		if start_wdt_timer = '0' then
+			wdt_counter1 <= std_logic_vector(to_unsigned(0, wdt_counter1'length));
+			wdt_elapsed <= std_logic_vector(to_unsigned(0, wdt_elapsed'length));
+			wdt_expired <= '0';
+		
+		elsif rising_edge(clk) and start_wdt_timer = '1' then
+			wdt_counter1 <= wdt_counter1 + "0000000000000001";
+			if(wdt_counter1 = "000000001110") then
+				wdt_elapsed <= wdt_elapsed + "0000000000000001";
+				wdt_counter1 <= "0000000000000000";
+			end if;
+			
+			if(wdt_elapsed >= "0000000010000000") then
+				wdt_expired <= '1';
+			else
+				wdt_expired <= '0';
+			end if;
+			
+		end if;
+	end process;
+	
 	--cpStateHandler_process: These processes below are responsible for assigning the next_state
 
 	process
@@ -267,7 +298,9 @@ begin
 					next_pkt_in_vcc <= std_logic_vector(to_unsigned(0, next_pkt_in_vcc'length));
 					next_pkt_in_vcell <= std_logic_vector(to_unsigned(0, next_pkt_in_vcell'length));
 					next_pkt_expires_in <= std_logic_vector(to_unsigned(0, next_pkt_expires_in'length));
-			
+		
+					start_wdt_timer <= '0';
+		
 					rsv_en <= '0';
 					rte_en <= '0';
 					sch_en <= '0';
@@ -684,6 +717,7 @@ begin
 						when others =>
 							null;
 					end case;
+					start_wdt_timer <= '1';			--Start WDT timer to prevent deadlocks
 					next_state <= injection10;		--Determine if the packet registered
 				when injection8 =>
 					--Configure the switch for DATA PACKETS
@@ -700,13 +734,20 @@ begin
 							null;
 					end case;
 					injt_dataGood <= '1'; 			--Set data good high until transmission ends
+					start_wdt_timer <= '1';			--Start WDT timer to prevent deadlocks
 					next_state <= injection12;		--Determine if the packet registered
 				when injection9 =>
-					next_state <= injection10;								--NOP
+					if(wdt_expired = '1') then
+						start_wdt_timer <= '0';							--Failed to ack back. Deadlock? Try again later.
+						next_state <= timer_check1;
+					else
+						next_state <= injection10;						--NOP
+					end if;
 				when injection10 =>
 					case rte_data_in(2 downto 0) is
 						when "000" =>							
 							if(s_ctrl_in_flg_set = '1') then				-- "10" South
+								start_wdt_timer <= '0';						-- Stop the WDT timer
 								rna_CtrlPkt(0) <= '0';
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								next_state <= injection13;
@@ -715,6 +756,7 @@ begin
 							end if;						
 						when "001" =>
 							if(w_ctrl_in_flg_set = '1') then				-- "11" West
+								start_wdt_timer <= '0';						-- Stop the WDT timer
 								rna_CtrlPkt(0) <= '0';
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								next_state <= injection13;
@@ -722,7 +764,8 @@ begin
 								next_state <= injection9;
 							end if;			
 						when "010" =>
-							if(n_ctrl_in_flg_set = '1') then				-- "00" North 
+							if(n_ctrl_in_flg_set = '1') then				-- "00" North
+								start_wdt_timer <= '0';						-- Stop the WDT timer
 								rna_CtrlPkt(0) <= '0';
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								next_state <= injection13;
@@ -731,6 +774,7 @@ begin
 							end if;						
 						when "011" =>
 							if(e_ctrl_in_flg_set = '1') then				-- "01" East
+								start_wdt_timer <= '0';						-- Stop the WDT timer
 								rna_CtrlPkt(0) <= '0';
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								next_state <= injection13;
@@ -741,18 +785,26 @@ begin
 							next_state <= injection1;
 					end case;
 				when injection11 =>
-					next_state <= injection12;
+					if(wdt_expired = '1') then
+						start_wdt_timer <= '0';								--Failed to ack back. Deadlock? Try again later.
+						next_state <= timer_check1;
+					else
+						next_state <= injection12;
+					end if;
 				when injection12 =>
 					case rte_data_in(2 downto 0) is
 						when "000" =>							
 							if(s_ctrl_in_flg_set = '1') then				-- "10" South
+								start_wdt_timer <= '0';						-- Stop the WDT timer
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								injt_dataGood <= '0';
 								next_state <= injection13;
 							else
 								next_state <= injection11;
 							end if;						
 						when "001" =>
 							if(w_ctrl_in_flg_set = '1') then				-- "11" West
+								start_wdt_timer <= '0';						-- Stop the WDT timer
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 								injt_dataGood <= '0';
 								next_state <= injection13;
@@ -761,14 +813,18 @@ begin
 							end if;			
 						when "010" =>
 							if(n_ctrl_in_flg_set = '1') then				-- "00" North 
+								start_wdt_timer <= '0';						-- Stop the WDT timer
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								injt_dataGood <= '0';
 								next_state <= injection13;
 							else
 								next_state <= injection11;
 							end if;						
 						when "011" =>
 							if(e_ctrl_in_flg_set = '1') then				-- "01" East
+								start_wdt_timer <= '0';						-- Stop the WDT timer
 								sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+								injt_dataGood <= '0';
 								next_state <= injection13;
 							else
 								next_state <= injection11;

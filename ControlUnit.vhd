@@ -122,10 +122,10 @@ entity ControlUnit is
 end ControlUnit;
 
 architecture Behavioral of ControlUnit is
-	type state_type is (start, north1, north2, north3, north4, north5, north6, north7, north8, north9,
-							  east1, east2, east3, east4, east5, east6, east7, east8, east9,
-							  south1, south2, south3, south4, south5, south6, south7, south8, south9,
-							  west1, west2, west3, west4, west5, west6, west7, west8, west9,
+	type state_type is (start, north1, north2, north3, north4, north5, north6, north7, north8, north9, north10, north11, north12,
+							  east1, east2, east3, east4, east5, east6, east7, east8, east9, east10, east11, east12,
+							  south1, south2, south3, south4, south5, south6, south7, south8, south9, south10, south11, south12,
+							  west1, west2, west3, west4, west5, west6, west7, west8, west9, west10, west11, west12,
 							  injection1, injection2, injection3, injection4, injection5,
 							  injection6, injection7, injection8, injection9, injection10, injection11, injection12, injection13,
 							  timer_check1, timer_check2, timer_check3, timer_check4,
@@ -351,22 +351,39 @@ begin
 					end if;
 				when north2 =>
 					if(n_buffer(6 downto 3) = router_address) then
-						next_state <= north3;	--It's for me!
+						next_state <= north3;		--It's for me!
 					else
-						next_state <= north4;	--Forward the control packet.
+						next_state <= north7;		--Forward the control packet.
 					end if;
 				when north3 =>
+					--Search address table for matching GID/PID
+					adr_search <= '1';
+					adr_data_out <= n_buffer(17 downto 10);
+					next_state <= north4;
+				when north4 =>	
+					if(adr_nf = '1') then
+						next_state <= north6;		-- Packet registered, discard any duplicates
+					else
+						next_state <= north5;		-- Packet was never registered before
+					end if;
+				when north5 =>
+					--Acknowledge back (discarding packet)
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					n_CTRflg <= '1', '0' after 1 ns;		-- ACK
+					next_state <= north12;
+				when north6 =>
 					if(table_full = '0') then
-						next_state <= north5;
+						next_state <= north8;
 					else
 						next_state <= east1;
 					end if;
-				when north4 =>
+				when north7 =>
 					--Forward the Packet by checking routing table first
 					address <= n_buffer(6 downto 3);
 					rte_en <= '0';
-					next_state <= north6;
-				when north5 =>	
+					next_state <= north9;
+				when north8 =>	
 					--Reserve and schedule the incoming control packet
 					n_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
@@ -380,8 +397,8 @@ begin
 					rsv_en <= '1';
 					sch_en <= '1';
 					adr_en <= '1';
-					next_state <= north7;
-				when north6 =>
+					next_state <= north10;
+				when north9 =>
 					--Configure the switch
 --					case rte_data_in(2 downto 0) is
 --						when "000" =>
@@ -400,8 +417,8 @@ begin
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= n_buffer;
 					n_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
-					next_state <= north9;
-				when north7 =>
+					next_state <= north12;
+				when north10 =>
 					w_address := w_address + 1;
 					reserved_cnt := reserved_cnt + 1;
 					
@@ -411,13 +428,13 @@ begin
 					else
 						table_full := '1';
 					end if;
-					next_state <= north8;
-				when north8 =>	
+					next_state <= north11;
+				when north11 =>	
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
-					next_state <= north9;
-				when north9 =>
+					next_state <= north12;
+				when north12 =>
 					n_rst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= east1;
 	--*EAST*--				
@@ -430,22 +447,39 @@ begin
 					end if;
 				when east2 =>
 					if(e_buffer(6 downto 3) = router_address) then
-						next_state <= east3;	--It's for me!
+						next_state <= east3;		--It's for me!
 					else
-						next_state <= east4;	--Forward the control packet.
+						next_state <= east7;		--Forward the control packet.
 					end if;
 				when east3 =>
+					--Search address table for matching GID/PID
+					adr_search <= '1';
+					adr_data_out <= e_buffer(17 downto 10);
+					next_state <= east4;
+				when east4 =>	
+					if(adr_nf = '1') then
+						next_state <= east6;		-- Packet registered, discard any duplicates
+					else
+						next_state <= east5;		-- Packet was never registered before
+					end if;
+				when east5 =>
+					--Acknowledge back (discarding packet)
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					e_CTRflg <= '1', '0' after 1 ns;		-- ACK
+					next_state <= east12;
+				when east6 =>
 					if(table_full = '0') then
-						next_state <= east5;
+						next_state <= east8;
 					else
 						next_state <= south1;
 					end if;
-				when east4 =>
+				when east7 =>
 					--Forward the Packet by checking routing table first
 					address <= e_buffer(6 downto 3);
 					rte_en <= '0';
-					next_state <= east6;
-				when east5 =>	
+					next_state <= east9;
+				when east8 =>	
 					--Reserve and schedule the incoming control packet
 					e_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
@@ -459,8 +493,8 @@ begin
 					rsv_en <= '1';
 					sch_en <= '1';
 					adr_en <= '1';
-					next_state <= east7;
-				when east6 =>
+					next_state <= east10;
+				when east9 =>
 					--Configure the switch
 --					case rte_data_in(2 downto 0) is
 --						when "000" =>
@@ -479,8 +513,8 @@ begin
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= e_buffer;
 					e_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
-					next_state <= east9;
-				when east7 =>
+					next_state <= east12;
+				when east10 =>
 					w_address := w_address + 1;
 					reserved_cnt := reserved_cnt + 1;
 					
@@ -490,13 +524,13 @@ begin
 					else
 						table_full := '1';
 					end if;
-					next_state <= east8;
-				when east8 =>	
+					next_state <= east11;
+				when east11 =>	
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
-					next_state <= east9;
-				when east9 =>
+					next_state <= east12;
+				when east12 =>
 					e_rst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= south1;	
 	--*SOUTH*--
@@ -509,22 +543,39 @@ begin
 					end if;
 				when south2 =>
 					if(s_buffer(6 downto 3) = router_address) then
-						next_state <= south3;	--It's for me!
+						next_state <= south3;		--It's for me!
 					else
-						next_state <= south4;	--Forward the control packet.
+						next_state <= south7;		--Forward the control packet.
 					end if;
 				when south3 =>
+					--Search address table for matching GID/PID
+					adr_search <= '1';
+					adr_data_out <= s_buffer(17 downto 10);
+					next_state <= south4;
+				when south4 =>	
+					if(adr_nf = '1') then
+						next_state <= south6;		-- Packet registered, discard any duplicates
+					else
+						next_state <= south5;		-- Packet was never registered before
+					end if;
+				when south5 =>
+					--Acknowledge back (discarding packet)
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					s_CTRflg <= '1', '0' after 1 ns;		-- ACK
+					next_state <= south12;
+				when south6 =>
 					if(table_full = '0') then
-						next_state <= south5;
+						next_state <= south8;
 					else
 						next_state <= west1;
 					end if;
-				when south4 =>
+				when south7 =>
 					--Forward the Packet by checking routing table first
 					address <= s_buffer(6 downto 3);
 					rte_en <= '0';
-					next_state <= south6;
-				when south5 =>	
+					next_state <= south9;
+				when south8 =>	
 					--Reserve and schedule the incoming control packet
 					s_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
@@ -538,8 +589,8 @@ begin
 					rsv_en <= '1';
 					sch_en <= '1';
 					adr_en <= '1';
-					next_state <= south7;
-				when south6 =>
+					next_state <= south10;
+				when south9 =>
 					--Configure the switch
 --					case rte_data_in(2 downto 0) is
 --						when "000" =>
@@ -558,8 +609,8 @@ begin
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= s_buffer;
 					s_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
-					next_state <= south9;
-				when south7 =>
+					next_state <= south12;
+				when south10 =>
 					w_address := w_address + 1;
 					reserved_cnt := reserved_cnt + 1;
 					
@@ -569,13 +620,13 @@ begin
 					else
 						table_full := '1';
 					end if;
-					next_state <= south8;
-				when south8 =>	
+					next_state <= south11;
+				when south11 =>	
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
-					next_state <= south9;
-				when south9 =>
+					next_state <= south12;
+				when south12 =>
 					s_rst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= west1;
 	--*WEST*--
@@ -588,22 +639,39 @@ begin
 					end if;
 				when west2 =>
 					if(w_buffer(6 downto 3) = router_address) then
-						next_state <= west3;	--It's for me!
+						next_state <= west3;		--It's for me!
 					else
-						next_state <= west4;	--Forward the control packet.
+						next_state <= west7;		--Forward the control packet.
 					end if;
 				when west3 =>
+					--Search address table for matching GID/PID
+					adr_search <= '1';
+					adr_data_out <= w_buffer(17 downto 10);
+					next_state <= west4;
+				when west4 =>	
+					if(adr_nf = '1') then
+						next_state <= west6;		-- Packet registered, discard any duplicates
+					else
+						next_state <= west5;		-- Packet was never registered before
+					end if;
+				when west5 =>
+					--Acknowledge back (discarding packet)
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					w_CTRflg <= '1', '0' after 1 ns;		-- ACK
+					next_state <= west12;
+				when west6 =>
 					if(table_full = '0') then
-						next_state <= west5;
+						next_state <= west8;
 					else
 						next_state <= injection1;
 					end if;
-				when west4 =>
+				when west7 =>
 					--Forward the Packet by checking routing table first
 					address <= w_buffer(6 downto 3);
 					rte_en <= '0';
-					next_state <= west6;
-				when west5 =>	
+					next_state <= west9;
+				when west8 =>	
 					--Reserve and schedule the incoming control packet
 					w_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
@@ -617,8 +685,8 @@ begin
 					rsv_en <= '1';
 					sch_en <= '1';
 					adr_en <= '1';
-					next_state <= west7;
-				when west6 =>
+					next_state <= west10;
+				when west9 =>
 					--Configure the switch
 --					case rte_data_in(2 downto 0) is
 --						when "000" =>
@@ -637,8 +705,8 @@ begin
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= w_buffer;
 					w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
-					next_state <= west9;
-				when west7 =>
+					next_state <= west12;
+				when west10 =>
 					w_address := w_address + 1;
 					reserved_cnt := reserved_cnt + 1;
 					
@@ -648,15 +716,16 @@ begin
 					else
 						table_full := '1';
 					end if;
-					next_state <= west8;
-				when west8 =>	
+					next_state <= west11;
+				when west11 =>	
 					rsv_en <= '0';
 					sch_en <= '0';
 					adr_en <= '0';
-					next_state <= west9;
-				when west9 =>
+					next_state <= west12;
+				when west12 =>
 					w_rst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= injection1;
+					
 	--*INJECTION*--
 				when injection1 =>
 					--Check flag
@@ -739,7 +808,23 @@ begin
 				when injection9 =>
 					if(wdt_expired = '1') then
 						start_wdt_timer <= '0';							--Failed to ack back. Deadlock? Try again later.
-						next_state <= timer_check1;
+						rna_CtrlPkt(0) <= '0';
+						case rte_data_in(2 downto 0) is
+							when "000" =>							
+									s_rst <= '1', '0' after 1 ns;				--Reset signals
+									next_state <= timer_check1;					
+							when "001" =>
+									w_rst <= '1', '0' after 1 ns;				--Reset signals
+									next_state <= timer_check1;
+							when "010" =>
+									n_rst <= '1', '0' after 1 ns;				--Reset signals
+									next_state <= timer_check1;					
+							when "011" =>
+									e_rst <= '1', '0' after 1 ns;				--Reset signals
+									next_state <= timer_check1;			
+							when others =>
+								next_state <= timer_check1;
+						end case;
 					else
 						next_state <= injection10;						--NOP
 					end if;
@@ -787,7 +872,23 @@ begin
 				when injection11 =>
 					if(wdt_expired = '1') then
 						start_wdt_timer <= '0';								--Failed to ack back. Deadlock? Try again later.
-						next_state <= timer_check1;
+						injt_dataGood <= '0';
+						case rte_data_in(2 downto 0) is
+							when "000" =>							
+									s_rst <= '1', '0' after 1 ns;				--Reset signals
+									next_state <= timer_check1;					
+							when "001" =>
+									w_rst <= '1', '0' after 1 ns;				--Reset signals
+									next_state <= timer_check1;
+							when "010" =>
+									n_rst <= '1', '0' after 1 ns;				--Reset signals
+									next_state <= timer_check1;					
+							when "011" =>
+									e_rst <= '1', '0' after 1 ns;				--Reset signals
+									next_state <= timer_check1;			
+							when others =>
+								next_state <= timer_check1;
+						end case;
 					else
 						next_state <= injection12;
 					end if;

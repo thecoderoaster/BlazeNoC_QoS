@@ -35,17 +35,19 @@ use work.router_library.all;
 --use UNISIM.VComponents.all;
 
 entity flow_control is
-	Port (  fc_CTRflg			: in		STD_LOGIC;									-- Clear To Recieve flag (from RNA)
-			  fc_dataIn 		: in  	STD_LOGIC_VECTOR (WIDTH downto 0); 	-- Input data port (from neighbor)
-           fc_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
-           fc_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
-			  fc_arbEnq			: in 		STD_LOGIC; 									-- Direct Enq control (from arbiter)
-			  fc_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
-           fc_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
-           fc_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
-			  fc_rnaDataStrb	: out		STD_LOGIC;									-- Data packet strobe (to RNA)
-			  fc_CTR				: out		STD_LOGIC;									-- Clear to Recieve (to neighbor)
-           fc_vcEnq 			: out  	STD_LOGIC);									-- enqueue command from RNA (to VC)
+	Port (  fc_CTRflg		: in	STD_LOGIC;									-- Clear To Recieve flag (from RNA)
+		fc_dataIn 		: in  	STD_LOGIC_VECTOR (WIDTH downto 0); 	-- Input data port (from neighbor)
+           	fc_dStrb 		: in  	STD_LOGIC;									-- Data strobe (from neighbor)
+           	fc_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
+		fc_arbEnq		: in 	STD_LOGIC; 									-- Direct Enq control (from arbiter)
+		fc_invld		: in 	STD_LOGIC;									-- Data Invalid Signal (From Neighbor)
+	 	fc_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
+          	fc_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
+           	fc_rnaCtrlStrb 		: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
+		fc_rnaDataStrb		: out	STD_LOGIC;									-- Data packet strobe (to RNA)
+		fc_CTR			: out	STD_LOGIC;									-- Clear to Recieve (to neighbor)
+           	fc_vcEnq 		: out  	STD_LOGIC);									-- enqueue command from RNA (to VC)
+
 end flow_control;
 
 architecture fc_4 of flow_control is
@@ -76,8 +78,8 @@ dStrbInd <= fc_dStrb when (senseOp = '0' and fc_dataIn(WIDTH downto 1) /= 0) els
 fc_rnaDataStrb <= '1' when (senseOp = '0' and fc_dataIn(WIDTH downto 1) /= 0 and (CTRInd = '0' and fc_dStrb = '1')) else '0';
 
 -- Clear to recieve handler
-CTRInd <= fc_CTRflg; --(not fc_vcFull) and fc_CTRflg;
-fc_CTR <= fc_CTRflg; -- direct communication between recv rna and sending rna
+CTRInd <= fc_CTRflg when (fc_invld = '0') else '0'; --(not fc_vcFull) and fc_CTRflg;
+fc_CTR <= fc_CTRflg when (fc_invld = '0') else '0'; -- direct communication between recv rna and sending rna
 
 -- VC Data strobe handler
 -- arbiter will have direct control to enqueue actions, but the data must be good and 

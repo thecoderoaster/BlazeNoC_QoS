@@ -42,6 +42,7 @@ entity fcu is
 			n_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
 			n_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
 			n_arbEnq			: in 		STD_LOGIC;									-- Direct Enq control (from arbiter)
+			n_invld			: in STD_LOGIC;									-- Data invalid signal (from neighbor)
 			n_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
 			n_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
 			n_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
@@ -54,6 +55,7 @@ entity fcu is
 			e_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
 			e_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
 			e_arbEnq			: in 		STD_LOGIC;									-- Direct Enq control (from arbiter)
+			e_invld			: in STD_LOGIC;									-- Data invalid signal (from neighbor)
 			e_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
 			e_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
 			e_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
@@ -66,6 +68,7 @@ entity fcu is
 			s_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
 			s_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
 			s_arbEnq			: in 		STD_LOGIC;									-- Direct Enq control (from arbiter)
+			s_invld			: in STD_LOGIC;									-- Data invalid signal (from neighbor)
 			s_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
 			s_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
 			s_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
@@ -78,6 +81,7 @@ entity fcu is
 			w_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
 			w_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
 			w_arbEnq			: in 		STD_LOGIC;									-- Direct Enq control (from arbiter)
+			w_invld			: in STD_LOGIC;									-- Data invalid signal (from neighbor)
 			w_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
 			w_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
 			w_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
@@ -90,17 +94,19 @@ end fcu;
 architecture fcu_4 of fcu is
 
 	component flow_control is
-		Port (  fc_CTRflg			: in		STD_LOGIC;									-- Clear To Recieve flag (from RNA)
-				  fc_dataIn 		: in  	STD_LOGIC_VECTOR (WIDTH downto 0); 	-- Input data port (from neighbor)
-				  fc_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
-				  fc_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
-				  fc_arbEnq			: in 		STD_LOGIC; 									-- Direct Enq control (from arbiter)
-				  fc_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
-				  fc_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
-				  fc_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
-				  fc_rnaDataStrb	: out		STD_LOGIC;									-- Data packet strobe (to RNA)
-				  fc_CTR				: out		STD_LOGIC;									-- Clear to Recieve (to neighbor)
-				  fc_vcEnq 			: out  	STD_LOGIC);									-- enqueue command from RNA (to VC)
+		Port (  fc_CTRflg		: in	STD_LOGIC;									-- Clear To Recieve flag (from RNA)
+		fc_dataIn 		: in  	STD_LOGIC_VECTOR (WIDTH downto 0); 	-- Input data port (from neighbor)
+           	fc_dStrb 		: in  	STD_LOGIC;									-- Data strobe (from neighbor)
+           	fc_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
+		fc_arbEnq		: in 	STD_LOGIC; 									-- Direct Enq control (from arbiter)
+		fc_invld		: in 	STD_LOGIC;									-- Data Invalid Signal (From Neighbor)
+	 	fc_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
+          	fc_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
+           	fc_rnaCtrlStrb 		: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
+		fc_rnaDataStrb		: out	STD_LOGIC;									-- Data packet strobe (to RNA)
+		fc_CTR			: out	STD_LOGIC;									-- Clear to Recieve (to neighbor)
+           	fc_vcEnq 		: out  	STD_LOGIC);									-- enqueue command from RNA (to VC)
+
 	end component;
 
 begin
@@ -110,6 +116,7 @@ begin
 												n_dStrb,
 												n_vcFull,
 												n_arbEnq,
+												n_invld,
 												n_vcData,
 												n_rnaCtrl,
 												n_rnaCtrlStrb,
@@ -122,6 +129,7 @@ begin
 												e_dStrb,
 												e_vcFull,
 												e_arbEnq,
+												e_invld,
 												e_vcData,
 												e_rnaCtrl,
 												e_rnaCtrlStrb,
@@ -134,6 +142,7 @@ begin
 												s_dStrb,
 												s_vcFull,
 												s_arbEnq,
+												s_invld,
 												s_vcData,
 												s_rnaCtrl,
 												s_rnaCtrlStrb,
@@ -146,6 +155,7 @@ begin
 												w_dStrb,
 												w_vcFull,
 												w_arbEnq,
+												w_invld,
 												w_vcData,
 												w_rnaCtrl,
 												w_rnaCtrlStrb,

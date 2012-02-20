@@ -55,6 +55,7 @@ entity Arbiter is
 				n_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				n_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				n_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
+				n_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
 				
 				e_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				e_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -62,6 +63,7 @@ entity Arbiter is
 				e_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				e_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				e_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
+				e_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
 				
 				s_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				s_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -69,6 +71,7 @@ entity Arbiter is
 				s_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				s_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				s_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
+				s_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
 				
 				w_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				w_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -76,6 +79,7 @@ entity Arbiter is
 				w_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				w_vc_strq 			: out 	std_logic;									-- Status request (from RNA) (dmuxed)
 				w_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
+				w_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
 			
 				--FCU Related
 				n_CTRinFlg			: in std_logic;
@@ -205,25 +209,29 @@ architecture rtl of Arbiter is
 			n_vc_rnaSelO 		: out  std_logic_vector (1 downto 0);		
 			n_vc_rnaSelS		: out	std_logic_vector (1 downto 0);		
 			n_vc_strq 			: out  std_logic;									
-			n_vc_status 		: in std_logic_vector (1 downto 0);		
+			n_vc_status 		: in std_logic_vector (1 downto 0);
+			n_invld				: out std_logic;
 			e_vc_deq 			: out  std_logic;									
 			e_vc_rnaSelI 		: out  std_logic_vector (1 downto 0);		
 			e_vc_rnaSelO 		: out  std_logic_vector (1 downto 0);		 
 			e_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			e_vc_strq 			: out std_logic;
 			e_vc_status 		: in std_logic_vector (1 downto 0);
+			e_invld				: out std_logic;
 			s_vc_deq 			: out  std_logic;							
 			s_vc_rnaSelI 		: out  std_logic_vector (1 downto 0); 
 			s_vc_rnaSelO 		: out  std_logic_vector (1 downto 0); 
 			s_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			s_vc_strq 			: out  std_logic;							
 			s_vc_status 		: in std_logic_vector (1 downto 0);
+			s_invld				: out std_logic;
 			w_vc_deq 			: out  std_logic;
 			w_vc_rnaSelI 		: out  std_logic_vector (1 downto 0); 
 			w_vc_rnaSelO 		: out  std_logic_vector (1 downto 0); 
 			w_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			w_vc_strq 			: out  std_logic;
 			w_vc_status 		: in std_logic_vector (1 downto 0);
+			w_invld				: out std_logic;
 			n_CTRinFlg			: in std_logic;
 			n_CTRflg				: out std_logic;
 			n_CtrlFlg			: in std_logic;
@@ -304,10 +312,10 @@ begin
 		port map (clk, reset, rsv_data_out, rsv_data_in, rte_data_out, rte_data_in, 
 					sch_data_out, sch_data_in, adr_data_out, adr_data_in, address, 
 					rsv_en, rte_en, sch_en, adr_en, adr_search, adr_nf, adr_nf_ack, adr_result,
-					n_vc_deq, n_vc_rnaSelI, n_vc_rnaSelO, n_vc_rnaSelS, n_vc_strq, n_vc_status,
-					e_vc_deq, e_vc_rnaSelI, e_vc_rnaSelO, e_vc_rnaSelS, e_vc_strq, e_vc_status,
-					s_vc_deq, s_vc_rnaSelI, s_vc_rnaSelO, s_vc_rnaSelS, s_vc_strq, s_vc_status,
-					w_vc_deq, w_vc_rnaSelI, w_vc_rnaSelO, w_vc_rnaSelS, w_vc_strq, w_vc_status,
+					n_vc_deq, n_vc_rnaSelI, n_vc_rnaSelO, n_vc_rnaSelS, n_vc_strq, n_vc_status, n_invld,
+					e_vc_deq, e_vc_rnaSelI, e_vc_rnaSelO, e_vc_rnaSelS, e_vc_strq, e_vc_status, e_invld,
+					s_vc_deq, s_vc_rnaSelI, s_vc_rnaSelO, s_vc_rnaSelS, s_vc_strq, s_vc_status, s_invld,
+					w_vc_deq, w_vc_rnaSelI, w_vc_rnaSelO, w_vc_rnaSelS, w_vc_strq, w_vc_status, w_invld,
 					n_CTRinFlg, n_CTRFlg, n_CtrlFlg, n_DataFlg, n_arbEnq, n_rnaCtrl, 
 					e_CTRinFlg, e_CTRFlg, e_CtrlFlg, e_DataFlg, e_arbEnq, e_rnaCtrl, 
 					s_CTRinFlg, s_CTRFlg, s_CtrlFlg, s_DataFlg, s_arbEnq, s_rnaCtrl,

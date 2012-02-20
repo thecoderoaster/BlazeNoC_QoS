@@ -138,6 +138,7 @@ architecture rtl of BlazeRouter is
 				n_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				n_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				n_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
+				n_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
 				
 				e_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				e_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -145,6 +146,7 @@ architecture rtl of BlazeRouter is
 				e_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				e_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				e_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
+				e_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
 				
 				s_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				s_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -152,6 +154,7 @@ architecture rtl of BlazeRouter is
 				s_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				s_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				s_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
+				s_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
 				
 				w_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				w_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -159,6 +162,7 @@ architecture rtl of BlazeRouter is
 				w_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				w_vc_strq 			: out 	std_logic;									-- Status request (from RNA) (dmuxed)
 				w_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
+				w_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)		
 			
 				--FCU Related
 				n_CTRinFlg			:in std_logic;				
@@ -214,7 +218,7 @@ architecture rtl of BlazeRouter is
 				n_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
 				n_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
 				n_arbEnq			: in 		STD_LOGIC;									-- Direct Enq control (from arbiter)
-				n_invld			: in STD_LOGIC;									-- Data invalid signal (from neighbor)
+				n_invld			: in 		STD_LOGIC;									-- Data invalid signal (from neighbor)
 				n_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
 				n_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
 				n_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
@@ -227,6 +231,7 @@ architecture rtl of BlazeRouter is
 				e_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
 				e_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
 				e_arbEnq			: in 		STD_LOGIC;									-- Direct Enq control (from arbiter)						e_invld			: in STD_LOGIC;									-- Data invalid signal (from neighbor)
+				e_invld			: in 		STD_LOGIC;									-- Data invalid signal (from neighbor)
 				e_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
 				e_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
 				e_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
@@ -239,6 +244,7 @@ architecture rtl of BlazeRouter is
 				s_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
 				s_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
 				s_arbEnq			: in 		STD_LOGIC;									-- Direct Enq control (from arbiter)						s_invld			: in STD_LOGIC;									-- Data invalid signal (from neighbor)
+				s_invld			: in 		STD_LOGIC;									-- Data invalid signal (from neighbor)
 				s_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
 				s_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
 				s_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
@@ -361,7 +367,7 @@ architecture rtl of BlazeRouter is
 	signal fcRnaEastEnq		: std_logic;
 	signal fcRnaSouthEnq		: std_logic;
 	signal fcRnaWestEnq		: std_logic;
-	
+
 	-- signals between switch and VC (routed)
 	signal vcSwNorth 		: std_logic_vector(WIDTH downto 0); -- Data output from VC to Switch
 	signal vcSwEast  		: std_logic_vector(WIDTH downto 0); 	
@@ -410,6 +416,7 @@ begin
 									rnaVcNorthSelS,
 									rnaVcNorthStrq,
 									vcRnaNorthStat,
+									north_invld_out,
 									
 									rnaVcEastDq,
 									rnaVcEastSelI,
@@ -417,6 +424,7 @@ begin
 									rnaVcEastSelS,
 									rnaVcEastStrq,
 									vcRnaEastStat,
+									east_invld_out,
 
 									rnaVcSouthDq,
 									rnaVcSouthSelI,
@@ -424,6 +432,7 @@ begin
 									rnaVcSouthSelS,
 									rnaVcSouthStrq,
 									vcRnaSouthStat,
+									south_invld_out,
 									
 									rnaVcWestDq,
 									rnaVcWestSelI,
@@ -431,6 +440,7 @@ begin
 									rnaVcWestSelS,
 									rnaVcWestStrq,
 									vcRnaWestStat,
+									west_invld_out,
 									
 									--FCU Related
 									north_CTR_in, -- get CTR from neighbor to know its ok to send

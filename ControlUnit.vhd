@@ -1,4 +1,4 @@
-				----------------------------------------------------------------------------------
+		----------------------------------------------------------------------------------
 -- Company: 
 -- Engineer: 
 -- 
@@ -65,25 +65,29 @@ entity ControlUnit is
 			n_vc_rnaSelO 		: out std_logic_vector (1 downto 0);		
 			n_vc_rnaSelS		: out	std_logic_vector (1 downto 0);		
 			n_vc_strq 			: out std_logic;									
-			n_vc_status 		: in 	std_logic_vector (1 downto 0);		
+			n_vc_status 		: in 	std_logic_vector (1 downto 0);
+			n_invld				: out std_logic;			
 			e_vc_deq 			: out std_logic;									
 			e_vc_rnaSelI 		: out std_logic_vector (1 downto 0);		
 			e_vc_rnaSelO 		: out std_logic_vector (1 downto 0);		 
 			e_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			e_vc_strq 			: out std_logic;
 			e_vc_status 		: in 	std_logic_vector (1 downto 0);
+			e_invld				: out std_logic;
 			s_vc_deq 			: out std_logic;							
 			s_vc_rnaSelI 		: out std_logic_vector (1 downto 0); 
 			s_vc_rnaSelO 		: out std_logic_vector (1 downto 0); 
 			s_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			s_vc_strq 			: out std_logic;							
 			s_vc_status 		: in 	std_logic_vector (1 downto 0);
+			s_invld				: out std_logic;
 			w_vc_deq 			: out std_logic;
 			w_vc_rnaSelI 		: out std_logic_vector (1 downto 0); 
 			w_vc_rnaSelO 		: out std_logic_vector (1 downto 0); 
 			w_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			w_vc_strq 			: out std_logic;
 			w_vc_status 		: in 	std_logic_vector (1 downto 0);
+			w_invld				: out std_logic;
 			n_CTRinFlg			: in  std_logic;
 			n_CTRflg				: out std_logic;
 			n_CtrlFlg			: in 	std_logic;
@@ -254,7 +258,7 @@ begin
 				wdt_counter1 <= "0000000000000000";
 			end if;
 			
-			if(wdt_elapsed >= "0000000010000000") then
+			if(wdt_elapsed >= "0000000000010000") then
 				wdt_expired <= '1';
 			else
 				wdt_expired <= '0';
@@ -339,6 +343,11 @@ begin
 					e_rst <= '1', '0' after 1 ns;
 					s_rst <= '1', '0' after 1 ns;
 					w_rst <= '1', '0' after 1 ns;
+					
+					n_invld <= '0';
+					e_invld <= '0';
+					s_invld <= '0';
+					w_invld <= '0';
 					
 					next_state <= north1;
 	--*NORTH*--
@@ -792,12 +801,16 @@ begin
 					--Configure the switch for DATA PACKETS
 					case rte_data_in(2 downto 0) is
 						when "000" =>
+							s_invld <= '0';
 							sw_nSel <= "101";			-- "00" North FIFO								
 						when "001" =>
+							w_invld <= '0';
 							sw_eSel <= "101";			-- "01" East FIFO
 						when "010" =>
+							n_invld <= '0';
 							sw_sSel <= "101";			-- "10" South FIFO
 						when "011" =>
+							e_invld <= '0';
 							sw_wSel <= "101";			-- "11" West FIFO
 						when others =>
 							null;
@@ -810,7 +823,7 @@ begin
 						start_wdt_timer <= '0';							--Failed to ack back. Deadlock? Try again later.
 						rna_CtrlPkt(0) <= '0';
 						case rte_data_in(2 downto 0) is
-							when "000" =>							
+							when "000" =>
 									s_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "001" =>
@@ -872,18 +885,22 @@ begin
 				when injection11 =>
 					if(wdt_expired = '1') then
 						start_wdt_timer <= '0';								--Failed to ack back. Deadlock? Try again later.
-						injt_dataGood <= '0';
+						--injt_dataGood <= '0';
 						case rte_data_in(2 downto 0) is
-							when "000" =>							
+							when "000" =>
+									s_invld <= '1';
 									s_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "001" =>
+									w_invld <= '1';
 									w_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;
 							when "010" =>
+									n_invld <= '1';
 									n_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "011" =>
+									e_invld <= '1';
 									e_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;			
 							when others =>

@@ -69,17 +69,16 @@ fc_vcData <= fc_dataIn;
 fc_rnaCtrl <= fc_dataIn;
 
 -- Dmux for control packet sense
-fc_rnaCtrlStrb <= fc_dStrb when (fc_invld = '0' and (senseOp = '1' and fc_dataIn(WIDTH downto 1) /= 0)) else '0';
---fc_rnaCtrlStrb <= '1' when (senseOp = '1' and (CTRInd = '0' and fc_dStrb = '1')) else '0';
-dStrbInd <= fc_dStrb when (senseOp = '0' and fc_dataIn(WIDTH downto 1) /= 0) else '0';
+fc_rnaCtrlStrb <= fc_dStrb when (senseOp = '1' and fc_dataIn(WIDTH downto 1) /= 0) else '0';
+dStrbInd <= fc_dStrb when (fc_invld = '0' and (senseOp = '0' and fc_dataIn(WIDTH downto 1) /= 0)) else '0';
 
 -- Data indicator for RNA 
 -- When a non control packet is wanting to enter and ctr is low we indicate it exists
 fc_rnaDataStrb <= '1' when (fc_invld = '0' and (senseOp = '0' and fc_dataIn(WIDTH downto 1) /= 0 and (CTRInd = '0' and fc_dStrb = '1'))) else '0';
 
 -- Clear to recieve handler
-CTRInd <= fc_CTRflg when (fc_invld = '0') else '0'; --(not fc_vcFull) and fc_CTRflg;
-fc_CTR <= fc_CTRflg when (fc_invld = '0') else '0'; -- direct communication between recv rna and sending rna
+CTRInd <= fc_CTRflg; --when (fc_invld = '0') else '0'; --(not fc_vcFull) and fc_CTRflg;
+fc_CTR <= fc_CTRflg; --when (fc_invld = '0') else '0'; -- direct communication between recv rna and sending rna
 
 -- VC Data strobe handler
 -- arbiter will have direct control to enqueue actions, but the data must be good and 

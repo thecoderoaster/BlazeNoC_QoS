@@ -66,28 +66,32 @@ entity ControlUnit is
 			n_vc_rnaSelS		: out	std_logic_vector (1 downto 0);		
 			n_vc_strq 			: out std_logic;									
 			n_vc_status 		: in 	std_logic_vector (1 downto 0);
-			n_invld				: out std_logic;			
+			n_invld_out			: out std_logic;
+			n_invld_in			: in  std_logic;
 			e_vc_deq 			: out std_logic;									
 			e_vc_rnaSelI 		: out std_logic_vector (1 downto 0);		
 			e_vc_rnaSelO 		: out std_logic_vector (1 downto 0);		 
 			e_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			e_vc_strq 			: out std_logic;
 			e_vc_status 		: in 	std_logic_vector (1 downto 0);
-			e_invld				: out std_logic;
+			e_invld_out			: out std_logic;
+			e_invld_in			: in 	std_logic;
 			s_vc_deq 			: out std_logic;							
 			s_vc_rnaSelI 		: out std_logic_vector (1 downto 0); 
 			s_vc_rnaSelO 		: out std_logic_vector (1 downto 0); 
 			s_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			s_vc_strq 			: out std_logic;							
 			s_vc_status 		: in 	std_logic_vector (1 downto 0);
-			s_invld				: out std_logic;
+			s_invld_out			: out std_logic;
+			s_invld_in			: in  std_logic;
 			w_vc_deq 			: out std_logic;
 			w_vc_rnaSelI 		: out std_logic_vector (1 downto 0); 
 			w_vc_rnaSelO 		: out std_logic_vector (1 downto 0); 
 			w_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			w_vc_strq 			: out std_logic;
 			w_vc_status 		: in 	std_logic_vector (1 downto 0);
-			w_invld				: out std_logic;
+			w_invld_out			: out std_logic;
+			w_invld_in			: in  std_logic;
 			n_CTRinFlg			: in  std_logic;
 			n_CTRflg				: out std_logic;
 			n_CtrlFlg			: in 	std_logic;
@@ -131,7 +135,7 @@ architecture Behavioral of ControlUnit is
 							  south1, south2, south3, south4, south5, south6, south7, south8, south9, south10, south11, south12,
 							  west1, west2, west3, west4, west5, west6, west7, west8, west9, west10, west11, west12,
 							  injection1, injection2, injection3, injection4, injection5,
-							  injection6, injection7, injection8, injection9, injection10, injection11, injection12, injection13,
+							  injection6, injection7, injection8, injection9, injection10, injection11, injection12, injection13, injection14,
 							  timer_check1, timer_check2, timer_check3, timer_check4,
 							  departure1,
 							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6, dp_arrivedOnNorth7,
@@ -191,7 +195,13 @@ architecture Behavioral of ControlUnit is
 	signal wdt_counter1 		: std_logic_vector(15 downto 0);
 	signal wdt_elapsed 		: std_logic_vector(15 downto 0);
 	signal wdt_expired 		: std_logic;
+	signal wdt_expires_in   : std_logic_vector(15 downto 0);
 	signal start_wdt_timer	: std_logic;
+	
+	signal internal_invld_set_n : std_logic;
+	signal internal_invld_set_e : std_logic;
+	signal internal_invld_set_s : std_logic;
+	signal internal_invld_set_w : std_logic;
 
 	
 begin
@@ -258,7 +268,7 @@ begin
 				wdt_counter1 <= "0000000000000000";
 			end if;
 			
-			if(wdt_elapsed >= "0000000000010000") then
+			if(wdt_elapsed >= wdt_expires_in) then
 				wdt_expired <= '1';
 			else
 				wdt_expired <= '0';
@@ -344,10 +354,15 @@ begin
 					s_rst <= '1', '0' after 1 ns;
 					w_rst <= '1', '0' after 1 ns;
 					
-					n_invld <= '0';
-					e_invld <= '0';
-					s_invld <= '0';
-					w_invld <= '0';
+					n_invld_out <= '0';
+					e_invld_out <= '0';
+					s_invld_out <= '0';
+					w_invld_out <= '0';
+					
+					internal_invld_set_n <= '0';
+					internal_invld_set_e <= '0';
+					internal_invld_set_s <= '0';
+					internal_invld_set_w <= '0';
 					
 					next_state <= north1;
 	--*NORTH*--
@@ -757,6 +772,8 @@ begin
 							next_state <= injection4;	-- Condition: PE is re/assigning addresses
 						when "10" =>
 							next_state <= injection5;	-- Condition: PE is updating Routing Table
+						when "11" =>
+							next_state <= injection14; -- Condition: PE is providing WDT seed
 						when others =>
 							sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 							next_state <= injection1;	-- Condition: Unknown, move to next state. (was timer_check1)
@@ -785,12 +802,20 @@ begin
 					--Configure the switch for CONTROL PACKETS
 					case rte_data_in(2 downto 0) is
 						when "000" =>
+							--n_invld_out <= '0';
+							internal_invld_set_n <= '0';
 							sw_nSel <= "111";			-- "00" North FIFO								
 						when "001" =>
+							--e_invld_out <= '0';
+							internal_invld_set_e <= '0';
 							sw_eSel <= "111";			-- "01" East FIFO
 						when "010" =>
+							--s_invld_out <= '0';
+							internal_invld_set_s <= '0';
 							sw_sSel <= "111";			-- "10" South FIFO
 						when "011" =>
+							--w_invld_out <= '0';
+							internal_invld_set_w <= '0';
 							sw_wSel <= "111";			-- "11" West FIFO
 						when others =>
 							null;
@@ -801,16 +826,20 @@ begin
 					--Configure the switch for DATA PACKETS
 					case rte_data_in(2 downto 0) is
 						when "000" =>
-							s_invld <= '0';
+							n_invld_out <= '0';
+							internal_invld_set_n <= '0';
 							sw_nSel <= "101";			-- "00" North FIFO								
 						when "001" =>
-							w_invld <= '0';
+							e_invld_out <= '0';
+							internal_invld_set_e <= '0';
 							sw_eSel <= "101";			-- "01" East FIFO
 						when "010" =>
-							n_invld <= '0';
+							s_invld_out <= '0';
+							internal_invld_set_s <= '0';
 							sw_sSel <= "101";			-- "10" South FIFO
 						when "011" =>
-							e_invld <= '0';
+							w_invld_out <= '0';
+							internal_invld_set_w <= '0';
 							sw_wSel <= "101";			-- "11" West FIFO
 						when others =>
 							null;
@@ -824,15 +853,19 @@ begin
 						rna_CtrlPkt(0) <= '0';
 						case rte_data_in(2 downto 0) is
 							when "000" =>
+									--n_invld_out <= '1';
 									s_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "001" =>
+									--e_invld_out <= '1';
 									w_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;
 							when "010" =>
+									--s_invld_out <= '1';
 									n_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "011" =>
+									--w_invld_out <= '1';
 									e_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;			
 							when others =>
@@ -888,19 +921,23 @@ begin
 						--injt_dataGood <= '0';
 						case rte_data_in(2 downto 0) is
 							when "000" =>
-									s_invld <= '1';
+									n_invld_out <= '1';
+									internal_invld_set_n <= '1';
 									s_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "001" =>
-									w_invld <= '1';
+									e_invld_out <= '1';
+									internal_invld_set_e <= '1';
 									w_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;
 							when "010" =>
-									n_invld <= '1';
+									s_invld_out <= '1';
+									internal_invld_set_s <= '1';
 									n_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "011" =>
-									e_invld <= '1';
+									w_invld_out <= '1';
+									internal_invld_set_w <= '1';
 									e_rst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;			
 							when others =>
@@ -968,6 +1005,11 @@ begin
 						when others =>
 							next_state <= injection1;
 					end case;
+				
+				when injection14 =>
+					wdt_expires_in <= injt_ctrlPkt(cp_size-1 downto 18);
+					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
+					next_state <= injection1;					
 					
 	--*TIMER_CHECK*--
 				when timer_check1 =>
@@ -1225,105 +1267,102 @@ begin
 	end process;
 	
 	--Monitors signal activity on NORTH port
-	north_monitor_process: process(n_rst, n_CtrlFlg, n_DataFlg, s_CTRinFlg)
+	north_monitor_process: process(n_rst, n_CtrlFlg, n_DataFlg, s_CTRinFlg, n_invld_in)
 	begin
-		if(n_rst = '1') then
+		if(n_rst = '1' or n_invld_in = '1') then
 			n_data_flg_set <= '0';
 			n_ctrl_flg_set <= '0';
 			n_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(n_DataFlg = '1' and n_rst = '0') then
+		if(n_DataFlg = '1' and n_rst = '0' and n_invld_in = '0') then						-- From Sending Router
 			n_data_flg_set <= '1';
 			n_buffer <= n_rnaCtrl;
 		end if;
 		
-		if(n_CtrlFlg = '1' and n_rst = '0') then
+		if(n_CtrlFlg = '1' and n_rst = '0' and n_invld_in = '0') then						-- From Sending Router
 			n_ctrl_flg_set <= '1';
 			n_buffer <= w_rnaCtrl;
 		end if;
 		
-		if(s_CTRinFlg = '1' and n_rst = '0') then
+		if(s_CTRinFlg = '1' and n_rst = '0' and internal_invld_set_s = '0') then		--ACK back from receving 
 			n_ctrl_in_flg_set <= '1';
 		end if;
 		
 	end process;
 	
 	--Monitors signal activity on EAST port
-	east_monitor_process: process(e_rst, e_CtrlFlg, e_DataFlg, w_CTRinFlg)
+	east_monitor_process: process(e_rst, e_CtrlFlg, e_DataFlg, w_CTRinFlg, e_invld_in)
 	begin
-		if(e_rst = '1') then
+		if(e_rst = '1' or e_invld_in = '1') then
 			e_data_flg_set <= '0';
 			e_ctrl_flg_set <= '0';
 			e_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(e_DataFlg = '1' and e_rst = '0') then
+		if(e_DataFlg = '1' and e_rst = '0' and e_invld_in = '0') then
 			e_data_flg_set <= '1';
 			e_buffer <= e_rnaCtrl;
 		end if;
 		
-		if(e_CtrlFlg = '1' and e_rst = '0') then
+		if(e_CtrlFlg = '1' and e_rst = '0' and e_invld_in = '0') then
 			e_ctrl_flg_set <= '1';
 			e_buffer <= e_rnaCtrl;
 		end if;
 		
-		if(w_CTRinFlg = '1' and e_rst = '0') then
+		if(w_CTRinFlg = '1' and e_rst = '0' and internal_invld_set_w = '0') then
 			e_ctrl_in_flg_set <= '1';
 		end if;
 		
 	end process;
 	
 	--Monitors signal activity on SOUTH port
-	south_monitor_process: process(s_rst, s_CtrlFlg, s_DataFlg, n_CTRinFlg)
+	south_monitor_process: process(s_rst, s_CtrlFlg, s_DataFlg, n_CTRinFlg, s_invld_in)
 	begin
-		if(s_rst = '1') then
+		if(s_rst = '1' or s_invld_in = '1') then
 			s_data_flg_set <= '0';
 			s_ctrl_flg_set <= '0';
 			s_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(s_DataFlg = '1' and s_rst = '0') then
+		if(s_DataFlg = '1' and s_rst = '0' and s_invld_in = '0') then
 			s_data_flg_set <= '1';
 			s_buffer <= s_rnaCtrl;
 		end if;
 		
-		if(s_CtrlFlg = '1' and s_rst = '0') then
+		if(s_CtrlFlg = '1' and s_rst = '0' and s_invld_in = '0') then
 			s_ctrl_flg_set <= '1';
 			s_buffer <= s_rnaCtrl;
 		end if;
 		
-		if(n_CTRinFlg = '1' and s_rst = '0') then
+		if(n_CTRinFlg = '1' and s_rst = '0' and internal_invld_set_n = '0') then
 			s_ctrl_in_flg_set <= '1';
 		end if;
 		
 	end process;
 	
 	--Monitors signal activity on WEST port
-	west_monitor_process: process(w_rst, w_CtrlFlg, w_DataFlg, e_CTRinFlg)
+	west_monitor_process: process(w_rst, w_CtrlFlg, w_DataFlg, e_CTRinFlg, w_invld_in)
 	begin
-		--if(rising_edge(clk)) then
-			if(w_rst = '1') then
-				w_data_flg_set <= '0';
-				w_ctrl_flg_set <= '0';
-				w_ctrl_in_flg_set <= '0';
-			end if;
-		
-			if(w_DataFlg = '1' and w_rst = '0') then
-				w_data_flg_set <= '1';
-				w_buffer <= w_rnaCtrl;
-			end if;
+		if(w_rst = '1' or w_invld_in = '1') then
+			w_data_flg_set <= '0';
+			w_ctrl_flg_set <= '0';
+			w_ctrl_in_flg_set <= '0';
+		end if;
 	
-			if(w_CtrlFlg = '1' and w_rst = '0') then
-				w_ctrl_flg_set <= '1';
-				w_buffer <= w_rnaCtrl;
-			end if;
-		
-			if(e_CTRinFlg = '1' and w_rst = '0') then
-				w_ctrl_in_flg_set <= '1';
-			end if;
-		--end if;
-		
+		if(w_DataFlg = '1' and w_rst = '0' and w_invld_in = '0') then
+			w_data_flg_set <= '1';
+			w_buffer <= w_rnaCtrl;
+		end if;
+
+		if(w_CtrlFlg = '1' and w_rst = '0' and w_invld_in = '0') then
+			w_ctrl_flg_set <= '1';
+			w_buffer <= w_rnaCtrl;
+		end if;
+	
+		if(e_CTRinFlg = '1' and w_rst = '0' and internal_invld_set_e = '0') then
+			w_ctrl_in_flg_set <= '1';
+		end if;
 	end process;
 	
 end Behavioral;

@@ -138,7 +138,8 @@ architecture rtl of BlazeRouter is
 				n_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				n_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				n_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
-				n_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
+				n_invld_out			: out 	std_logic;									-- Data invalid signal (to neighbor)
+				n_invld_in			: in		std_logic;									-- Data invalid signal (from neighbor)
 				
 				e_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				e_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -146,7 +147,8 @@ architecture rtl of BlazeRouter is
 				e_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				e_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				e_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
-				e_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
+				e_invld_out			: out 	std_logic;									-- Data invalid signal (to neighbor)
+				e_invld_in			: in		std_logic;									-- Data invalid signal (from neighbor)
 				
 				s_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				s_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -154,7 +156,8 @@ architecture rtl of BlazeRouter is
 				s_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				s_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
 				s_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
-				s_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)
+				s_invld_out			: out 	std_logic;									-- Data invalid signal (to neighbor)
+				s_invld_in			: in		std_logic;									-- Data invalid signal (from neighbor)
 				
 				w_vc_deq 			: out  	std_logic;									-- Dequeue latch input (from RNA) (dmuxed)
 				w_vc_rnaSelI 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for input (from RNA) 
@@ -162,7 +165,8 @@ architecture rtl of BlazeRouter is
 				w_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				w_vc_strq 			: out 	std_logic;									-- Status request (from RNA) (dmuxed)
 				w_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
-				w_invld				: out 	std_logic;									-- Data invalid signal (from neighbor)		
+				w_invld_out			: out 	std_logic;									-- Data invalid signal (to neighbor)
+				w_invld_in			: in		std_logic;									-- Data invalid signal (from neighbor)	
 			
 				--FCU Related
 				n_CTRinFlg			:in std_logic;				
@@ -417,6 +421,7 @@ begin
 									rnaVcNorthStrq,
 									vcRnaNorthStat,
 									north_invld_out,
+									north_invld_in,
 									
 									rnaVcEastDq,
 									rnaVcEastSelI,
@@ -425,6 +430,7 @@ begin
 									rnaVcEastStrq,
 									vcRnaEastStat,
 									east_invld_out,
+									east_invld_in,
 
 									rnaVcSouthDq,
 									rnaVcSouthSelI,
@@ -433,6 +439,7 @@ begin
 									rnaVcSouthStrq,
 									vcRnaSouthStat,
 									south_invld_out,
+									south_invld_in,
 									
 									rnaVcWestDq,
 									rnaVcWestSelI,
@@ -441,6 +448,7 @@ begin
 									rnaVcWestStrq,
 									vcRnaWestStat,
 									west_invld_out,
+									west_invld_in,
 									
 									--FCU Related
 									north_CTR_in, -- get CTR from neighbor to know its ok to send

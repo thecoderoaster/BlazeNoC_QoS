@@ -125,207 +125,224 @@ architecture rtl of BlazeNoC is
 	-- Signal Definitions
 		
 	-- Router 0
-	signal router0_north_to_south_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router0_north_to_south_din_good		: std_logic;
-	signal router0_north_to_south_CTR_in		: std_logic;
-	signal router0_north_to_south_invld_in		: std_logic;
-	signal router0_north_to_south_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router0_north_to_south_dout_good	: std_logic;
-	signal router0_north_to_south_CTR_out		: std_logic;
-	signal router0_north_to_south_invld_out	: std_logic;
+	signal router0toX_north_to_south_data_in		: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router0toX_north_to_south_din_good		: std_logic;
+	signal router0toX_north_to_south_CTR_in		: std_logic;
+	signal router0toX_north_to_south_invld_in		: std_logic;
+	signal router0toX_north_to_south_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0toX_north_to_south_dout_good	: std_logic;
+	signal router0toX_north_to_south_CTR_out		: std_logic;
+	signal router0toX_north_to_south_invld_out	: std_logic;
 
-	signal router0_east_to_west_data_in			: std_logic_vector (WIDTH downto 0);
-	signal router0_east_to_west_din_good		: std_logic;
-	signal router0_east_to_west_CTR_in			: std_logic;
-	signal router0_east_to_west_invld_in		: std_logic;
-	signal router0_east_to_west_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router0_east_to_west_dout_good		: std_logic;
-	signal router0_east_to_west_CTR_out			: std_logic;
-	signal router0_east_to_west_invld_out		: std_logic;
+	signal router0to1_east_to_west_data_in			: std_logic_vector (WIDTH downto 0);		--Plugged into Router 1 West
+	signal router0to1_east_to_west_din_good		: std_logic;
+	signal router0to1_east_to_west_CTR_in			: std_logic;
+	signal router0to1_east_to_west_invld_in		: std_logic;
+	signal router0to1_east_to_west_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0to1_east_to_west_dout_good		: std_logic;
+	signal router0to1_east_to_west_CTR_out			: std_logic;
+	signal router0to1_east_to_west_invld_out		: std_logic;
 	
-	signal router0_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router0_south_to_north_din_good		: std_logic;
-	signal router0_south_to_north_CTR_in		: std_logic;
-	signal router0_south_to_north_invld_in		: std_logic;
-	signal router0_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router0_south_to_north_dout_good	: std_logic;
-	signal router0_south_to_north_CTR_out		: std_logic;
-	signal router0_south_to_north_invld_out		: std_logic;
+	signal router0toX_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router0toX_south_to_north_din_good		: std_logic;
+	signal router0toX_south_to_north_CTR_in		: std_logic;
+	signal router0toX_south_to_north_invld_in		: std_logic;
+	signal router0toX_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0toX_south_to_north_dout_good	: std_logic;
+	signal router0toX_south_to_north_CTR_out		: std_logic;
+	signal router0toX_south_to_north_invld_out		: std_logic;
 	
-	signal router0_west_to_east_data_in			: std_logic_vector (WIDTH downto 0);
-	signal router0_west_to_east_din_good		: std_logic;
-	signal router0_west_to_east_CTR_in			: std_logic;
-	signal router0_west_to_east_invld_in		: std_logic;
-	signal router0_west_to_east_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router0_west_to_east_dout_good		: std_logic;
-	signal router0_west_to_east_CTR_out			: std_logic;
-	signal router0_west_to_east_invld_out		: std_logic;
+	signal router0toX_west_to_east_data_in			: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router0toX_west_to_east_din_good		: std_logic;
+	signal router0toX_west_to_east_CTR_in			: std_logic;
+	signal router0toX_west_to_east_invld_in		: std_logic;
+	signal router0toX_west_to_east_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0toX_west_to_east_dout_good		: std_logic;
+	signal router0toX_west_to_east_CTR_out			: std_logic;
+	signal router0toX_west_to_east_invld_out		: std_logic;
 	
-	signal router0_injection_data		: std_logic_vector (WIDTH downto 0);
+	signal router0_injection_data		: std_logic_vector (WIDTH downto 0);						--Plugged into PE0
 	signal router0_injection_enq		: std_logic;
 	signal router0_injection_status	: std_logic_vector (1 downto 0);
 	
-	signal router0_ejection_data		: std_logic_vector (WIDTH downto 0);
+	signal router0_ejection_data		: std_logic_vector (WIDTH downto 0);						--Plugged into PE0
 	signal router0_ejection_deq		: std_logic;
 	signal router0_ejection_status	: std_logic_vector (1 downto 0);
 
 	-- Router 1
-	signal router1_north_to_south_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router1_north_to_south_din_good		: std_logic;
-	signal router1_north_to_south_CTR_in		: std_logic;
-	signal router1_north_to_south_invld_in		: std_logic;
-	signal router1_north_to_south_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router1_north_to_south_dout_good	: std_logic;
-	signal router1_north_to_south_CTR_out		: std_logic;
-	signal router1_north_to_south_invld_out	: std_logic;
+	signal router1toX_north_to_south_data_in		: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router1toX_north_to_south_din_good		: std_logic;
+	signal router1toX_north_to_south_CTR_in		: std_logic;
+	signal router1toX_north_to_south_invld_in		: std_logic;
+	signal router1toX_north_to_south_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router1toX_north_to_south_dout_good	: std_logic;
+	signal router1toX_north_to_south_CTR_out		: std_logic;
+	signal router1toX_north_to_south_invld_out	: std_logic;
 
-	signal router1_east_to_west_data_in			: std_logic_vector (WIDTH downto 0);
-	signal router1_east_to_west_din_good		: std_logic;
-	signal router1_east_to_west_CTR_in			: std_logic;
-	signal router1_east_to_west_invld_in		: std_logic;
-	signal router1_east_to_west_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router1_east_to_west_dout_good		: std_logic;
-	signal router1_east_to_west_CTR_out			: std_logic;
-	signal router1_east_to_west_invld_out		: std_logic;
+	signal router1toX_east_to_west_data_in			: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router1toX_east_to_west_din_good		: std_logic;
+	signal router1toX_east_to_west_CTR_in			: std_logic;
+	signal router1toX_east_to_west_invld_in		: std_logic;
+	signal router1toX_east_to_west_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router1toX_east_to_west_dout_good		: std_logic;
+	signal router1toX_east_to_west_CTR_out			: std_logic;
+	signal router1toX_east_to_west_invld_out		: std_logic;
 	
-	signal router1_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router1_south_to_north_din_good		: std_logic;
-	signal router1_south_to_north_CTR_in		: std_logic;
-	signal router1_south_to_north_invld_in		: std_logic;
-	signal router1_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router1_south_to_north_dout_good	: std_logic;
-	signal router1_south_to_north_CTR_out		: std_logic;
-	signal router1_south_to_north_invld_out	: std_logic;
+	signal router1to3_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);		--Plugged into Router 3 North	
+	signal router1to3_south_to_north_din_good		: std_logic;
+	signal router1to3_south_to_north_CTR_in		: std_logic;
+	signal router1to3_south_to_north_invld_in		: std_logic;
+	signal router1to3_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router1to3_south_to_north_dout_good	: std_logic;
+	signal router1to3_south_to_north_CTR_out		: std_logic;
+	signal router1to3_south_to_north_invld_out	: std_logic;
 	
-	signal router1_west_to_east_data_in		: std_logic_vector (WIDTH downto 0);
-	signal router1_west_to_east_din_good		: std_logic;
-	signal router1_west_to_east_CTR_in			: std_logic;
-	signal router1_west_to_east_invld_in		: std_logic;
-	signal router1_west_to_east_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router1_west_to_east_dout_good		: std_logic;
-	signal router1_west_to_east_CTR_out		: std_logic;
-	signal router1_west_to_east_invld_out	: std_logic;
+--	signal router1toX_west_to_east_data_in			: std_logic_vector (WIDTH downto 0);		--Not used. Uncomment if
+--	signal router1toX_west_to_east_din_good		: std_logic;										--Router1 west plugs into
+--	signal router1toX_west_to_east_CTR_in			: std_logic;										--another router or another
+--	signal router1toX_west_to_east_invld_in		: std_logic;										--port.
+--	signal router1toX_west_to_east_data_out		: std_logic_vector (WIDTH downto 0);
+--	signal router1toX_west_to_east_dout_good		: std_logic;
+--	signal router1toX_west_to_east_CTR_out			: std_logic;
+--	signal router1toX_west_to_east_invld_out		: std_logic;
 	
-	signal router1_injection_data		: std_logic_vector (WIDTH downto 0);
+	signal router1_injection_data		: std_logic_vector (WIDTH downto 0);						--Plugged into PE1
 	signal router1_injection_enq		: std_logic;
 	signal router1_injection_status	: std_logic_vector (1 downto 0);
 	
-	signal router1_ejection_data		: std_logic_vector (WIDTH downto 0);
+	signal router1_ejection_data		: std_logic_vector (WIDTH downto 0);						--Plugged into PE1
 	signal router1_ejection_deq		: std_logic;
 	signal router1_ejection_status	: std_logic_vector (1 downto 0);
---	
---	-- Router 3
---	signal router2_north_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router2_north_din_good		: std_logic;
---	signal router2_north_CTR_in		: std_logic;
---	signal router2_north_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router2_north_dout_good	: std_logic;
---	signal router2_north_CTR_out		: std_logic;
---
---	signal router2_east_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router2_east_din_good		: std_logic;
---	signal router2_east_CTR_in			: std_logic;
---	signal router2_east_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router2_east_dout_good		: std_logic;
---	signal router2_east_CTR_out		: std_logic;
---	
---	signal router2_south_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router2_south_din_good		: std_logic;
---	signal router2_south_CTR_in		: std_logic;
---	signal router2_south_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router2_south_dout_good	: std_logic;
---	signal router2_south_CTR_out		: std_logic;
---	
---	signal router2_west_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router2_west_din_good		: std_logic;
---	signal router2_west_CTR_in			: std_logic;
---	signal router2_west_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router2_west_dout_good		: std_logic;
---	signal router2_west_CTR_out		: std_logic;
---	
---	signal router2_injection_data		: std_logic_vector (WIDTH downto 0);
---	signal router2_injection_enq		: std_logic;
---	signal router2_injection_status	: std_logic_vector (1 downto 0);
---	
---	signal router2_ejection_data		: std_logic_vector (WIDTH downto 0);
---	signal router2_ejection_deq		: std_logic;
---	signal router2_ejection_status	: std_logic_vector (1 downto 0);
---	
---	-- Router 4
---	signal router3_north_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router3_north_din_good		: std_logic;
---	signal router3_north_CTR_in		: std_logic;
---	signal router3_north_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router3_north_dout_good	: std_logic;
---	signal router3_north_CTR_out		: std_logic;
---
---	signal router3_east_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router3_east_din_good		: std_logic;
---	signal router3_east_CTR_in			: std_logic;
---	signal router3_east_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router3_east_dout_good		: std_logic;
---	signal router3_east_CTR_out		: std_logic;
---	
---	signal router3_south_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router3_south_din_good		: std_logic;
---	signal router3_south_CTR_in		: std_logic;
---	signal router3_south_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router3_south_dout_good	: std_logic;
---	signal router3_south_CTR_out		: std_logic;
---	
---	signal router3_west_data_in		: std_logic_vector (WIDTH downto 0);
---	signal router3_west_din_good		: std_logic;
---	signal router3_west_CTR_in			: std_logic;
---	signal router3_west_data_out		: std_logic_vector (WIDTH downto 0);
---	signal router3_west_dout_good		: std_logic;
---	signal router3_west_CTR_out		: std_logic;
---	
---	signal router3_injection_data		: std_logic_vector (WIDTH downto 0);
---	signal router3_injection_enq		: std_logic;
---	signal router3_injection_status	: std_logic_vector (1 downto 0);
---	
---	signal router3_ejection_data		: std_logic_vector (WIDTH downto 0);
---	signal router3_ejection_deq		: std_logic;
---	signal router3_ejection_status	: std_logic_vector (1 downto 0);
+	
+	-- Router 2
+--	signal router2toX_north_to_south_data_in		: std_logic_vector (WIDTH downto 0);		--Not used. Uncomment if
+--	signal router2toX_north_to_south_din_good		: std_logic;										--Router2 north plugs into
+--	signal router2toX_north_to_south_CTR_in		: std_logic;										--another router or another
+--	signal router2toX_north_to_south_invld_in		: std_logic;										--port.
+--	signal router2toX_north_to_south_data_out		: std_logic_vector (WIDTH downto 0);
+--	signal router2toX_north_to_south_dout_good	: std_logic;
+--	signal router2toX_north_to_south_CTR_out		: std_logic;
+--	signal router2toX_north_to_south_invld_out	: std_logic;
+
+	signal router2to3_east_to_west_data_in			: std_logic_vector (WIDTH downto 0);		--Plugged into Router 3 West
+	signal router2to3_east_to_west_din_good		: std_logic;
+	signal router2to3_east_to_west_CTR_in			: std_logic;
+	signal router2to3_east_to_west_invld_in		: std_logic;
+	signal router2to3_east_to_west_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router2to3_east_to_west_dout_good		: std_logic;
+	signal router2to3_east_to_west_CTR_out			: std_logic;
+	signal router2to3_east_to_west_invld_out		: std_logic;
+	
+	signal router2toX_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router2toX_south_to_north_din_good		: std_logic;
+	signal router2toX_south_to_north_CTR_in		: std_logic;
+	signal router2toX_south_to_north_invld_in		: std_logic;
+	signal router2toX_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router2toX_south_to_north_dout_good	: std_logic;
+	signal router2toX_south_to_north_CTR_out		: std_logic;
+	signal router2toX_south_to_north_invld_out	: std_logic;
+	
+	signal router2toX_west_to_east_data_in			: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router2toX_west_to_east_din_good		: std_logic;
+	signal router2toX_west_to_east_CTR_in			: std_logic;
+	signal router2toX_west_to_east_invld_in		: std_logic;
+	signal router2toX_west_to_east_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router2toX_west_to_east_dout_good		: std_logic;
+	signal router2toX_west_to_east_CTR_out			: std_logic;
+	signal router2toX_west_to_east_invld_out		: std_logic;
+	
+	signal router2_injection_data		: std_logic_vector (WIDTH downto 0);						--Plugged into PE2
+	signal router2_injection_enq		: std_logic;
+	signal router2_injection_status	: std_logic_vector (1 downto 0);
+	
+	signal router2_ejection_data		: std_logic_vector (WIDTH downto 0);						--Plugged into PE2
+	signal router2_ejection_deq		: std_logic;
+	signal router2_ejection_status	: std_logic_vector (1 downto 0);
+	
+	-- Router 3
+--	signal router3toX_north_to_south_data_in		: std_logic_vector (WIDTH downto 0);		--Not used. Uncomment if
+--	signal router3toX_north_to_south_din_good		: std_logic;										--Router 3 north plugs into
+--	signal router3toX_north_to_south_CTR_in		: std_logic;										--another router or another
+--	signal router3toX_north_to_south_invld_in		: std_logic;										--port
+--	signal router3toX_north_to_south_data_out		: std_logic_vector (WIDTH downto 0);
+--	signal router3toX_north_to_south_dout_good	: std_logic;
+--	signal router3toX_north_to_south_CTR_out		: std_logic;
+--	signal router3toX_north_to_south_invld_out	: std_logic;
+
+	signal router3toX_east_to_west_data_in			: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router3toX_east_to_west_din_good		: std_logic;
+	signal router3toX_east_to_west_CTR_in			: std_logic;
+	signal router3toX_east_to_west_invld_in		: std_logic;
+	signal router3toX_east_to_west_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router3toX_east_to_west_dout_good		: std_logic;
+	signal router3toX_east_to_west_CTR_out			: std_logic;
+	signal router3toX_east_to_west_invld_out		: std_logic;
+	
+	signal router3toX_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
+	signal router3toX_south_to_north_din_good		: std_logic;
+	signal router3toX_south_to_north_CTR_in		: std_logic;
+	signal router3toX_south_to_north_invld_in		: std_logic;
+	signal router3toX_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router3toX_south_to_north_dout_good	: std_logic;
+	signal router3toX_south_to_north_CTR_out		: std_logic;
+	signal router3toX_south_to_north_invld_out	: std_logic;
+	
+--	signal router3toX_west_to_east_data_in			: std_logic_vector (WIDTH downto 0);		--Not used. Uncomment if
+--	signal router3toX_west_to_east_din_good		: std_logic;										--Router 3 west plugs into
+--	signal router3toX_west_to_east_CTR_in			: std_logic;										--another router
+--	signal router3toX_west_to_east_invld_in		: std_logic;
+--	signal router3toX_west_to_east_data_out		: std_logic_vector (WIDTH downto 0);
+--	signal router3toX_west_to_east_dout_good		: std_logic;
+--	signal router3toX_west_to_east_CTR_out			: std_logic;
+--	signal router3toX_west_to_east_invld_out		: std_logic;
+	
+	signal router3_injection_data		: std_logic_vector (WIDTH downto 0);						--Plugged into PE3
+	signal router3_injection_enq		: std_logic;
+	signal router3_injection_status	: std_logic_vector (1 downto 0);
+	
+	signal router3_ejection_data		: std_logic_vector (WIDTH downto 0);						--Plugged into PE3
+	signal router3_ejection_deq		: std_logic;
+	signal router3_ejection_status	: std_logic_vector (1 downto 0);
+	
 	
 begin
 
 		Router0 : BlazeRouter
-		port map(router0_north_to_south_data_in, 					--North Port
-					router0_north_to_south_din_good,
-					router0_north_to_south_CTR_in,
-					router0_north_to_south_invld_in,
-					router0_north_to_south_data_out,
-					router0_north_to_south_dout_good,
-					router0_north_to_south_CTR_out,
-					router0_north_to_south_invld_out,
+		port map(router0toX_north_to_south_data_in, 						--North Port
+					router0toX_north_to_south_din_good,
+					router0toX_north_to_south_CTR_in,
+					router0toX_north_to_south_invld_in,
+					router0toX_north_to_south_data_out,
+					router0toX_north_to_south_dout_good,
+					router0toX_north_to_south_CTR_out,
+					router0toX_north_to_south_invld_out,
 					
-					router0_east_to_west_data_in,						--East Port [Connected to Router1 WEST PORT]
-					router0_east_to_west_din_good,
-					router0_east_to_west_CTR_in,	
-					router0_east_to_west_invld_in,
-					router0_east_to_west_data_out,
-					router0_east_to_west_dout_good,
-					router0_east_to_west_CTR_out,
-					router0_east_to_west_invld_out,
+					router0to1_east_to_west_data_in,						--East Port [Connected to Router1 WEST PORT]
+					router0to1_east_to_west_din_good,
+					router0to1_east_to_west_CTR_in,	
+					router0to1_east_to_west_invld_in,
+					router0to1_east_to_west_data_out,
+					router0to1_east_to_west_dout_good,
+					router0to1_east_to_west_CTR_out,
+					router0to1_east_to_west_invld_out,
 					
-					router0_south_to_north_data_in,					--South Port
-					router0_south_to_north_din_good,
-					router0_south_to_north_CTR_in,
-					router0_south_to_north_invld_in,
-					router0_south_to_north_data_out,
-					router0_south_to_north_dout_good,
-					router0_south_to_north_CTR_out,
-					router0_south_to_north_invld_out,
+					router0toX_south_to_north_data_in,					--South Port
+					router0toX_south_to_north_din_good,
+					router0toX_south_to_north_CTR_in,
+					router0toX_south_to_north_invld_in,
+					router0toX_south_to_north_data_out,
+					router0toX_south_to_north_dout_good,
+					router0toX_south_to_north_CTR_out,
+					router0toX_south_to_north_invld_out,
 					
-					router0_west_to_east_data_in,						--West Port [Connected to Router1 EAST PORT]
-					router0_west_to_east_din_good,
-					router0_west_to_east_CTR_in,
-					router0_west_to_east_invld_in,
-					router0_west_to_east_data_out,
-					router0_west_to_east_dout_good,	
-					router0_west_to_east_CTR_out,
-					router0_west_to_east_invld_out,
+					router0toX_west_to_east_data_in,						--West Port [Connected to Router1 EAST PORT]
+					router0toX_west_to_east_din_good,
+					router0toX_west_to_east_CTR_in,
+					router0toX_west_to_east_invld_in,
+					router0toX_west_to_east_data_out,
+					router0toX_west_to_east_dout_good,	
+					router0toX_west_to_east_CTR_out,
+					router0toX_west_to_east_invld_out,
 					
 					router0_injection_data,								--Injection
 					router0_injection_enq,
@@ -338,41 +355,41 @@ begin
 					reset);
 					
 		Router1 : BlazeRouter
-		port map(router1_north_to_south_data_in, 					--North Port
-					router1_north_to_south_din_good,
-					router1_north_to_south_CTR_in,
-					router1_north_to_south_invld_in,
-					router1_north_to_south_data_out,
-					router1_north_to_south_dout_good,
-					router1_north_to_south_CTR_out,
-					router1_north_to_south_invld_out,
+		port map(router1toX_north_to_south_data_in, 					--North Port
+					router1toX_north_to_south_din_good,
+					router1toX_north_to_south_CTR_in,
+					router1toX_north_to_south_invld_in,
+					router1toX_north_to_south_data_out,
+					router1toX_north_to_south_dout_good,
+					router1toX_north_to_south_CTR_out,
+					router1toX_north_to_south_invld_out,
 					
-					router1_east_to_west_data_in,						--East Port
-					router1_east_to_west_din_good,
-					router1_east_to_west_CTR_in,
-					router1_east_to_west_invld_in,					
-					router1_east_to_west_data_out,					
-					router1_east_to_west_dout_good,
-					router1_east_to_west_CTR_out,
-					router1_east_to_west_invld_out,
+					router1toX_east_to_west_data_in,						--East Port
+					router1toX_east_to_west_din_good,
+					router1toX_east_to_west_CTR_in,
+					router1toX_east_to_west_invld_in,					
+					router1toX_east_to_west_data_out,					
+					router1toX_east_to_west_dout_good,
+					router1toX_east_to_west_CTR_out,
+					router1toX_east_to_west_invld_out,
 					
-					router1_south_to_north_data_in,					--South Port
-					router1_south_to_north_din_good,
-					router1_south_to_north_CTR_in,
-					router1_south_to_north_invld_in,
-					router1_south_to_north_data_out,
-					router1_south_to_north_dout_good,
-					router1_south_to_north_CTR_out,
-					router1_south_to_north_invld_out,
+					router1to3_south_to_north_data_in,					--South Port
+					router1to3_south_to_north_din_good,
+					router1to3_south_to_north_CTR_in,
+					router1to3_south_to_north_invld_in,
+					router1to3_south_to_north_data_out,
+					router1to3_south_to_north_dout_good,
+					router1to3_south_to_north_CTR_out,
+					router1to3_south_to_north_invld_out,
 					
-					router0_east_to_west_data_out,					--West Port [Connected to Router0 EAST PORT]
-					router0_east_to_west_dout_good,
-					router0_east_to_west_CTR_out,
-					router0_east_to_west_invld_out,
-					router0_east_to_west_data_in,	
-					router0_east_to_west_din_good,
-					router0_east_to_west_CTR_in,
-					router0_east_to_west_invld_in,
+					router0to1_east_to_west_data_out,					--West Port [Connected to Router0 EAST PORT]
+					router0to1_east_to_west_dout_good,
+					router0to1_east_to_west_CTR_out,
+					router0to1_east_to_west_invld_out,
+					router0to1_east_to_west_data_in,	
+					router0to1_east_to_west_din_good,
+					router0to1_east_to_west_CTR_in,
+					router0to1_east_to_west_invld_in,
 					
 					router1_injection_data,								--Injection
 					router1_injection_enq,

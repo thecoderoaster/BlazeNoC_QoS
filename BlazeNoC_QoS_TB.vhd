@@ -1321,84 +1321,84 @@ BEGIN
 --***********************************************--
 		--***STEP 3: Inject control packets***  ROUTER 0
 --***********************************************--		
-		--CONTROL PACKET (#1)
-		--PAYLOAD = 1200 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0x010 (RESERVE SOUTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000000000001" & "0000" & "0000" & "010" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
+--		--CONTROL PACKET (#1)
+--		--PAYLOAD = 1200 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0x010 (RESERVE SOUTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000000000000001" & "0000" & "0000" & "010" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET (#2)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000000000000011" & "0000" & "0001" & "000" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		--CONTROL PACKET (#3)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000000000000111" & "0000" & "0010" & "000" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--
+--		wait for clk_period*40;
+--		
+--		--CONTROL PACKET #4
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000000000001111" & "0000" & "0011" & "000" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*10;
 		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#2)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000000000011" & "0000" & "0001" & "000" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		--CONTROL PACKET (#3)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000000000111" & "0000" & "0010" & "000" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-
-		wait for clk_period*40;
-		
-		--CONTROL PACKET #4
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000000001111" & "0000" & "0011" & "000" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*10;
-		
-		--CONTROL PACKET #5
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000000011111" & "0000" & "0100" & "001" & "0001" & "00" & "1";
+		--CONTROL PACKET #5A (SEND FROM ROUTER 0 TO ROUTER 1)
+		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE SOUTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+		data_inject_PE0 <= "0000000000011111" & "0000" & "0000" & "010" & "0001" & "00" & "1";
 		sm_triggerPE0 <= '1';
 		
 		if(done_PE0 = '0') then					--Handshaking
@@ -1415,9 +1415,9 @@ BEGIN
 		
 		wait for clk_period*15;
 		
-		--CONTROL PACKET #6
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000000111111" & "0000" & "0101" & "011" & "0001" & "00" & "1";
+		--CONTROL PACKET #5B (SEND FROM ROUTER 0 TO ROUTER 3)
+		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (EJECT) : ADDR = 0x03 (DST ROUTER ADDRESS) : COND = 0x00
+		data_inject_PE0 <= "0000000010011111" & "0000" & "0000" & "111" & "0011" & "00" & "1";
 		sm_triggerPE0 <= '1';
 		
 		if(done_PE0 = '0') then					--Handshaking
@@ -1432,199 +1432,11 @@ BEGIN
 			wait until full_PE0 = '0';
 		end if;
 		
-		wait for clk_period*2;
+		wait for clk_period*15;
 		
-		--CONTROL PACKET #7
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000001111111" & "0000" & "0110" & "011" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		--CONTROL PACKET #8
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000011111111" & "0000" & "0111" & "000" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET #9
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000111111111" & "0000" & "1000" & "000" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET #10
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000001111111111" & "0000" & "1001" & "010" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*20;
-		
-		--CONTROL PACKET #11
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000011111111111" & "0000" & "1010" & "001" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET #12
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000111111111111" & "0000" & "1011" & "000" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET #13
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0001111111111111" & "0000" & "1100" & "111" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET #14
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0011111111111111" & "0000" & "1101" & "001" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET #15
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0111111111111111" & "0000" & "1110" & "010" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET #16
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1111111111111111" & "0000" & "1111" & "000" & "0001" & "00" & "1";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
---		--CONTROL PACKET #17
+--		--CONTROL PACKET #6
 --		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
---		data_inject_PE0 <= "0101010101010101" & "0000" & "0000" & "001" & "0001" & "00" & "1";
+--		data_inject_PE0 <= "0000000000111111" & "0000" & "0101" & "011" & "0001" & "00" & "1";
 --		sm_triggerPE0 <= '1';
 --		
 --		if(done_PE0 = '0') then					--Handshaking
@@ -1641,9 +1453,26 @@ BEGIN
 --		
 --		wait for clk_period*2;
 --		
---		--CONTROL PACKET #18
+--		--CONTROL PACKET #7
 --		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
---		data_inject_PE0 <= "1010101010101010" & "0000" & "0001" & "010" & "0001" & "00" & "1";
+--		data_inject_PE0 <= "0000000001111111" & "0000" & "0110" & "011" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		--CONTROL PACKET #8
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000000011111111" & "0000" & "0111" & "000" & "0001" & "00" & "1";
 --		sm_triggerPE0 <= '1';
 --		
 --		if(done_PE0 = '0') then					--Handshaking
@@ -1659,84 +1488,200 @@ BEGIN
 --		end if;
 --		
 --		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #1)
-		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0000000000000000" & "0000" & "0000" & "010" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		
-		wait for clk_period*20;
-		
-		--Inject a data packet (LEGIT PACKET #2)
-		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0001000000000000" & "0000" & "0001" & "000" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*4;
-		
-		--Inject a data packet (LEGIT PACKET #3)
-		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0010000000000000" & "0000" & "0010" & "000" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-
-		
-		--Inject a data packet (LEGIT PACKET #4)
-		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0011000000000000" & "0000" & "0011" & "000" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-
---		--Inject a data packet (INVALID PACKET #4)
+--		
+--		--CONTROL PACKET #9
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000000111111111" & "0000" & "1000" & "000" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET #10
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000001111111111" & "0000" & "1001" & "010" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*20;
+--		
+--		--CONTROL PACKET #11
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000011111111111" & "0000" & "1010" & "001" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET #12
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0000111111111111" & "0000" & "1011" & "000" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET #13
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0001111111111111" & "0000" & "1100" & "111" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET #14
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0011111111111111" & "0000" & "1101" & "001" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET #15
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0111111111111111" & "0000" & "1110" & "010" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET #16
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1111111111111111" & "0000" & "1111" & "000" & "0001" & "00" & "1";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+----		--CONTROL PACKET #17
+----		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+----		data_inject_PE0 <= "0101010101010101" & "0000" & "0000" & "001" & "0001" & "00" & "1";
+----		sm_triggerPE0 <= '1';
+----		
+----		if(done_PE0 = '0') then					--Handshaking
+----			wait until done_PE0 = '1';
+----		end if;
+----		
+----		sm_triggerPE0 <= '0';
+----			
+----		wait for clk_period*2;
+----	
+----		if(full_PE0 = '1') then
+----			wait until full_PE0 = '0';
+----		end if;
+----		
+----		wait for clk_period*2;
+----		
+----		--CONTROL PACKET #18
+----		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+----		data_inject_PE0 <= "1010101010101010" & "0000" & "0001" & "010" & "0001" & "00" & "1";
+----		sm_triggerPE0 <= '1';
+----		
+----		if(done_PE0 = '0') then					--Handshaking
+----			wait until done_PE0 = '1';
+----		end if;
+----		
+----		sm_triggerPE0 <= '0';
+----			
+----		wait for clk_period*2;
+----	
+----		if(full_PE0 = '1') then
+----			wait until full_PE0 = '0';
+----		end if;
+----		
+----		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #1)
 --		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
---		data_inject_PE0 <= "1111111111111100" & "0000" & "0101" & "001" & "0010" & "00" & "0";
+--		data_inject_PE0 <= "0000000000000000" & "0000" & "0000" & "010" & "0001" & "00" & "0";
 --		sm_triggerPE0 <= '1';
 --		
 --		if(done_PE0 = '0') then					--Handshaking
@@ -1750,542 +1695,409 @@ BEGIN
 --		if(full_PE0 = '1') then
 --			wait until full_PE0 = '0';
 --		end if;
-
-		--Inject a data packet (LEGIT PACKET #5)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0100000000000000" & "0000" & "0100" & "001" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*15;
-		
-		--Inject a data packet (LEGIT PACKET #6)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0101000000000000" & "0000" & "0101" & "011" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #7)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0110000000000000" & "0000" & "0110" & "011" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		--Inject a data packet (LEGIT PACKET #8)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "0111000000000000" & "0000" & "0111" & "000" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #9)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1000000000000000" & "0000" & "1000" & "000" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #10)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1001000000000000" & "0000" & "1001" & "010" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*20;
-		
-		--Inject a data packet (LEGIT PACKET #11)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1010000000000000" & "0000" & "1010" & "001" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #12)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1011000000000000" & "0000" & "1011" & "000" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #13)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1100000000000000" & "0000" & "1100" & "111" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #14)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1101000000000000" & "0000" & "1101" & "001" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #15)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1110000000000000" & "0000" & "1110" & "010" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #16)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE0 <= "1111000000000000" & "0000" & "1111" & "000" & "0001" & "00" & "0";
-		sm_triggerPE0 <= '1';
-		
-		if(done_PE0 = '0') then					--Handshaking
-			wait until done_PE0 = '1';
-		end if;
-		
-		sm_triggerPE0 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE0 = '1') then
-			wait until full_PE0 = '0';
-		end if;
-		
-		wait for clk_period*2;
+--		
+--		
+--		wait for clk_period*20;
+--		
+--		--Inject a data packet (LEGIT PACKET #2)
+--		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0001000000000000" & "0000" & "0001" & "000" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*4;
+--		
+--		--Inject a data packet (LEGIT PACKET #3)
+--		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0010000000000000" & "0000" & "0010" & "000" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--
+--		
+--		--Inject a data packet (LEGIT PACKET #4)
+--		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0011000000000000" & "0000" & "0011" & "000" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--
+----		--Inject a data packet (INVALID PACKET #4)
+----		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+----		data_inject_PE0 <= "1111111111111100" & "0000" & "0101" & "001" & "0010" & "00" & "0";
+----		sm_triggerPE0 <= '1';
+----		
+----		if(done_PE0 = '0') then					--Handshaking
+----			wait until done_PE0 = '1';
+----		end if;
+----		
+----		sm_triggerPE0 <= '0';
+----			
+----		wait for clk_period*2;
+----	
+----		if(full_PE0 = '1') then
+----			wait until full_PE0 = '0';
+----		end if;
+--
+--		--Inject a data packet (LEGIT PACKET #5)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0100000000000000" & "0000" & "0100" & "001" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*15;
+--		
+--		--Inject a data packet (LEGIT PACKET #6)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0101000000000000" & "0000" & "0101" & "011" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #7)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0110000000000000" & "0000" & "0110" & "011" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		--Inject a data packet (LEGIT PACKET #8)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "0111000000000000" & "0000" & "0111" & "000" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #9)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1000000000000000" & "0000" & "1000" & "000" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #10)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1001000000000000" & "0000" & "1001" & "010" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*20;
+--		
+--		--Inject a data packet (LEGIT PACKET #11)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1010000000000000" & "0000" & "1010" & "001" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #12)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1011000000000000" & "0000" & "1011" & "000" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #13)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1100000000000000" & "0000" & "1100" & "111" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #14)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1101000000000000" & "0000" & "1101" & "001" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #15)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1110000000000000" & "0000" & "1110" & "010" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #16)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE0 <= "1111000000000000" & "0000" & "1111" & "000" & "0001" & "00" & "0";
+--		sm_triggerPE0 <= '1';
+--		
+--		if(done_PE0 = '0') then					--Handshaking
+--			wait until done_PE0 = '1';
+--		end if;
+--		
+--		sm_triggerPE0 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE0 = '1') then
+--			wait until full_PE0 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
 
 
 
 --***********************************************--
 		--***STEP 3: Inject control packets***  ROUTER 1
 --***********************************************--		
-		--CONTROL PACKET (#1)
-		--PAYLOAD = 1200 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0x010 (RESERVE SOUTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000000000001" & "0001" & "0000" & "010" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#2)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000000000011" & "0001" & "0001" & "000" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		--CONTROL PACKET (#3)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000000000111" & "0001" & "0010" & "000" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-
-		wait for clk_period*40;
-		
-		--CONTROL PACKET (#4)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000000001111" & "0001" & "0011" & "000" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*10;
-		
-		--CONTROL PACKET (#5)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000000011111" & "0001" & "0100" & "001" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*15;
-		
-		--CONTROL PACKET (#6)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000000111111" & "0001" & "0101" & "011" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#7)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000001111111" & "0001" & "0110" & "011" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		--CONTROL PACKET (#8)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000011111111" & "0001" & "0111" & "000" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#9)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000111111111" & "0001" & "1000" & "000" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#10)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000001111111111" & "0001" & "1001" & "010" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*20;
-		
-		--CONTROL PACKET (#11)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000011111111111" & "0001" & "1010" & "001" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#12)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000111111111111" & "0001" & "1011" & "000" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#13)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0001111111111111" & "0001" & "1100" & "111" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#14)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0011111111111111" & "0001" & "1101" & "001" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#15)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0111111111111111" & "0001" & "1110" & "010" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--CONTROL PACKET (#16)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1111111111111111" & "0001" & "1111" & "000" & "0000" & "00" & "1";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
---		--CONTROL PACKET (#17)
+--		--CONTROL PACKET (#1)
+--		--PAYLOAD = 1200 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0x010 (RESERVE SOUTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000000000000001" & "0001" & "0000" & "010" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET (#2)
 --		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
---		data_inject_PE1 <= "0101010101010101" & "0001" & "0000" & "001" & "0000" & "00" & "1";
+--		data_inject_PE1 <= "0000000000000011" & "0001" & "0001" & "000" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		--CONTROL PACKET (#3)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000000000000111" & "0001" & "0010" & "000" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--
+--		wait for clk_period*40;
+--		
+--		--CONTROL PACKET (#4)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000000000001111" & "0001" & "0011" & "000" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*10;
+--		
+--		--CONTROL PACKET (#5)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000000000011111" & "0001" & "0100" & "001" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*15;
+--		
+--		--CONTROL PACKET (#6)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000000000111111" & "0001" & "0101" & "011" & "0000" & "00" & "1";
 --		sm_triggerPE1 <= '1';
 --		
 --		if(done_PE1 = '0') then					--Handshaking
@@ -2302,9 +2114,26 @@ BEGIN
 --		
 --		wait for clk_period*2;
 --		
---		--CONTROL PACKET (#18)
+--		--CONTROL PACKET (#7)
 --		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
---		data_inject_PE1 <= "1010101010101010" & "0001" & "0001" & "010" & "0000" & "00" & "1";
+--		data_inject_PE1 <= "0000000001111111" & "0001" & "0110" & "011" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		--CONTROL PACKET (#8)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000000011111111" & "0001" & "0111" & "000" & "0000" & "00" & "1";
 --		sm_triggerPE1 <= '1';
 --		
 --		if(done_PE1 = '0') then					--Handshaking
@@ -2320,84 +2149,200 @@ BEGIN
 --		end if;
 --		
 --		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #1)
-		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0000000000000000" & "0001" & "0000" & "010" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		
-		wait for clk_period*20;
-		
-		--Inject a data packet (LEGIT PACKET #2)
-		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0001000000000000" & "0001" & "0001" & "000" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*4;
-		
-		--Inject a data packet (LEGIT PACKET #3)
-		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0010000000000000" & "0001" & "0010" & "000" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-
-		
-		--Inject a data packet (LEGIT PACKET #4)
-		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0011000000000000" & "0001" & "0011" & "000" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-
---		--Inject a data packet (INVALID PACKET #4)
+--		
+--		--CONTROL PACKET (#9)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000000111111111" & "0001" & "1000" & "000" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET (#10)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000001111111111" & "0001" & "1001" & "010" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*20;
+--		
+--		--CONTROL PACKET (#11)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000011111111111" & "0001" & "1010" & "001" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET (#12)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0000111111111111" & "0001" & "1011" & "000" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET (#13)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0001111111111111" & "0001" & "1100" & "111" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET (#14)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0011111111111111" & "0001" & "1101" & "001" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET (#15)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0111111111111111" & "0001" & "1110" & "010" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--CONTROL PACKET (#16)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1111111111111111" & "0001" & "1111" & "000" & "0000" & "00" & "1";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+----		--CONTROL PACKET (#17)
+----		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+----		data_inject_PE1 <= "0101010101010101" & "0001" & "0000" & "001" & "0000" & "00" & "1";
+----		sm_triggerPE1 <= '1';
+----		
+----		if(done_PE1 = '0') then					--Handshaking
+----			wait until done_PE1 = '1';
+----		end if;
+----		
+----		sm_triggerPE1 <= '0';
+----			
+----		wait for clk_period*2;
+----	
+----		if(full_PE1 = '1') then
+----			wait until full_PE1 = '0';
+----		end if;
+----		
+----		wait for clk_period*2;
+----		
+----		--CONTROL PACKET (#18)
+----		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+----		data_inject_PE1 <= "1010101010101010" & "0001" & "0001" & "010" & "0000" & "00" & "1";
+----		sm_triggerPE1 <= '1';
+----		
+----		if(done_PE1 = '0') then					--Handshaking
+----			wait until done_PE1 = '1';
+----		end if;
+----		
+----		sm_triggerPE1 <= '0';
+----			
+----		wait for clk_period*2;
+----	
+----		if(full_PE1 = '1') then
+----			wait until full_PE1 = '0';
+----		end if;
+----		
+----		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #1)
 --		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
---		data_inject_PE1 <= "1111111111111100" & "0001" & "0101" & "001" & "0010" & "00" & "0";
+--		data_inject_PE1 <= "0000000000000000" & "0001" & "0000" & "010" & "0000" & "00" & "0";
 --		sm_triggerPE1 <= '1';
 --		
 --		if(done_PE1 = '0') then					--Handshaking
@@ -2411,232 +2356,306 @@ BEGIN
 --		if(full_PE1 = '1') then
 --			wait until full_PE1 = '0';
 --		end if;
-
-		--Inject a data packet (LEGIT PACKET #5)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0100000000000000" & "0001" & "0100" & "001" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*15;
-		
-		--Inject a data packet (LEGIT PACKET #6)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0101000000000000" & "0001" & "0101" & "011" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #7)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0110000000000000" & "0001" & "0110" & "011" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		--Inject a data packet (LEGIT PACKET #8)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "0111000000000000" & "0001" & "0111" & "000" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #9)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1000000000000000" & "0001" & "1000" & "000" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #10)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1001000000000000" & "0001" & "1001" & "010" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*20;
-		
-		--Inject a data packet (LEGIT PACKET #11)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1010000000000000" & "0001" & "1010" & "001" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #12)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1011000000000000" & "0001" & "1011" & "000" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #13)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1100000000000000" & "0001" & "1100" & "111" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #14)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1101000000000000" & "0001" & "1101" & "001" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #15)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1110000000000000" & "0001" & "1110" & "010" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
-		
-		--Inject a data packet (LEGIT PACKET #16)
-		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
-		data_inject_PE1 <= "1111000000000000" & "0001" & "1111" & "000" & "0000" & "00" & "0";
-		sm_triggerPE1 <= '1';
-		
-		if(done_PE1 = '0') then					--Handshaking
-			wait until done_PE1 = '1';
-		end if;
-		
-		sm_triggerPE1 <= '0';
-			
-		wait for clk_period*2;
-	
-		if(full_PE1 = '1') then
-			wait until full_PE1 = '0';
-		end if;
-		
-		wait for clk_period*2;
+--		
+--		
+--		wait for clk_period*20;
+--		
+--		--Inject a data packet (LEGIT PACKET #2)
+--		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0001000000000000" & "0001" & "0001" & "000" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*4;
+--		
+--		--Inject a data packet (LEGIT PACKET #3)
+--		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0010000000000000" & "0001" & "0010" & "000" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--
+--		
+--		--Inject a data packet (LEGIT PACKET #4)
+--		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0011000000000000" & "0001" & "0011" & "000" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--
+----		--Inject a data packet (INVALID PACKET #4)
+----		--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0x011 (SOUTH RESERVED) : ADDR = 0x06 (DST ROUTER ADDRESS) : COND = 0x00
+----		data_inject_PE1 <= "1111111111111100" & "0001" & "0101" & "001" & "0010" & "00" & "0";
+----		sm_triggerPE1 <= '1';
+----		
+----		if(done_PE1 = '0') then					--Handshaking
+----			wait until done_PE1 = '1';
+----		end if;
+----		
+----		sm_triggerPE1 <= '0';
+----			
+----		wait for clk_period*2;
+----	
+----		if(full_PE1 = '1') then
+----			wait until full_PE1 = '0';
+----		end if;
+--
+--		--Inject a data packet (LEGIT PACKET #5)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0100000000000000" & "0001" & "0100" & "001" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*15;
+--		
+--		--Inject a data packet (LEGIT PACKET #6)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0101000000000000" & "0001" & "0101" & "011" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #7)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0110000000000000" & "0001" & "0110" & "011" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		--Inject a data packet (LEGIT PACKET #8)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "0111000000000000" & "0001" & "0111" & "000" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #9)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1000000000000000" & "0001" & "1000" & "000" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #10)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1001000000000000" & "0001" & "1001" & "010" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*20;
+--		
+--		--Inject a data packet (LEGIT PACKET #11)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1010000000000000" & "0001" & "1010" & "001" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #12)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1011000000000000" & "0001" & "1011" & "000" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #13)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1100000000000000" & "0001" & "1100" & "111" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #14)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1101000000000000" & "0001" & "1101" & "001" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #15)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1110000000000000" & "0001" & "1110" & "010" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
+--		
+--		--Inject a data packet (LEGIT PACKET #16)
+--		--PAYLOAD = 2000 Cycles (TID) : MID = 0x01 (SOURCE)	: PID = 0x02 (PKT ID) :	DIR = 0x000 (RESERVE NORTH) : ADDR = 0x01 (DST ROUTER ADDRESS) : COND = 0x00
+--		data_inject_PE1 <= "1111000000000000" & "0001" & "1111" & "000" & "0000" & "00" & "0";
+--		sm_triggerPE1 <= '1';
+--		
+--		if(done_PE1 = '0') then					--Handshaking
+--			wait until done_PE1 = '1';
+--		end if;
+--		
+--		sm_triggerPE1 <= '0';
+--			
+--		wait for clk_period*2;
+--	
+--		if(full_PE1 = '1') then
+--			wait until full_PE1 = '0';
+--		end if;
+--		
+--		wait for clk_period*2;
 
 
 

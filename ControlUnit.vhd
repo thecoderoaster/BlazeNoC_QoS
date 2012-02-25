@@ -344,10 +344,10 @@ begin
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
 					
-					sw_nSel <= "111";
-					sw_eSel <= "111";
-					sw_sSel <= "111";
-					sw_wSel <= "111";
+					sw_nSel <= "000";
+					sw_eSel <= "000";
+					sw_sSel <= "000";
+					sw_wSel <= "000";
 					
 					n_rst <= '1', '0' after 1 ns;
 					e_rst <= '1', '0' after 1 ns;
@@ -386,9 +386,9 @@ begin
 					next_state <= north4;
 				when north4 =>	
 					if(adr_nf = '1') then
-						next_state <= north6;		-- Packet registered, discard any duplicates
+						next_state <= north6;		-- Packet was never registered before
 					else
-						next_state <= north5;		-- Packet was never registered before
+						next_state <= north5;		-- Packet registered, discard any duplicates
 					end if;
 				when north5 =>
 					--Acknowledge back (discarding packet)
@@ -397,6 +397,9 @@ begin
 					n_CTRflg <= '1', '0' after 1 ns;		-- ACK
 					next_state <= north12;
 				when north6 =>
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					
 					if(table_full = '0') then
 						next_state <= north8;
 					else
@@ -482,9 +485,9 @@ begin
 					next_state <= east4;
 				when east4 =>	
 					if(adr_nf = '1') then
-						next_state <= east6;		-- Packet registered, discard any duplicates
+						next_state <= east6;		-- Packet was never registered before
 					else
-						next_state <= east5;		-- Packet was never registered before
+						next_state <= east5;		-- Packet registered, discard any duplicates
 					end if;
 				when east5 =>
 					--Acknowledge back (discarding packet)
@@ -493,6 +496,9 @@ begin
 					e_CTRflg <= '1', '0' after 1 ns;		-- ACK
 					next_state <= east12;
 				when east6 =>
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+					
 					if(table_full = '0') then
 						next_state <= east8;
 					else
@@ -578,9 +584,9 @@ begin
 					next_state <= south4;
 				when south4 =>	
 					if(adr_nf = '1') then
-						next_state <= south6;		-- Packet registered, discard any duplicates
+						next_state <= south6;		-- Packet was never registered before 
 					else
-						next_state <= south5;		-- Packet was never registered before
+						next_state <= south5;		-- Packet registered, discard any duplicates
 					end if;
 				when south5 =>
 					--Acknowledge back (discarding packet)
@@ -589,6 +595,9 @@ begin
 					s_CTRflg <= '1', '0' after 1 ns;		-- ACK
 					next_state <= south12;
 				when south6 =>
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+				
 					if(table_full = '0') then
 						next_state <= south8;
 					else
@@ -674,9 +683,9 @@ begin
 					next_state <= west4;
 				when west4 =>	
 					if(adr_nf = '1') then
-						next_state <= west6;		-- Packet registered, discard any duplicates
+						next_state <= west6;		-- Packet was never registered before
 					else
-						next_state <= west5;		-- Packet was never registered before
+						next_state <= west5;		-- Packet registered, discard any duplicates
 					end if;
 				when west5 =>
 					--Acknowledge back (discarding packet)
@@ -685,6 +694,9 @@ begin
 					w_CTRflg <= '1', '0' after 1 ns;		-- ACK
 					next_state <= west12;
 				when west6 =>
+					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
+				
 					if(table_full = '0') then
 						next_state <= west8;
 					else
@@ -711,23 +723,24 @@ begin
 					adr_en <= '1';
 					next_state <= west10;
 				when west9 =>
-					--Configure the switch
---					case rte_data_in(2 downto 0) is
---						when "000" =>
---							sw_nSel <= "111";			-- "00" North FIFO								
---						when "001" =>
---							sw_eSel <= "111";			-- "01" East FIFO
---						when "010" =>
---							sw_sSel <= "111";			-- "10" South FIFO
---						when "011" =>
---							sw_wSel <= "111";			-- "11" Ejection FIFO
---						when others =>												-- TO DO: Handle Ejection
---							null;
---					end case;
-					
-					sw_wSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= w_buffer;
+					
+					--Configure the switch
+					case rte_data_in(2 downto 0) is
+						when "000" =>
+							sw_nSel <= "111";			-- "00" North FIFO								
+						when "001" =>
+							sw_eSel <= "111";			-- "01" East FIFO
+						when "010" =>
+							sw_sSel <= "111";			-- "10" South FIFO
+						when "011" =>
+							sw_wSel <= "111";			-- "11" Ejection FIFO
+						when others =>												-- TO DO: Handle Ejection
+							null;
+					end case;
+					
+					--sw_wSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					w_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= west12;
 				when west10 =>
@@ -1114,6 +1127,7 @@ begin
 				when dp_arrivedOnNorth5 =>
 					address <= adr_result;			--should be the address found above
 					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
 					rsv_en <= '0';
 					next_state <= dp_arrivedOnNorth6;
 				when dp_arrivedOnNorth6 =>
@@ -1158,6 +1172,7 @@ begin
 				when dp_arrivedOnEast5 =>
 					address <= adr_result;									--should be the address found above
 					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
 					rsv_en <= '0';
 					next_state <= dp_arrivedOnEast6;
 				when dp_arrivedOnEast6 =>
@@ -1202,6 +1217,7 @@ begin
 				when dp_arrivedOnSouth5 =>
 					address <= adr_result;									--should be the address found above
 					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
 					rsv_en <= '0';
 					next_state <= dp_arrivedOnSouth6;
 				when dp_arrivedOnSouth6 =>
@@ -1246,6 +1262,7 @@ begin
 				when dp_arrivedOnWest5 =>
 					address <= adr_result;									--should be the address found above
 					adr_search <= '0';
+					adr_nf_ack <= '1', '0' after 1 ns;
 					rsv_en <= '0';
 					next_state <= dp_arrivedOnWest6;
 				when dp_arrivedOnWest6 =>
@@ -1282,7 +1299,7 @@ begin
 		
 		if(n_CtrlFlg = '1' and n_rst = '0' and n_invld_in = '0') then						-- From Sending Router
 			n_ctrl_flg_set <= '1';
-			n_buffer <= w_rnaCtrl;
+			n_buffer <= n_rnaCtrl;
 		end if;
 		
 		if(s_CTRinFlg = '1' and n_rst = '0' and internal_invld_set_s = '0') then		--ACK back from receving 

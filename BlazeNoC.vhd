@@ -308,7 +308,7 @@ architecture rtl of BlazeNoC is
 begin
 
 		Router0 : BlazeRouter
-		port map(router0toX_north_to_south_data_in, 						--North Port
+		port map(router0toX_north_to_south_data_in, 					--North Port
 					router0toX_north_to_south_din_good,
 					router0toX_north_to_south_CTR_in,
 					router0toX_north_to_south_invld_in,

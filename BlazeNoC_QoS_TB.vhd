@@ -154,7 +154,8 @@ BEGIN
 		if(full_PE0 = '1') then
 			wait until full_PE0 = '0';
 		end if;
-
+		
+--**Update Routing Table**--
 		--PAYLOAD = 0x0001 (PORT - Ejection) : MID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
 		data_inject_PE0 <= "0000000000001111" & "0000" & "0001" & "000" & "0000" & "10" & "1";
 		--sm_triggerPE0 <= '1', '0' after 1 ns;
@@ -188,8 +189,8 @@ BEGIN
 			wait until full_PE0 = '0';
 		end if;
 		
-		--PAYLOAD = 0x0001 (PORT - East) : MID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_PE0 <= "0000000000000011" & "0010" & "0001" & "000" & "0000" & "10" & "1";
+		--PAYLOAD = 0x0001 (PORT - South) : MID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE0 <= "0000000000000101" & "0010" & "0001" & "000" & "0000" & "10" & "1";
 		sm_triggerPE0 <= '1';
 		
 		if(done_PE0 = '0') then					--Handshaking
@@ -450,7 +451,8 @@ BEGIN
 		if(full_PE1 = '1') then
 			wait until full_PE1 = '0';
 		end if;
-		
+
+--**Update Routing Table**--
 		--PAYLOAD = 0x0007 (PORT - West) : MID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
 		data_inject_PE1 <= "0000000000000111" & "0000" & "0001" & "000" & "0000" & "10" & "1";
 		sm_triggerPE1 <= '1';
@@ -483,8 +485,8 @@ BEGIN
 			wait until full_PE1 = '0';
 		end if;
 		
-		--PAYLOAD = 0x0001 (PORT - East) : MID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_PE1 <= "0000000000000011" & "0010" & "0001" & "000" & "0000" & "10" & "1";
+		--PAYLOAD = 0x0001 (PORT - West) : MID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000111" & "0010" & "0001" & "000" & "0000" & "10" & "1";
 		sm_triggerPE1 <= '1';
 		
 		if(done_PE1 = '0') then					--Handshaking
@@ -499,8 +501,8 @@ BEGIN
 			wait until full_PE1 = '0';
 		end if;
 		
-		--PAYLOAD = 0x0002 (PORT - East) : MID = 0x03 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
-		data_inject_PE1 <= "0000000000000011" & "0011" & "0001" & "000" & "0000" & "10" & "1";
+		--PAYLOAD = 0x0002 (PORT - South) : MID = 0x03 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE1 <= "0000000000000101" & "0011" & "0001" & "000" & "0000" & "10" & "1";
 		sm_triggerPE1 <= '1';
 		
 		if(done_PE1 = '0') then					--Handshaking
@@ -725,6 +727,597 @@ BEGIN
 			wait until full_PE1 = '0';
 		end if;
 		
+--**ROUTER 2 INFORMATION**--
+
+--**Update WDT SEED**--
+		
+		--PAYLOAD = 0x0001 (PORT - Ejection) : MID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000001001" & "0000" & "0000" & "000" & "0000" & "11" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+
+--**Update Routing Table**--
+		--PAYLOAD = 0x0001 (PORT - North) : MID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "0000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0001 (PORT - East) : MID = 0x01 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000011" & "0001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0001 (PORT - Ejection) : MID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000001111" & "0010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - East) : MID = 0x03 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000011" & "0011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0003 (PORT - NULL) : MID = 0x04 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "0100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - NULL) : MID = 0x05 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "0101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0003 (PORT - NULL) : MID = 0x06 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "0110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0000 (PORT - NULL) : MID = 0x07 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "0111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0001 (PORT - NULL) : MID = 0x08	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "1000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - NULL) : MID = 0x09	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "1001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0000 (PORT - NULL) : MID = 0x0A	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "1010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0001 (PORT - NULL) : MID = 0x0B	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "1011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - NULL) : MID = 0x0C	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "1100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0003 (PORT - NULL) : MID = 0x0D	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "1101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - NULL) : MID = 0x0E	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "1110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0000 (PORT - NULL) : MID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000001" & "1111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+		--***STEP 2: Update Router Address***
+		
+		--PAYLOAD = 0x0002 (Address - 2) : MID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE2 <= "0000000000000010" & "0001" & "0001" & "000" & "0000" & "01" & "1";
+		sm_triggerPE2 <= '1';
+		
+		if(done_PE2 = '0') then					--Handshaking
+			wait until done_PE2 = '1';
+		end if;
+		
+		sm_triggerPE2 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE2 = '1') then
+			wait until full_PE2 = '0';
+		end if;
+		
+--**ROUTER 3 INFORMATION**--
+
+--**Update WDT SEED**--
+		
+		--PAYLOAD = 0x0001 (PORT - Ejection) : MID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000011001" & "0000" & "0000" & "000" & "0000" & "11" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+
+--**Update Routing Table**--
+		--PAYLOAD = 0x0001 (PORT - North) : MID = 0x00 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "0000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0001 (PORT - North) : MID = 0x01 (DST ADDRESS) : PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "0001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0001 (PORT - West) : MID = 0x02 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000111" & "0010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - Ejection) : MID = 0x03 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000001111" & "0011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0003 (PORT - NULL) : MID = 0x04 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "0100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - NULL) : MID = 0x05 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "0101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0003 (PORT - NULL) : MID = 0x06 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "0110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0000 (PORT - NULL) : MID = 0x07 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "0111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0001 (PORT - NULL) : MID = 0x08	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "1000" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - NULL) : MID = 0x09	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "1001" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0000 (PORT - NULL) : MID = 0x0A	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "1010" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0001 (PORT - NULL) : MID = 0x0B	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "1011" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - NULL) : MID = 0x0C	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "1100" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0003 (PORT - NULL) : MID = 0x0D	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "1101" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0002 (PORT - NULL) : MID = 0x0E	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "1110" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--PAYLOAD = 0x0000 (PORT - NULL) : MID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000001" & "1111" & "0001" & "000" & "0000" & "10" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+		--***STEP 2: Update Router Address***
+		
+		--PAYLOAD = 0x0002 (Address - 2) : MID = 0x0F	 (DST ADDRESS): PID = 0x01 (PKT ID) : DIR = 0x00 : ADDR = 0x00 (SRC ADDRESS) : COND = 0x01
+		data_inject_PE3 <= "0000000000000011" & "0001" & "0001" & "000" & "0000" & "01" & "1";
+		sm_triggerPE3 <= '1';
+		
+		if(done_PE3 = '0') then					--Handshaking
+			wait until done_PE3 = '1';
+		end if;
+		
+		sm_triggerPE3 <= '0';
+			
+		wait for clk_period*2;
+	
+		if(full_PE3 = '1') then
+			wait until full_PE3 = '0';
+		end if;
+		
+
 --***********************************************--
 		--***STEP 3: Inject control packets***  ROUTER 0
 --***********************************************--		

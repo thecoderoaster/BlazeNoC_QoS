@@ -143,14 +143,14 @@ architecture rtl of BlazeNoC is
 	signal router0to1_east_to_west_CTR_out			: std_logic;
 	signal router0to1_east_to_west_invld_out		: std_logic;
 	
-	signal router0toX_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
-	signal router0toX_south_to_north_din_good		: std_logic;
-	signal router0toX_south_to_north_CTR_in		: std_logic;
-	signal router0toX_south_to_north_invld_in		: std_logic;
-	signal router0toX_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
-	signal router0toX_south_to_north_dout_good	: std_logic;
-	signal router0toX_south_to_north_CTR_out		: std_logic;
-	signal router0toX_south_to_north_invld_out		: std_logic;
+	signal router0to2_south_to_north_data_in		: std_logic_vector (WIDTH downto 0);		--Plugged into Router 2 North
+	signal router0to2_south_to_north_din_good		: std_logic;
+	signal router0to2_south_to_north_CTR_in		: std_logic;
+	signal router0to2_south_to_north_invld_in		: std_logic;
+	signal router0to2_south_to_north_data_out		: std_logic_vector (WIDTH downto 0);
+	signal router0to2_south_to_north_dout_good	: std_logic;
+	signal router0to2_south_to_north_CTR_out		: std_logic;
+	signal router0to2_south_to_north_invld_out	: std_logic;
 	
 	signal router0toX_west_to_east_data_in			: std_logic_vector (WIDTH downto 0);		--Not plugged 2/24/2012
 	signal router0toX_west_to_east_din_good		: std_logic;
@@ -326,14 +326,14 @@ begin
 					router0to1_east_to_west_CTR_out,
 					router0to1_east_to_west_invld_out,
 					
-					router0toX_south_to_north_data_in,					--South Port
-					router0toX_south_to_north_din_good,
-					router0toX_south_to_north_CTR_in,
-					router0toX_south_to_north_invld_in,
-					router0toX_south_to_north_data_out,
-					router0toX_south_to_north_dout_good,
-					router0toX_south_to_north_CTR_out,
-					router0toX_south_to_north_invld_out,
+					router0to2_south_to_north_data_in,					--South Port [Connected to Router 2 NORTH PORT]
+					router0to2_south_to_north_din_good,
+					router0to2_south_to_north_CTR_in,
+					router0to2_south_to_north_invld_in,
+					router0to2_south_to_north_data_out,
+					router0to2_south_to_north_dout_good,
+					router0to2_south_to_north_CTR_out,
+					router0to2_south_to_north_invld_out,
 					
 					router0toX_west_to_east_data_in,						--West Port [Connected to Router1 EAST PORT]
 					router0toX_west_to_east_din_good,
@@ -373,7 +373,7 @@ begin
 					router1toX_east_to_west_CTR_out,
 					router1toX_east_to_west_invld_out,
 					
-					router1to3_south_to_north_data_in,					--South Port
+					router1to3_south_to_north_data_in,					--South Port [Connected to Router 3 NORTH PORT]
 					router1to3_south_to_north_din_good,
 					router1to3_south_to_north_CTR_in,
 					router1to3_south_to_north_invld_in,
@@ -391,13 +391,107 @@ begin
 					router0to1_east_to_west_CTR_in,
 					router0to1_east_to_west_invld_in,
 					
-					router1_injection_data,								--Injection
+					router1_injection_data,									--Injection
 					router1_injection_enq,
 					router1_injection_status,
 					
-					router1_ejection_data,								--Ejection
+					router1_ejection_data,									--Ejection
 					router1_ejection_deq,
 					router1_ejection_status,
+					clk,
+					reset);
+
+		Router2 : BlazeRouter
+		port map(router0to2_south_to_north_data_out,					--North Port [Connected to Router 0 SOUTH PORT]
+					router0to2_south_to_north_dout_good,
+					router0to2_south_to_north_CTR_out,
+					router0to2_south_to_north_invld_out,
+					router0to2_south_to_north_data_in,	
+					router0to2_south_to_north_din_good,
+					router0to2_south_to_north_CTR_in,
+					router0to2_south_to_north_invld_in,
+					
+					router2to3_east_to_west_data_in,						--East Port [Connected to Router3 WEST PORT]
+					router2to3_east_to_west_din_good,
+					router2to3_east_to_west_CTR_in,	
+					router2to3_east_to_west_invld_in,
+					router2to3_east_to_west_data_out,
+					router2to3_east_to_west_dout_good,
+					router2to3_east_to_west_CTR_out,
+					router2to3_east_to_west_invld_out,
+					
+					router2toX_south_to_north_data_in,					--South Port
+					router2toX_south_to_north_din_good,
+					router2toX_south_to_north_CTR_in,
+					router2toX_south_to_north_invld_in,
+					router2toX_south_to_north_data_out,
+					router2toX_south_to_north_dout_good,
+					router2toX_south_to_north_CTR_out,
+					router2toX_south_to_north_invld_out,
+					
+					router2toX_west_to_east_data_in,						--West Port
+					router2toX_west_to_east_din_good,
+					router2toX_west_to_east_CTR_in,
+					router2toX_west_to_east_invld_in,
+					router2toX_west_to_east_data_out,
+					router2toX_west_to_east_dout_good,	
+					router2toX_west_to_east_CTR_out,
+					router2toX_west_to_east_invld_out,
+					
+					router2_injection_data,									--Injection
+					router2_injection_enq,
+					router2_injection_status,
+					
+					router2_ejection_data,									--Ejection
+					router2_ejection_deq,
+					router2_ejection_status,
+					clk,
+					reset);
+
+		Router3 : BlazeRouter
+		port map(router1to3_south_to_north_data_out,					--North Port [Connected to Router 1 SOUTH PORT]
+					router1to3_south_to_north_dout_good,
+					router1to3_south_to_north_CTR_out,
+					router1to3_south_to_north_invld_out,
+					router1to3_south_to_north_data_in,					
+					router1to3_south_to_north_din_good,
+					router1to3_south_to_north_CTR_in,
+					router1to3_south_to_north_invld_in,
+					
+					router3toX_east_to_west_data_in,						--East Port
+					router3toX_east_to_west_din_good,
+					router3toX_east_to_west_CTR_in,	
+					router3toX_east_to_west_invld_in,
+					router3toX_east_to_west_data_out,
+					router3toX_east_to_west_dout_good,
+					router3toX_east_to_west_CTR_out,
+					router3toX_east_to_west_invld_out,
+					
+					router3toX_south_to_north_data_in,					--South Port
+					router3toX_south_to_north_din_good,
+					router3toX_south_to_north_CTR_in,
+					router3toX_south_to_north_invld_in,
+					router3toX_south_to_north_data_out,
+					router3toX_south_to_north_dout_good,
+					router3toX_south_to_north_CTR_out,
+					router3toX_south_to_north_invld_out,
+					
+					router2to3_east_to_west_data_out,					--West Port [Connected to Router 2 EAST PORT]
+					router2to3_east_to_west_dout_good,
+					router2to3_east_to_west_CTR_out,
+					router2to3_east_to_west_invld_out,
+					router2to3_east_to_west_data_in,						
+					router2to3_east_to_west_din_good,
+					router2to3_east_to_west_CTR_in,	
+					router2to3_east_to_west_invld_in,
+					
+					router3_injection_data,								--Injection
+					router3_injection_enq,
+					router3_injection_status,
+					
+					router3_ejection_data,								--Ejection
+					router3_ejection_deq,
+					router3_ejection_status,
 					clk,
 					reset);
 
@@ -428,6 +522,34 @@ begin
 					router1_ejection_data,
 					router1_ejection_deq,
 					router1_ejection_status);
+					
+		Processing_Element2: PE
+		port map(clk,
+					reset,
+					sm_triggerPE2,
+					full_PE2,
+					done_PE2,
+					data_inject_PE2,
+					router2_injection_data,
+					router2_injection_enq,
+					router2_injection_status,
+					router2_ejection_data,
+					router2_ejection_deq,
+					router2_ejection_status);
+					
+		Processing_Element3: PE
+		port map(clk,
+					reset,
+					sm_triggerPE3,
+					full_PE3,
+					done_PE3,
+					data_inject_PE3,
+					router3_injection_data,
+					router3_injection_enq,
+					router3_injection_status,
+					router3_ejection_data,
+					router3_ejection_deq,
+					router3_ejection_status);
 					
 					
 

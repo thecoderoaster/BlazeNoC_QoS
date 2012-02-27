@@ -426,23 +426,23 @@ begin
 					adr_en <= '1';
 					next_state <= north10;
 				when north9 =>
-					--Configure the switch
---					case rte_data_in(2 downto 0) is
---						when "000" =>
---							sw_nSel <= "111";			-- "00" North FIFO								
---						when "001" =>
---							sw_eSel <= "111";			-- "01" East FIFO
---						when "010" =>
---							sw_sSel <= "111";			-- "10" South FIFO
---						when "011" =>
---							sw_wSel <= "111";			-- "11" Ejection FIFO
---						when others =>												-- TO DO: Handle Ejection
---							null;
---					end case;
-					
-					sw_nSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= n_buffer;
+					
+					--Configure the switch
+					case rte_data_in(2 downto 0) is
+						when "000" =>
+							sw_nSel <= "111";			-- "00" North FIFO								
+						when "001" =>
+							sw_eSel <= "111";			-- "01" East FIFO
+						when "010" =>
+							sw_sSel <= "111";			-- "10" South FIFO
+						when "011" =>
+							sw_wSel <= "111";			-- "11" Ejection FIFO
+						when others =>												
+							null;							-- TO DO: Handle Ejection
+					end case;
+					
 					n_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= north12;
 				when north10 =>
@@ -525,23 +525,23 @@ begin
 					adr_en <= '1';
 					next_state <= east10;
 				when east9 =>
-					--Configure the switch
---					case rte_data_in(2 downto 0) is
---						when "000" =>
---							sw_nSel <= "111";			-- "00" North FIFO								
---						when "001" =>
---							sw_eSel <= "111";			-- "01" East FIFO
---						when "010" =>
---							sw_sSel <= "111";			-- "10" South FIFO
---						when "011" =>
---							sw_wSel <= "111";			-- "11" Ejection FIFO
---						when others =>												-- TO DO: Handle Ejection
---							null;
---					end case;
-					
-					sw_eSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= e_buffer;
+					
+					--Configure the switch
+					case rte_data_in(2 downto 0) is
+						when "000" =>
+							sw_nSel <= "111";			-- "00" North FIFO								
+						when "001" =>
+							sw_eSel <= "111";			-- "01" East FIFO
+						when "010" =>
+							sw_sSel <= "111";			-- "10" South FIFO
+						when "011" =>
+							sw_wSel <= "111";			-- "11" Ejection FIFO
+						when others =>												-- TO DO: Handle Ejection
+							null;
+					end case;
+					
 					e_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= east12;
 				when east10 =>
@@ -624,23 +624,23 @@ begin
 					adr_en <= '1';
 					next_state <= south10;
 				when south9 =>
-					--Configure the switch
---					case rte_data_in(2 downto 0) is
---						when "000" =>
---							sw_nSel <= "111";			-- "00" North FIFO								
---						when "001" =>
---							sw_eSel <= "111";			-- "01" East FIFO
---						when "010" =>
---							sw_sSel <= "111";			-- "10" South FIFO
---						when "011" =>
---							sw_wSel <= "111";			-- "11" Ejection FIFO
---						when others =>												-- TO DO: Handle Ejection
---							null;
---					end case;
-					
-					sw_sSel <= rte_data_in(2 downto 0);				--North Neighbor (use Control from Arbiter)
 					--Write to rna_ctrlPkt
 					rna_ctrlPkt <= s_buffer;
+					
+					--Configure the switch
+					case rte_data_in(2 downto 0) is
+						when "000" =>
+							sw_nSel <= "111";			-- "00" North FIFO								
+						when "001" =>
+							sw_eSel <= "111";			-- "01" East FIFO
+						when "010" =>
+							sw_sSel <= "111";			-- "10" South FIFO
+						when "011" =>
+							sw_wSel <= "111";			-- "11" Ejection FIFO
+						when others =>												-- TO DO: Handle Ejection
+							null;
+					end case;
+				
 					s_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 					next_state <= south12;
 				when south10 =>

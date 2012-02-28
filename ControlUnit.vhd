@@ -796,7 +796,7 @@ begin
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
 					next_state <= injection1;					
 				when injection5 =>
-					address <= injt_ctrlPkt(17 downto 14);
+					address <= injt_ctrlPkt(13 downto 10);
 					rte_data_out <= injt_ctrlPkt(21 downto 19);
 					rte_en <= '1';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO

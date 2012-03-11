@@ -44,8 +44,9 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
  
     COMPONENT BlazeNoC
     PORT(
-         clk : IN  std_logic;
-         reset : IN  std_logic;
+         clk_rte : IN  std_logic;
+         clk_pe : IN std_logic;
+			reset : IN  std_logic;
          sm_triggerPE0 : IN  std_logic;
          sm_triggerPE1 : IN  std_logic;
          sm_triggerPE2 : IN  std_logic;
@@ -67,7 +68,8 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
     
 
    --Inputs
-   signal clk : std_logic := '0';
+   signal clk_rte : std_logic := '0';
+	signal clk_pe : std_logic := '0';
    signal reset : std_logic := '0';
    signal sm_triggerPE0 : std_logic := '0';
    signal sm_triggerPE1 : std_logic := '0';
@@ -138,7 +140,8 @@ BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: BlazeNoC PORT MAP (
-          clk => clk,
+          clk_rte => clk_rte,
+			 clk_pe => clk_pe,
           reset => reset,
           sm_triggerPE0 => sm_triggerPE0,
           sm_triggerPE1 => sm_triggerPE1,
@@ -160,14 +163,23 @@ BEGIN
 		  
 	
    -- Clock process definitions
-   clk_process :process
+   clk_rte_process :process
    begin
-		clk <= '0';
+		clk_rte <= '0';
 		wait for clk_period/2;
-		clk <= '1';
+		clk_rte <= '1';
 		wait for clk_period/2;
    end process;
  
+ 
+	-- Clock process definitions
+   clk_pe_process :process
+   begin
+		clk_pe <= '0';
+		wait for clk_period/4;
+		clk_pe <= '1';
+		wait for clk_period/4;
+   end process;
  
 --******************--
 --**NOC SETUP**--
@@ -291,6 +303,25 @@ BEGIN
 			packet_type_RT0 <= "00";
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
+			wait for clk_period*2;
+			
+			-- Resets Internal Counters			
+			reset_RT0 <= '1', '0' after 1 ns;
+			
+			wait for clk_period*2;
+			
+			--Send a control packet
+			tid_RT0 <= "1100000110000011";
+			rsv_port_RT0 <= "111";
+			dst_address_RT0 <= "0011";
+			packet_type_RT0 <= "00";
+			trigger_0_cp <= '1', '0' after 1 ns;
+			
+			wait for clk_period*2;
+			
+			-- Resets Internal Counters			
+			reset_RT0 <= '1', '0' after 1 ns;
+			
 			wait for clk_period*20;
 			
 			--Send its data packet
@@ -401,20 +432,20 @@ BEGIN
 	
 		if(router_start = '1') then
 			
-			--Send a control packet
-			tid_RT1 <= "0000000100000011";
-			rsv_port_RT1 <= "010";
-			dst_address_RT1 <= "0011";
-			packet_type_RT1 <= "00";
-			trigger_1_cp <= '1', '0' after 1 ns;
-			
-			wait for clk_period*20;
-			
-			--Send its data packet
-			rsv_port_RT1 <= "010";
-			dst_address_RT1 <= "0011";
-			packet_type_RT1 <= "00";
-			trigger_1_dp <= '1', '0' after 1 ns;
+--			--Send a control packet
+--			tid_RT1 <= "0000000100000011";
+--			rsv_port_RT1 <= "010";
+--			dst_address_RT1 <= "0011";
+--			packet_type_RT1 <= "00";
+--			trigger_1_cp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period*20;
+--			
+--			--Send its data packet
+--			rsv_port_RT1 <= "010";
+--			dst_address_RT1 <= "0011";
+--			packet_type_RT1 <= "00";
+--			trigger_1_dp <= '1', '0' after 1 ns;
 			
 			--Done
 			router_start := '0';	
@@ -519,20 +550,20 @@ BEGIN
 	
 		if(router_start = '1') then
 			
-			--Send a control packet
-			tid_RT2 <= "0000000100000011";
-			rsv_port_RT2 <= "010";
-			dst_address_RT2 <= "0000";
-			packet_type_RT2 <= "00";
-			trigger_2_cp <= '1', '0' after 1 ns;
-			
-			wait for clk_period*20;
-			
-			--Send its data packet
-			rsv_port_RT2 <= "010";
-			dst_address_RT2 <= "0000";
-			packet_type_RT2 <= "00";
-			trigger_2_dp <= '1', '0' after 1 ns;
+--			--Send a control packet
+--			tid_RT2 <= "0000000100000011";
+--			rsv_port_RT2 <= "010";
+--			dst_address_RT2 <= "0000";
+--			packet_type_RT2 <= "00";
+--			trigger_2_cp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period*20;
+--			
+--			--Send its data packet
+--			rsv_port_RT2 <= "010";
+--			dst_address_RT2 <= "0000";
+--			packet_type_RT2 <= "00";
+--			trigger_2_dp <= '1', '0' after 1 ns;
 			
 			--Done
 			router_start := '0';	
@@ -637,20 +668,20 @@ BEGIN
 	
 		if(router_start = '1') then
 			
-			--Send a control packet
-			tid_RT3 <= "0000000100000011";
-			rsv_port_RT3 <= "010";
-			dst_address_RT3 <= "0010";
-			packet_type_RT3 <= "00";
-			trigger_3_cp <= '1', '0' after 1 ns;
-			
-			wait for clk_period*20;
-			
-			--Send its data packet
-			rsv_port_RT3 <= "010";
-			dst_address_RT3 <= "0010";
-			packet_type_RT3 <= "00";
-			trigger_3_dp <= '1', '0' after 1 ns;
+--			--Send a control packet
+--			tid_RT3 <= "0000000100000011";
+--			rsv_port_RT3 <= "010";
+--			dst_address_RT3 <= "0010";
+--			packet_type_RT3 <= "00";
+--			trigger_3_cp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period*20;
+--			
+--			--Send its data packet
+--			rsv_port_RT3 <= "010";
+--			dst_address_RT3 <= "0010";
+--			packet_type_RT3 <= "00";
+--			trigger_3_dp <= '1', '0' after 1 ns;
 			
 			--Done
 			router_start := '0';	

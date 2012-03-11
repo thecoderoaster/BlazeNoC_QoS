@@ -34,7 +34,8 @@ use work.router_library.all;
 --use UNISIM.VComponents.all;
 
 entity BlazeNoC is
-	port ( clk						: in std_logic; 	-- global clock
+	port ( clk_rte					: in std_logic; 	-- global clock for router
+			 clk_pe					: in std_logic;	-- PE clocks
 			 reset					: in std_logic;
 			 
 			 sm_triggerPE0			: in std_logic;
@@ -351,7 +352,7 @@ begin
 					router0_ejection_data,								--Ejection
 					router0_ejection_deq,
 					router0_ejection_status,
-					clk,
+					clk_rte,
 					reset);
 					
 		Router1 : BlazeRouter
@@ -398,7 +399,7 @@ begin
 					router1_ejection_data,									--Ejection
 					router1_ejection_deq,
 					router1_ejection_status,
-					clk,
+					clk_rte,
 					reset);
 
 		Router2 : BlazeRouter
@@ -445,7 +446,7 @@ begin
 					router2_ejection_data,									--Ejection
 					router2_ejection_deq,
 					router2_ejection_status,
-					clk,
+					clk_rte,
 					reset);
 
 		Router3 : BlazeRouter
@@ -492,11 +493,11 @@ begin
 					router3_ejection_data,								--Ejection
 					router3_ejection_deq,
 					router3_ejection_status,
-					clk,
+					clk_rte,
 					reset);
 
 		Processing_Element0: PE
-		port map(clk,
+		port map(clk_pe,
 					reset,
 					sm_triggerPE0,
 					full_PE0,
@@ -510,7 +511,7 @@ begin
 					router0_ejection_status);
 		
 		Processing_Element1: PE
-		port map(clk,
+		port map(clk_pe,
 					reset,
 					sm_triggerPE1,
 					full_PE1,
@@ -524,7 +525,7 @@ begin
 					router1_ejection_status);
 					
 		Processing_Element2: PE
-		port map(clk,
+		port map(clk_pe,
 					reset,
 					sm_triggerPE2,
 					full_PE2,
@@ -538,7 +539,7 @@ begin
 					router2_ejection_status);
 					
 		Processing_Element3: PE
-		port map(clk,
+		port map(clk_pe,
 					reset,
 					sm_triggerPE3,
 					full_PE3,

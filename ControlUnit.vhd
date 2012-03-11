@@ -137,7 +137,7 @@ architecture Behavioral of ControlUnit is
 							  injection1, injection2, injection3, injection4, injection5,
 							  injection6, injection7, injection8, injection9, injection10, injection11, injection12, injection13, injection14,
 							  timer_check1, timer_check2, timer_check3, timer_check4,
-							  departure1,
+							  departure1, departure2, departure3, departure4,
 							  dp_arrivedOnNorth1, dp_arrivedOnNorth2, dp_arrivedOnNorth3, dp_arrivedOnNorth4, dp_arrivedOnNorth5, dp_arrivedOnNorth6, dp_arrivedOnNorth7,
 							  dp_arrivedOnEast1, dp_arrivedOnEast2, dp_arrivedOnEast3, dp_arrivedOnEast4, dp_arrivedOnEast5, dp_arrivedOnEast6, dp_arrivedOnEast7,
 							  dp_arrivedOnSouth1, dp_arrivedOnSouth2, dp_arrivedOnSouth3, dp_arrivedOnSouth4, dp_arrivedOnSouth5, dp_arrivedOnSouth6, dp_arrivedOnSouth7,
@@ -217,6 +217,7 @@ begin
 		elsif rising_edge(clk) then
 			timeunit1 <= timeunit1 + "0000000000000001";
 			if(timeunit1 = "000000111110") then
+			--if(timeunit1 = "0000011000101010") then				-- 3052 periods = 30.518 us ~ 32.768 kHz (RTC)
 				globaltime <= globaltime + "0000000000000001";
 				timeunit1 <= "0000000000000000";
 			end if;
@@ -1054,7 +1055,6 @@ begin
 					next_state <= dp_arrivedOnNorth1;
 				when timer_check4 =>
 					if(time_expired = '1') then
-						start_timer <= '0';
 						next_state <= departure1;
 					else
 						next_state <= dp_arrivedOnNorth1;
@@ -1063,29 +1063,80 @@ begin
 				when departure1 =>
 					--Use the routing table info saved in next_pkt_departing_from_gate to control VCC
 					case next_pkt_in_vcc is
-						when "000" =>
-							n_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			-- "00" North FIFO 
-							n_vc_deq <= '1', '0' after 1 ns;
+						when "000" =>															-- "00" North FIFO
+							n_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			 
 							sw_nSel <= next_pkt_departing_from_gate;									
-						when "001" =>
-							e_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			-- "01" East FIFO
-							e_vc_deq <= '1', '0' after 1 ns;
+						when "001" =>															-- "01" East FIFO
+							e_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			
 							sw_eSel <= next_pkt_departing_from_gate;
-						when "010" =>
-							s_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			-- "10" South FIFO
-							s_vc_deq <= '1', '0' after 1 ns;
+						when "010" =>															-- "10" South FIFO
+							s_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			
 							sw_sSel <= next_pkt_departing_from_gate;
-						when "011" =>
-							w_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			-- "11" West FIFO
-							w_vc_deq <= '1', '0' after 1 ns;
-							sw_wSel <= next_pkt_departing_from_gate;
-						when others =>											-- TO DO: Handle Ejection
+						when "011" =>															-- "11" West FIFO
+							case next_pkt_in_vcell(2 downto 0) is					
+								when "010" =>
+									w_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "010" South Cell
+									--sw_sSel <= next_pkt_departing_from_gate;
+									sw_sSel <= next_pkt_in_vcc;							-- West Cell
+									s_invld_out <= '0';
+									internal_invld_set_s <= '0';
+									n_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when others =>
+									null;
+							end case;
+						when others =>															-- **TODO**: Handle Ejection
 							null;
 					end case;
-							
 					
-					--Check CTR going high to low
-					--wait until falling_edge(n_CTRflg);
+				when departure2 =>
+					if(wdt_expired = '1') then
+						start_wdt_timer <= '0';									--Failed to ack back. Deadlock? Try again later.
+						case next_pkt_in_vcell(2 downto 0) is
+							when "010" =>
+								s_invld_out <= '1';
+								internal_invld_set_s <= '1';
+								n_rst <= '1', '0' after 1 ns;					--Reset signals
+								next_state <= dp_arrivedOnNorth1;						
+							when others =>
+								next_state <= dp_arrivedOnNorth1;
+						end case;
+					else
+						next_state <= departure3;
+					end if;
+
+				when departure3 =>
+					case next_pkt_in_vcell(2 downto 0) is		
+						when "010" =>
+							if(n_ctrl_in_flg_set = '1') then				-- "00" North 
+								start_wdt_timer <= '0';						-- Stop the WDT timer		
+								next_state <= departure4;
+							else
+								next_state <= departure2;
+							end if;							
+						when others =>
+							next_state <= dp_arrivedOnNorth1;
+					end case;
+					
+					
+					
+				when departure4 =>
+					--We successfully transmitted the data packet to the next router!
+					
+					--Dequeue VCC
+					case next_pkt_in_vcc is
+						when "000" =>
+							n_vc_deq <= '1', '0' after 1 ns;								-- "00" North FIFO 							
+						when "001" =>	
+							e_vc_deq <= '1', '0' after 1 ns;								-- "01" East FIFO
+						when "010" =>
+							s_vc_deq <= '1', '0' after 1 ns;								-- "10" South FIFO
+						when "011" =>
+							w_vc_deq <= '1', '0' after 1 ns;								-- "11" West FIFO
+						when others =>
+							null;
+					end case;
 					
 					--Update Space in Reservation Table now that packet has departed
 					r_address := r_address + 1;
@@ -1097,6 +1148,10 @@ begin
 					else
 						table_full := '1';
 					end if;
+					
+					--Reset signals confirming it's okay to start another job
+					start_timer <= '0';
+					
 					next_state <= dp_arrivedOnNorth1;
 					
 	--*NORTH ARRIVALS*--

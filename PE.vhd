@@ -87,7 +87,7 @@ begin
 				elsif(ejection_status = EMPTY_FIFO) then
 					next_state1 <= start;
 				elsif(ejection_status = NORM_FIFO) then
-					next_state1 <= start;
+					next_state1 <= ctr_state;
 				elsif(ejection_status = ERR_FIFO) then
 					next_state1 <= start;
 				else

@@ -1064,29 +1064,138 @@ begin
 					--Use the routing table info saved in next_pkt_departing_from_gate to control VCC
 					case next_pkt_in_vcc is
 						when "000" =>															-- "00" North FIFO
-							n_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			 
-							sw_nSel <= next_pkt_departing_from_gate;									
-						when "001" =>															-- "01" East FIFO
-							e_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			
-							sw_eSel <= next_pkt_departing_from_gate;
-						when "010" =>															-- "10" South FIFO
-							s_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);			
-							sw_sSel <= next_pkt_departing_from_gate;
-						when "011" =>															-- "11" West FIFO
 							case next_pkt_in_vcell(2 downto 0) is					
+								when "001" =>
+									n_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "000" East Cell
+									sw_eSel <= next_pkt_in_vcc;							
+									e_invld_out <= '0';
+									internal_invld_set_e <= '0';
+									w_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
 								when "010" =>
-									w_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "010" South Cell
-									--sw_sSel <= next_pkt_departing_from_gate;
-									sw_sSel <= next_pkt_in_vcc;							-- West Cell
+									n_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "000" East Cell
+									sw_sSel <= next_pkt_in_vcc;							
 									s_invld_out <= '0';
 									internal_invld_set_s <= '0';
 									n_rst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
+								when "011" =>
+									n_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "010" South Cell
+									sw_wSel <= next_pkt_in_vcc;							
+									w_invld_out <= '0';
+									internal_invld_set_w <= '0';
+									e_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "111" =>													-- "111" Ejection Cell
+									n_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);
+									sw_ejectSel <= next_pkt_in_vcc;
+									next_state <= departure3;
+								when others =>
+									null;
+							end case;									
+						when "001" =>	
+							case next_pkt_in_vcell(2 downto 0) is	-- "01" East FIFO
+								when "000" =>
+									e_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "000" North Cell
+									sw_nSel <= next_pkt_in_vcc;							
+									n_invld_out <= '0';
+									internal_invld_set_n <= '0';
+									s_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "010" =>
+									e_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "000" East Cell
+									sw_sSel <= next_pkt_in_vcc;							
+									s_invld_out <= '0';
+									internal_invld_set_s <= '0';
+									n_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "011" =>
+									e_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "010" South Cell
+									sw_wSel <= next_pkt_in_vcc;							
+									w_invld_out <= '0';
+									internal_invld_set_w <= '0';
+									e_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "111" =>													-- "111" Ejection Cell
+									e_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);
+									sw_ejectSel <= next_pkt_in_vcc;
+									next_state <= departure3;
+								when others =>
+									null;
+							end case;									
+						when "010" =>
+							case next_pkt_in_vcell(2 downto 0) is							-- "10" South FIFO
+								when "000" =>
+									s_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "000" East Cell
+									sw_nSel <= next_pkt_in_vcc;							
+									n_invld_out <= '0';
+									internal_invld_set_n <= '0';
+									s_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "001" =>
+									s_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "000" East Cell
+									sw_eSel <= next_pkt_in_vcc;							
+									e_invld_out <= '0';
+									internal_invld_set_e <= '0';
+									w_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "011" =>
+									s_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "010" South Cell
+									sw_wSel <= next_pkt_in_vcc;							
+									w_invld_out <= '0';
+									internal_invld_set_w <= '0';
+									e_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "111" =>													-- "111" Ejection Cell
+									s_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);
+									sw_ejectSel <= next_pkt_in_vcc;
+									next_state <= departure3;
+								when others =>
+									null;
+							end case;									
+						when "011" =>															-- "11" West FIFO
+							case next_pkt_in_vcell(2 downto 0) is					
+								when "000" =>
+									w_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "000" North Cell
+									sw_nSel <= next_pkt_in_vcc;							
+									n_invld_out <= '0';
+									internal_invld_set_n <= '0';
+									s_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "001" =>
+									w_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "000" East Cell
+									sw_eSel <= next_pkt_in_vcc;							
+									e_invld_out <= '0';
+									internal_invld_set_e <= '0';
+									w_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "010" =>
+									w_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);	-- "010" South Cell
+									sw_sSel <= next_pkt_in_vcc;							
+									s_invld_out <= '0';
+									internal_invld_set_s <= '0';
+									n_rst <= '1', '0' after 1 ns;							--Reset signals
+									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
+									next_state <= departure3;
+								when "111" =>													-- "111" Ejection Cell
+									w_vc_rnaSelO <= next_pkt_in_vcell(1 downto 0);
+									sw_ejectSel <= next_pkt_in_vcc;
+									next_state <= departure3;
 								when others =>
 									null;
 							end case;
-						when others =>															-- **TODO**: Handle Ejection
+						when others =>
 							null;
 					end case;
 					
@@ -1094,10 +1203,25 @@ begin
 					if(wdt_expired = '1') then
 						start_wdt_timer <= '0';									--Failed to ack back. Deadlock? Try again later.
 						case next_pkt_in_vcell(2 downto 0) is
+							when "000" =>
+								n_invld_out <= '1';
+								internal_invld_set_n <= '1';
+								s_rst <= '1', '0' after 1 ns;					--Reset signals
+								next_state <= dp_arrivedOnNorth1;
+							when "001" =>
+								e_invld_out <= '1';
+								internal_invld_set_e <= '1';
+								w_rst <= '1', '0' after 1 ns;					--Reset signals
+								next_state <= dp_arrivedOnNorth1;
 							when "010" =>
 								s_invld_out <= '1';
 								internal_invld_set_s <= '1';
 								n_rst <= '1', '0' after 1 ns;					--Reset signals
+								next_state <= dp_arrivedOnNorth1;
+							when "011" =>
+								w_invld_out <= '1';
+								internal_invld_set_w <= '1';
+								e_rst <= '1', '0' after 1 ns;					--Reset signals
 								next_state <= dp_arrivedOnNorth1;						
 							when others =>
 								next_state <= dp_arrivedOnNorth1;
@@ -1108,17 +1232,39 @@ begin
 
 				when departure3 =>
 					case next_pkt_in_vcell(2 downto 0) is		
+						when "000" =>
+							if(s_ctrl_in_flg_set = '1') then				-- "00" North 
+								start_wdt_timer <= '0';						-- Stop the WDT timer		
+								next_state <= departure4;
+							else
+								next_state <= departure2;
+							end if;
+						when "001" =>
+							if(w_ctrl_in_flg_set = '1') then				-- "00" North 
+								start_wdt_timer <= '0';						-- Stop the WDT timer		
+								next_state <= departure4;
+							else
+								next_state <= departure2;
+							end if;
 						when "010" =>
 							if(n_ctrl_in_flg_set = '1') then				-- "00" North 
 								start_wdt_timer <= '0';						-- Stop the WDT timer		
 								next_state <= departure4;
 							else
 								next_state <= departure2;
-							end if;							
+							end if;
+						when "011" =>
+							if(e_ctrl_in_flg_set = '1') then				-- "00" North 
+								start_wdt_timer <= '0';						-- Stop the WDT timer		
+								next_state <= departure4;
+							else
+								next_state <= departure2;
+							end if;
+						when "111" =>
+							next_state <= departure4;						-- NOP for ejection data. 1 clock cycle
 						when others =>
 							next_state <= dp_arrivedOnNorth1;
 					end case;
-					
 					
 					
 				when departure4 =>

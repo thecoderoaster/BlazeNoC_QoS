@@ -1,4 +1,4 @@
---------------------------------------------------------------------------------
+		--------------------------------------------------------------------------------
 -- Company: 
 -- Engineer:
 --
@@ -135,6 +135,7 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	
    -- Clock period definitions
    constant clk_period : time := 10 ns;
+	constant clk_period_pe : time := 20 ns;
  
 BEGIN
  
@@ -176,9 +177,9 @@ BEGIN
    clk_pe_process :process
    begin
 		clk_pe <= '0';
-		wait for clk_period/4;
+		wait for clk_period_pe/2;
 		clk_pe <= '1';
-		wait for clk_period/4;
+		wait for clk_period_pe/2;
    end process;
  
 --******************--
@@ -191,12 +192,12 @@ BEGIN
       reset <= '0';
 		
 		--Initiate a Reset		
-		wait for clk_period*2;
-		reset <= '1', '0' after clk_period;
+		wait for clk_period_pe*2;
+		reset <= '1', '0' after clk_period_pe;
 	
-      wait for clk_period*10;
+      wait for clk_period_pe*10;
 		
-		router_setup <= '1', '0' after clk_period*4;
+		router_setup <= '1', '0' after clk_period_pe*4;
 		
 		wait;
 		
@@ -217,7 +218,7 @@ BEGIN
 			-- Resets Internal Counters			
 			reset_RT0 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--******************************--
 			--**Setup Router Watchdog Seed**--
@@ -229,12 +230,12 @@ BEGIN
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
 			wait until pe0_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters
 			reset_RT0 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*4;
+			wait for clk_period_pe*4;
 			
 			--***********************--
 			--**Setup Routing Table**--
@@ -246,7 +247,7 @@ BEGIN
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
 			wait until pe0_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[1]**--
 			tid_RT0 <= "0000000000000011";				--Router 0 [Direction for: RT1 (Go East)]
@@ -254,7 +255,7 @@ BEGIN
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
 			wait until pe0_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[2]**--
 			tid_RT0 <= "0000000000000101";				--Router 0 [Direction for: RT2 (Go South)]
@@ -262,7 +263,7 @@ BEGIN
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
 			wait until pe0_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[3]**--
 			tid_RT0 <= "0000000000000011";				--Router 0 [Direction for: RT3 (Go East)]
@@ -270,11 +271,11 @@ BEGIN
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
 			wait until pe0_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			reset_RT0 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*4;
+			wait for clk_period_pe*4;
 
 			--************************--
 			--**Setup Router Address**--
@@ -284,12 +285,12 @@ BEGIN
 			trigger_0_cp <= '1', '0' after 1 ns;
 	
 			wait until pe0_Ready = '1';						
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT0 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			router_start := '1';
 		end if;
@@ -303,12 +304,12 @@ BEGIN
 			packet_type_RT0 <= "00";
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT0 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--Send a control packet
 			tid_RT0 <= "1100000110000011";
@@ -317,12 +318,12 @@ BEGIN
 			packet_type_RT0 <= "00";
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT0 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*20;
+			wait for clk_period_pe*20;
 			
 			--Send its data packet
 			rsv_port_RT0 <= "010";
@@ -333,7 +334,7 @@ BEGIN
 			--Done
 			router_start := '0';	
 		else
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 		end if;
 		
@@ -353,7 +354,7 @@ BEGIN
 			-- Resets Internal Counters			
 			reset_RT1 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--******************************--
 			--**Setup Router Watchdog Seed**--
@@ -365,12 +366,12 @@ BEGIN
 			trigger_1_cp <= '1', '0' after 1 ns;
 			
 			wait until pe1_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters
 			reset_RT1<= '1', '0' after 1 ns;
 			
-			wait for clk_period*4;
+			wait for clk_period_pe*4;
 			
 			--***********************--
 			--**Setup Routing Table**--
@@ -382,7 +383,7 @@ BEGIN
 			trigger_1_cp <= '1', '0' after 1 ns;
 			
 			wait until pe1_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[1]**--
 			tid_RT1 <= "0000000000001111";				--Router 1 [Direction for: RT1 (Go Ejection)]
@@ -390,7 +391,7 @@ BEGIN
 			trigger_1_cp <= '1', '0' after 1 ns;
 			
 			wait until pe1_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[2]**--		
 			tid_RT1 <= "0000000000000111";				--Router 1 [Direction for: RT2 (Go West)]
@@ -398,7 +399,7 @@ BEGIN
 			trigger_1_cp <= '1', '0' after 1 ns;
 			
 			wait until pe1_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[3]**--	
 			tid_RT1 <= "0000000000000101";				--Router 1 [Direction for: RT3 (Go South)]
@@ -406,11 +407,11 @@ BEGIN
 			trigger_1_cp <= '1', '0' after 1 ns;
 			
 			wait until pe1_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			reset_RT1 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*4;
+			wait for clk_period_pe*4;
 
 			--************************--
 			--**Setup Router Address**--
@@ -420,38 +421,35 @@ BEGIN
 			trigger_1_cp <= '1', '0' after 1 ns;
 		
 			wait until pe1_Ready = '1';						
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT1 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			router_start := '1';
 		end if;
 	
 		if(router_start = '1') then
 			
---			--Send a control packet
---			tid_RT1 <= "0000000100000011";
---			rsv_port_RT1 <= "010";
---			dst_address_RT1 <= "0011";
---			packet_type_RT1 <= "00";
---			trigger_1_cp <= '1', '0' after 1 ns;
---			
---			wait for clk_period*20;
---			
---			--Send its data packet
---			rsv_port_RT1 <= "010";
---			dst_address_RT1 <= "0011";
---			packet_type_RT1 <= "00";
---			trigger_1_dp <= '1', '0' after 1 ns;
+			reset_RT1 <= '1', '0' after 1 ns;
 			
+			wait for clk_period_pe*2;
+			
+			loop
+				--Send GARBAGE data to Router 3
+				rsv_port_RT1 <= "010";
+				dst_address_RT1 <= "0011";
+				packet_type_RT1 <= "00";
+				trigger_1_dp <= '1', '0' after 1 ns;
+				wait until pe1_Ready = '1';
+			end loop;
 			--Done
 			router_start := '0';	
 			
 		else
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 		end if;
 		
@@ -471,7 +469,7 @@ BEGIN
 			-- Resets Internal Counters			
 			reset_RT2 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--******************************--
 			--**Setup Router Watchdog Seed**--
@@ -483,12 +481,12 @@ BEGIN
 			trigger_2_cp <= '1', '0' after 1 ns;
 			
 			wait until pe2_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters
 			reset_RT2 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*4;
+			wait for clk_period_pe*4;
 			
 			--***********************--
 			--**Setup Routing Table**--
@@ -500,7 +498,7 @@ BEGIN
 			trigger_2_cp <= '1', '0' after 1 ns;
 			
 			wait until pe2_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[1]**--
 			tid_RT2 <= "0000000000000011";				--Router 2 [Direction for: RT1 (Go East)]
@@ -508,7 +506,7 @@ BEGIN
 			trigger_2_cp <= '1', '0' after 1 ns;
 			
 			wait until pe2_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[2]**--
 			tid_RT2 <= "0000000000001111";				--Router 2 [Direction for: RT2 (Go Ejection)]
@@ -516,7 +514,7 @@ BEGIN
 			trigger_2_cp <= '1', '0' after 1 ns;
 			
 			wait until pe2_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[3]**--
 			tid_RT2 <= "0000000000000011";				--Router 2 [Direction for: RT3 (Go East)]
@@ -524,11 +522,11 @@ BEGIN
 			trigger_2_cp <= '1', '0' after 1 ns;
 	
 			wait until pe2_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			reset_RT2 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*4;
+			wait for clk_period_pe*4;
 
 			--************************--
 			--**Setup Router Address**--
@@ -538,38 +536,31 @@ BEGIN
 			trigger_2_cp <= '1', '0' after 1 ns;
 			
 			wait until pe2_Ready = '1';						
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT2 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			router_start := '1';
 		end if;
 	
 		if(router_start = '1') then
-			
---			--Send a control packet
---			tid_RT2 <= "0000000100000011";
---			rsv_port_RT2 <= "010";
---			dst_address_RT2 <= "0000";
---			packet_type_RT2 <= "00";
---			trigger_2_cp <= '1', '0' after 1 ns;
---			
---			wait for clk_period*20;
---			
---			--Send its data packet
---			rsv_port_RT2 <= "010";
---			dst_address_RT2 <= "0000";
---			packet_type_RT2 <= "00";
---			trigger_2_dp <= '1', '0' after 1 ns;
-			
+						
+			loop
+				--Send GARBAGE data to Router 3
+				rsv_port_RT2 <= "010";
+				dst_address_RT2 <= "0000";
+				packet_type_RT2 <= "00";
+				trigger_2_dp <= '1', '0' after 1 ns;
+				wait until pe2_Ready = '1';
+			end loop;
 			--Done
 			router_start := '0';	
 			
 		else
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 		end if;
 		
@@ -589,7 +580,7 @@ BEGIN
 			-- Resets Internal Counters			
 			reset_RT3 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--******************************--
 			--**Setup Router Watchdog Seed**--
@@ -601,12 +592,12 @@ BEGIN
 			trigger_3_cp <= '1', '0' after 1 ns;
 			
 			wait until pe3_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters
 			reset_RT3 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*4;
+			wait for clk_period_pe*4;
 			
 			--***********************--
 			--**Setup Routing Table**--
@@ -618,7 +609,7 @@ BEGIN
 			trigger_3_cp <= '1', '0' after 1 ns;
 			
 			wait until pe3_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[1]**--
 			tid_RT3 <= "0000000000000001";				--Router 3 [Direction for: RT1 (Go North)]
@@ -626,7 +617,7 @@ BEGIN
 			trigger_3_cp <= '1', '0' after 1 ns;
 			
 			wait until pe3_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[2]**--
 			tid_RT3 <= "0000000000000111";				--Router 3 [Direction for: RT2 (Go West)]
@@ -634,7 +625,7 @@ BEGIN
 			trigger_3_cp <= '1', '0' after 1 ns;
 			
 			wait until pe3_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			--**Routing Table[3]**--	
 			tid_RT3 <= "0000000000001111";				--Router 3 [Direction for: RT3 (Go West)]
@@ -642,11 +633,11 @@ BEGIN
 			trigger_3_cp <= '1', '0' after 1 ns;
 			
 			wait until pe3_Ready = '1';
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			reset_RT3 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*4;
+			wait for clk_period_pe*4;
 
 			--************************--
 			--**Setup Router Address**--
@@ -656,12 +647,12 @@ BEGIN
 			trigger_3_cp <= '1', '0' after 1 ns;
 			
 			wait until pe3_Ready = '1';						
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT3 <= '1', '0' after 1 ns;
 			
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 			router_start := '1';
 		end if;
@@ -675,7 +666,7 @@ BEGIN
 --			packet_type_RT3 <= "00";
 --			trigger_3_cp <= '1', '0' after 1 ns;
 --			
---			wait for clk_period*20;
+--			wait for clk_period_pe*20;
 --			
 --			--Send its data packet
 --			rsv_port_RT3 <= "010";
@@ -687,7 +678,7 @@ BEGIN
 			router_start := '0';	
 			
 		else
-			wait for clk_period*2;
+			wait for clk_period_pe*2;
 			
 		end if;
 		
@@ -839,7 +830,7 @@ end process;
 		
 		end if;
 		
-		if (trigger_2_dp = '1' and done_PE2 = '1' and full_PE2 = '0') then
+		if (trigger_2_dp = '1' and done_PE2 = '0' and full_PE2 = '0') then
 			--**************************************************************************************************************************************************--
 			--DATA PACKET
 			--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0xUUU (SOUTH RESERVED) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00

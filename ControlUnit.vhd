@@ -167,29 +167,37 @@ architecture Behavioral of ControlUnit is
 	signal w_DpFlg				: std_logic;
 	
 	--Monitoring
-	signal n_rst				: std_logic;
+	signal n_dRst				: std_logic;
+	signal n_cRst				: std_logic;
 	signal n_data_flg_set	: std_logic;
 	signal n_ctrl_flg_set	: std_logic;
 	signal n_ctrl_in_flg_set : std_logic;
-	signal n_buffer			: std_logic_vector(cp_size-1 downto 0);
+	signal n_dbuffer			: std_logic_vector(cp_size-1 downto 0);
+	signal n_cbuffer			: std_logic_vector(cp_size-1 downto 0);
 	
-	signal e_rst				: std_logic;
+	signal e_dRst				: std_logic;
+	signal e_cRst				: std_logic;
 	signal e_data_flg_set	: std_logic;
 	signal e_ctrl_flg_set	: std_logic;
 	signal e_ctrl_in_flg_set : std_logic;
-	signal e_buffer			: std_logic_vector(cp_size-1 downto 0);
+	signal e_dbuffer			: std_logic_vector(cp_size-1 downto 0);
+	signal e_cbuffer			: std_logic_vector(cp_size-1 downto 0);
 	
-	signal s_rst				: std_logic;
+	signal s_dRst				: std_logic;
+	signal s_cRst				: std_logic;
 	signal s_data_flg_set	: std_logic;
 	signal s_ctrl_flg_set	: std_logic;
 	signal s_ctrl_in_flg_set : std_logic;
-	signal s_buffer			: std_logic_vector(cp_size-1 downto 0);
+	signal s_dbuffer			: std_logic_vector(cp_size-1 downto 0);
+	signal s_cbuffer			: std_logic_vector(cp_size-1 downto 0);
 
-	signal w_rst				: std_logic;
+	signal w_dRst				: std_logic;
+	signal w_cRst				: std_logic;
 	signal w_data_flg_set	: std_logic;
 	signal w_ctrl_flg_set	: std_logic;
 	signal w_ctrl_in_flg_set : std_logic;
-	signal w_buffer			: std_logic_vector(cp_size-1 downto 0);
+	signal w_dbuffer			: std_logic_vector(cp_size-1 downto 0);
+	signal w_cbuffer			: std_logic_vector(cp_size-1 downto 0);
 	
 	--WDT Related
 	signal wdt_counter1 		: std_logic_vector(15 downto 0);
@@ -297,6 +305,7 @@ begin
 		variable r_address			: std_logic_vector(address_size-1 downto 0);
 		variable reserved_cnt		: std_logic_vector(address_size-1 downto 0);
 		variable table_full 			: std_logic;
+		variable inj_blk_count		: std_logic_vector(3 downto 0);
 	
 		begin
 			case state is
@@ -350,20 +359,32 @@ begin
 					sw_sSel <= "000";
 					sw_wSel <= "000";
 					
-					n_rst <= '1', '0' after 1 ns;
-					e_rst <= '1', '0' after 1 ns;
-					s_rst <= '1', '0' after 1 ns;
-					w_rst <= '1', '0' after 1 ns;
+					n_dRst <= '1', '0' after 1 ns;
+					e_dRst <= '1', '0' after 1 ns;
+					s_dRst <= '1', '0' after 1 ns;
+					w_dRst <= '1', '0' after 1 ns;
 					
-					n_invld_out <= '0';
-					e_invld_out <= '0';
-					s_invld_out <= '0';
-					w_invld_out <= '0';
+					n_cRst <= '1', '0' after 1 ns;
+					e_cRst <= '1', '0' after 1 ns;
+					s_cRst <= '1', '0' after 1 ns;
+					w_cRst <= '1', '0' after 1 ns;
+					
+					n_d_invld_out <= '0';
+					e_d_invld_out <= '0';
+					s_d_invld_out <= '0';
+					w_d_invld_out <= '0';
+					
+					n_c_invld_out <= '0';
+					e_c_invld_out <= '0';
+					s_c_invld_out <= '0';
+					w_c_invld_out <= '0';
 					
 					internal_invld_set_n <= '0';
 					internal_invld_set_e <= '0';
 					internal_invld_set_s <= '0';
 					internal_invld_set_w <= '0';
+					
+					inj_blk_count := "0000";
 					
 					next_state <= north1;
 	--*NORTH*--
@@ -375,7 +396,7 @@ begin
 						next_state <= east1;
 					end if;
 				when north2 =>
-					if(n_buffer(6 downto 3) = router_address) then
+					if(n_cbuffer(6 downto 3) = router_address) then
 						next_state <= north3;		--It's for me!
 					else
 						next_state <= north7;		--Forward the control packet.
@@ -383,7 +404,7 @@ begin
 				when north3 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= n_buffer(17 downto 10);
+					adr_data_out <= n_cbuffer(17 downto 10);
 					next_state <= north4;
 				when north4 =>	
 					if(adr_nf = '1') then
@@ -408,18 +429,18 @@ begin
 					end if;
 				when north7 =>
 					--Forward the Packet by checking routing table first
-					address <= n_buffer(6 downto 3);
+					address <= n_cbuffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= north9;
 				when north8 =>	
 					--Reserve and schedule the incoming control packet
 					n_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
-					rsv_data_out <= "000" & n_buffer(9 downto 7);
+					rsv_data_out <= "000" & n_cbuffer(9 downto 7);
 					--Write bits to sch_packet
-					sch_data_out <= (globaltime + n_buffer(cp_size-1 downto 18));
+					sch_data_out <= (globaltime + n_cbuffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					adr_data_out <= n_buffer(17 downto 10);
+					adr_data_out <= n_cbuffer(17 downto 10);
 					--Send to reservation table
 					address <= w_address;
 					rsv_en <= '1';
@@ -428,7 +449,7 @@ begin
 					next_state <= north10;
 				when north9 =>
 					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= n_buffer;
+					rna_ctrlPkt <= n_cbuffer;
 					
 					--Configure the switch
 					case rte_data_in(2 downto 0) is
@@ -463,7 +484,7 @@ begin
 					adr_en <= '0';
 					next_state <= north12;
 				when north12 =>
-					n_rst <= '1', '0' after 1 ns;						--Reset flags
+					n_cRst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= east1;
 	--*EAST*--				
 				when east1 =>
@@ -474,7 +495,7 @@ begin
 						next_state <= south1;
 					end if;
 				when east2 =>
-					if(e_buffer(6 downto 3) = router_address) then
+					if(e_cbuffer(6 downto 3) = router_address) then
 						next_state <= east3;		--It's for me!
 					else
 						next_state <= east7;		--Forward the control packet.
@@ -482,7 +503,7 @@ begin
 				when east3 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= e_buffer(17 downto 10);
+					adr_data_out <= e_cbuffer(17 downto 10);
 					next_state <= east4;
 				when east4 =>	
 					if(adr_nf = '1') then
@@ -507,18 +528,18 @@ begin
 					end if;
 				when east7 =>
 					--Forward the Packet by checking routing table first
-					address <= e_buffer(6 downto 3);
+					address <= e_cbuffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= east9;
 				when east8 =>	
 					--Reserve and schedule the incoming control packet
 					e_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
-					rsv_data_out <= "001" & e_buffer(9 downto 7);
+					rsv_data_out <= "001" & e_cbuffer(9 downto 7);
 					--Write bits to sch_packet
-					sch_data_out <= (globaltime + e_buffer(cp_size-1 downto 18));
+					sch_data_out <= (globaltime + e_cbuffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					adr_data_out <= e_buffer(17 downto 10);
+					adr_data_out <= e_cbuffer(17 downto 10);
 					--Send to reservation table
 					address <= w_address;
 					rsv_en <= '1';
@@ -527,7 +548,7 @@ begin
 					next_state <= east10;
 				when east9 =>
 					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= e_buffer;
+					rna_ctrlPkt <= e_cbuffer;
 					
 					--Configure the switch
 					case rte_data_in(2 downto 0) is
@@ -562,7 +583,7 @@ begin
 					adr_en <= '0';
 					next_state <= east12;
 				when east12 =>
-					e_rst <= '1', '0' after 1 ns;						--Reset flags
+					e_cRst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= south1;	
 	--*SOUTH*--
 				when south1 =>
@@ -573,7 +594,7 @@ begin
 						next_state <= west1;
 					end if;
 				when south2 =>
-					if(s_buffer(6 downto 3) = router_address) then
+					if(s_cbuffer(6 downto 3) = router_address) then
 						next_state <= south3;		--It's for me!
 					else
 						next_state <= south7;		--Forward the control packet.
@@ -581,7 +602,7 @@ begin
 				when south3 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= s_buffer(17 downto 10);
+					adr_data_out <= s_cbuffer(17 downto 10);
 					next_state <= south4;
 				when south4 =>	
 					if(adr_nf = '1') then
@@ -606,18 +627,18 @@ begin
 					end if;
 				when south7 =>
 					--Forward the Packet by checking routing table first
-					address <= s_buffer(6 downto 3);
+					address <= s_cbuffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= south9;
 				when south8 =>	
 					--Reserve and schedule the incoming control packet
 					s_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
-					rsv_data_out <= "010" & s_buffer(9 downto 7);
+					rsv_data_out <= "010" & s_cbuffer(9 downto 7);
 					--Write bits to sch_packet
-					sch_data_out <= (globaltime + s_buffer(cp_size-1 downto 18));
+					sch_data_out <= (globaltime + s_cbuffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					adr_data_out <= s_buffer(17 downto 10);
+					adr_data_out <= s_cbuffer(17 downto 10);
 					--Send to reservation table
 					address <= w_address;
 					rsv_en <= '1';
@@ -626,7 +647,7 @@ begin
 					next_state <= south10;
 				when south9 =>
 					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= s_buffer;
+					rna_ctrlPkt <= s_cbuffer;
 					
 					--Configure the switch
 					case rte_data_in(2 downto 0) is
@@ -661,7 +682,7 @@ begin
 					adr_en <= '0';
 					next_state <= south12;
 				when south12 =>
-					s_rst <= '1', '0' after 1 ns;						--Reset flags
+					s_cRst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= west1;
 	--*WEST*--
 				when west1 =>
@@ -672,7 +693,7 @@ begin
 						next_state <= injection1;
 					end if;
 				when west2 =>
-					if(w_buffer(6 downto 3) = router_address) then
+					if(w_cbuffer(6 downto 3) = router_address) then
 						next_state <= west3;		--It's for me!
 					else
 						next_state <= west7;		--Forward the control packet.
@@ -680,7 +701,7 @@ begin
 				when west3 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= w_buffer(17 downto 10);
+					adr_data_out <= w_cbuffer(17 downto 10);
 					next_state <= west4;
 				when west4 =>	
 					if(adr_nf = '1') then
@@ -705,18 +726,18 @@ begin
 					end if;
 				when west7 =>
 					--Forward the Packet by checking routing table first
-					address <= w_buffer(6 downto 3);
+					address <= w_cbuffer(6 downto 3);
 					rte_en <= '0';
 					next_state <= west9;
 				when west8 =>	
 					--Reserve and schedule the incoming control packet
 					w_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 					--Write bits to rsv_data_out
-					rsv_data_out <= "011" & w_buffer(9 downto 7);
+					rsv_data_out <= "011" & w_cbuffer(9 downto 7);
 					--Write bits to sch_packet
-					sch_data_out <= (globaltime + w_buffer(cp_size-1 downto 18));
+					sch_data_out <= (globaltime + w_cbuffer(cp_size-1 downto 18));
 					--Store GID/PID in location w_address
-					adr_data_out <= w_buffer(17 downto 10);
+					adr_data_out <= w_cbuffer(17 downto 10);
 					--Send to reservation table
 					address <= w_address;
 					rsv_en <= '1';
@@ -725,7 +746,7 @@ begin
 					next_state <= west10;
 				when west9 =>
 					--Write to rna_ctrlPkt
-					rna_ctrlPkt <= w_buffer;
+					rna_ctrlPkt <= w_cbuffer;
 					
 					--Configure the switch
 					case rte_data_in(2 downto 0) is
@@ -761,7 +782,7 @@ begin
 					adr_en <= '0';
 					next_state <= west12;
 				when west12 =>
-					w_rst <= '1', '0' after 1 ns;						--Reset flags
+					w_cRst <= '1', '0' after 1 ns;						--Reset flags
 					next_state <= injection1;
 					
 	--*INJECTION*--
@@ -868,19 +889,19 @@ begin
 						case rte_data_in(2 downto 0) is
 							when "000" =>
 									--n_invld_out <= '1';
-									s_rst <= '1', '0' after 1 ns;				--Reset signals
+									s_cRst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "001" =>
 									--e_invld_out <= '1';
-									w_rst <= '1', '0' after 1 ns;				--Reset signals
+									w_cRst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;
 							when "010" =>
 									--s_invld_out <= '1';
-									n_rst <= '1', '0' after 1 ns;				--Reset signals
+									n_cRst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "011" =>
 									--w_invld_out <= '1';
-									e_rst <= '1', '0' after 1 ns;				--Reset signals
+									e_cRst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;			
 							when others =>
 								next_state <= timer_check1;
@@ -937,22 +958,22 @@ begin
 							when "000" =>
 									n_invld_out <= '1';
 									internal_invld_set_n <= '1';
-									s_rst <= '1', '0' after 1 ns;				--Reset signals
+									s_dRst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "001" =>
 									e_invld_out <= '1';
 									internal_invld_set_e <= '1';
-									w_rst <= '1', '0' after 1 ns;				--Reset signals
+									w_dRst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;
 							when "010" =>
 									s_invld_out <= '1';
 									internal_invld_set_s <= '1';
-									n_rst <= '1', '0' after 1 ns;				--Reset signals
+									n_dRst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;					
 							when "011" =>
 									w_invld_out <= '1';
 									internal_invld_set_w <= '1';
-									e_rst <= '1', '0' after 1 ns;				--Reset signals
+									e_dRst <= '1', '0' after 1 ns;				--Reset signals
 									next_state <= timer_check1;			
 							when others =>
 								next_state <= timer_check1;
@@ -1004,26 +1025,52 @@ begin
 				
 				when injection13 =>
 					case rte_data_in(2 downto 0) is
-						when "000" =>							
-								s_rst <= '1', '0' after 1 ns;				--Reset signals
-								next_state <= injection1;						
+						when "000" =>
+								if(injt_ctrlPkt(0) = '1') then				--Reset signals	
+									s_cRst <= '1', '0' after 1 ns;
+								else
+									s_dRst <= '1', '0' after 1 ns;
+								end if;
 						when "001" =>
-								w_rst <= '1', '0' after 1 ns;				--Reset signals
-								next_state <= injection1;
+								if(injt_ctrlPkt(0) = '1') then				--Reset signals
+									w_cRst <= '1', '0' after 1 ns;
+								else
+									w_dRst <= '1', '0' after 1 ns;
+								end if;
 						when "010" =>
-								n_rst <= '1', '0' after 1 ns;				--Reset signals
-								next_state <= injection1;					
+								if(injt_ctrlPkt(0) = '1') then				--Reset signals
+									n_cRst <= '1', '0' after 1 ns;
+								else
+									n_dRst <= '1', '0' after 1 ns;
+								end if;
 						when "011" =>
-								e_rst <= '1', '0' after 1 ns;				--Reset signals
-								next_state <= injection1;			
+								if(injt_ctrlPkt(0) = '1') then				--Reset signals
+									e_cRst <= '1', '0' after 1 ns;
+								else
+									e_dRst <= '1', '0' after 1 ns;
+								end if;
 						when others =>
-							next_state <= injection1;
+							null;
 					end case;
+				
+					inj_blk_count := inj_blk_count + 1;
+					if(inj_blk_count = "1010") then				-- Maximum blocks sent = 10 --
+						inj_blk_count := "0000";					-- Reset --
+						next_state <= timer_check1;
+					else
+						next_state <= injection1;					
+					end if;
 				
 				when injection14 =>
 					wdt_expires_in <= injt_ctrlPkt(cp_size-1 downto 18);
-					sw_rnaCtDeq <= '1', '0' after 1 ns;		-- dequeue from FIFO
-					next_state <= injection1;					
+					sw_rnaCtDeq <= '1', '0' after 1 ns;			-- dequeue from FIFO
+					inj_blk_count := inj_blk_count + 1;
+					if(inj_blk_count = "1010") then				-- Maximum blocks sent = 10 --
+						inj_blk_count := "0000";					-- Reset --
+						next_state <= timer_check1;
+					else
+						next_state <= injection1;					
+					end if;
 					
 	--*TIMER_CHECK*--
 				when timer_check1 =>
@@ -1070,7 +1117,7 @@ begin
 									sw_eSel <= next_pkt_in_vcc;							
 									e_invld_out <= '0';
 									internal_invld_set_e <= '0';
-									w_rst <= '1', '0' after 1 ns;							--Reset signals
+									w_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "010" =>
@@ -1078,7 +1125,7 @@ begin
 									sw_sSel <= next_pkt_in_vcc;							
 									s_invld_out <= '0';
 									internal_invld_set_s <= '0';
-									n_rst <= '1', '0' after 1 ns;							--Reset signals
+									n_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "011" =>
@@ -1086,7 +1133,7 @@ begin
 									sw_wSel <= next_pkt_in_vcc;							
 									w_invld_out <= '0';
 									internal_invld_set_w <= '0';
-									e_rst <= '1', '0' after 1 ns;							--Reset signals
+									e_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "111" =>													-- "111" Ejection Cell
@@ -1103,7 +1150,7 @@ begin
 									sw_nSel <= next_pkt_in_vcc;							
 									n_invld_out <= '0';
 									internal_invld_set_n <= '0';
-									s_rst <= '1', '0' after 1 ns;							--Reset signals
+									s_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "010" =>
@@ -1111,7 +1158,7 @@ begin
 									sw_sSel <= next_pkt_in_vcc;							
 									s_invld_out <= '0';
 									internal_invld_set_s <= '0';
-									n_rst <= '1', '0' after 1 ns;							--Reset signals
+									n_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "011" =>
@@ -1119,7 +1166,7 @@ begin
 									sw_wSel <= next_pkt_in_vcc;							
 									w_invld_out <= '0';
 									internal_invld_set_w <= '0';
-									e_rst <= '1', '0' after 1 ns;							--Reset signals
+									e_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "111" =>													-- "111" Ejection Cell
@@ -1136,7 +1183,7 @@ begin
 									sw_nSel <= next_pkt_in_vcc;							
 									n_invld_out <= '0';
 									internal_invld_set_n <= '0';
-									s_rst <= '1', '0' after 1 ns;							--Reset signals
+									s_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "001" =>
@@ -1144,7 +1191,7 @@ begin
 									sw_eSel <= next_pkt_in_vcc;							
 									e_invld_out <= '0';
 									internal_invld_set_e <= '0';
-									w_rst <= '1', '0' after 1 ns;							--Reset signals
+									w_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "011" =>
@@ -1152,7 +1199,7 @@ begin
 									sw_wSel <= next_pkt_in_vcc;							
 									w_invld_out <= '0';
 									internal_invld_set_w <= '0';
-									e_rst <= '1', '0' after 1 ns;							--Reset signals
+									e_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "111" =>													-- "111" Ejection Cell
@@ -1169,7 +1216,7 @@ begin
 									sw_nSel <= next_pkt_in_vcc;							
 									n_invld_out <= '0';
 									internal_invld_set_n <= '0';
-									s_rst <= '1', '0' after 1 ns;							--Reset signals
+									s_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "001" =>
@@ -1177,7 +1224,7 @@ begin
 									sw_eSel <= next_pkt_in_vcc;							
 									e_invld_out <= '0';
 									internal_invld_set_e <= '0';
-									w_rst <= '1', '0' after 1 ns;							--Reset signals
+									w_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "010" =>
@@ -1185,7 +1232,7 @@ begin
 									sw_sSel <= next_pkt_in_vcc;							
 									s_invld_out <= '0';
 									internal_invld_set_s <= '0';
-									n_rst <= '1', '0' after 1 ns;							--Reset signals
+									n_dRst <= '1', '0' after 1 ns;							--Reset signals
 									start_wdt_timer <= '1';									--Start WDT timer to prevent deadlocks
 									next_state <= departure3;
 								when "111" =>													-- "111" Ejection Cell
@@ -1206,22 +1253,22 @@ begin
 							when "000" =>
 								n_invld_out <= '1';
 								internal_invld_set_n <= '1';
-								s_rst <= '1', '0' after 1 ns;					--Reset signals
+								s_dRst <= '1', '0' after 1 ns;					--Reset signals
 								next_state <= dp_arrivedOnNorth1;
 							when "001" =>
 								e_invld_out <= '1';
 								internal_invld_set_e <= '1';
-								w_rst <= '1', '0' after 1 ns;					--Reset signals
+								w_dRst <= '1', '0' after 1 ns;					--Reset signals
 								next_state <= dp_arrivedOnNorth1;
 							when "010" =>
 								s_invld_out <= '1';
 								internal_invld_set_s <= '1';
-								n_rst <= '1', '0' after 1 ns;					--Reset signals
+								n_dRst <= '1', '0' after 1 ns;					--Reset signals
 								next_state <= dp_arrivedOnNorth1;
 							when "011" =>
 								w_invld_out <= '1';
 								internal_invld_set_w <= '1';
-								e_rst <= '1', '0' after 1 ns;					--Reset signals
+								e_dRst <= '1', '0' after 1 ns;					--Reset signals
 								next_state <= dp_arrivedOnNorth1;						
 							when others =>
 								next_state <= dp_arrivedOnNorth1;
@@ -1311,7 +1358,7 @@ begin
 				when dp_arrivedOnNorth2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= n_buffer(17 downto 10);
+					adr_data_out <= n_dbuffer(17 downto 10);
 					next_state <= dp_arrivedOnNorth3;
 				when dp_arrivedOnNorth3 =>	
 					if(adr_nf = '1') then
@@ -1342,7 +1389,7 @@ begin
 				when dp_arrivedOnNorth7 =>
 					n_CTRflg <= '0';
 					n_arbEnq <= '0';
-					n_rst <= '1', '0' after 1 ns;
+					n_dRst <= '1', '0' after 1 ns;
 					next_state <= dp_arrivedOnEast1;
 				
 	--*EAST ARRIVALS*--
@@ -1356,7 +1403,7 @@ begin
 				when dp_arrivedOnEast2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= e_buffer(17 downto 10);
+					adr_data_out <= e_dbuffer(17 downto 10);
 					next_state <= dp_arrivedOnEast3;
 				when dp_arrivedOnEast3 =>	
 					if(adr_nf = '1') then
@@ -1387,7 +1434,7 @@ begin
 				when dp_arrivedOnEast7 =>
 					e_CTRflg <= '0';
 					e_arbEnq <= '0';
-					e_rst <= '1', '0' after 1 ns;
+					e_dRst <= '1', '0' after 1 ns;
 					next_state <= dp_arrivedOnSouth1;
 				
 	--*SOUTH ARRIVALS*--
@@ -1401,7 +1448,7 @@ begin
 				when dp_arrivedOnSouth2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= s_buffer(17 downto 10);
+					adr_data_out <= s_dbuffer(17 downto 10);
 					next_state <= dp_arrivedOnSouth3;
 				when dp_arrivedOnSouth3 =>	
 					if(adr_nf = '1') then
@@ -1432,7 +1479,7 @@ begin
 				when dp_arrivedOnSouth7 =>
 					s_CTRflg <= '0';
 					s_arbEnq <= '0';
-					s_rst <= '1', '0' after 1 ns;
+					s_dRst <= '1', '0' after 1 ns;
 					next_state <= dp_arrivedOnWest1;
 					
 	--*WEST ARRIVALS*--
@@ -1446,7 +1493,7 @@ begin
 				when dp_arrivedOnWest2 =>
 					--Search address table for matching GID/PID
 					adr_search <= '1';
-					adr_data_out <= w_buffer(17 downto 10);
+					adr_data_out <= w_dbuffer(17 downto 10);
 					next_state <= dp_arrivedOnWest3;
 				when dp_arrivedOnWest3 =>	
 					if(adr_nf = '1') then
@@ -1477,7 +1524,7 @@ begin
 				when dp_arrivedOnWest7 =>
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
-					w_rst <= '1', '0' after 1 ns;
+					w_dRst <= '1', '0' after 1 ns;
 					next_state <= north1;
 				when others =>
 					next_state <= north1;
@@ -1485,100 +1532,112 @@ begin
 	end process;
 	
 	--Monitors signal activity on NORTH port
-	north_monitor_process: process(n_rst, n_CtrlFlg, n_DataFlg, s_CTRinFlg, n_invld_in)
+	north_monitor_process: process(n_dRst, n_cRst, n_CtrlFlg, n_DataFlg, s_CTRinFlg, n_d_invld_in, n_c_invld_in)
 	begin
-		if(n_rst = '1' or n_invld_in = '1') then
+		if(n_dRst = '1' or n_d_invld_in = '1') then
 			n_data_flg_set <= '0';
+		end if;
+		
+		if(n_cRst = '1' or n_c_invld_in = '1') then
 			n_ctrl_flg_set <= '0';
 			n_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(n_DataFlg = '1' and n_rst = '0' and n_invld_in = '0') then						-- From Sending Router
+		if(n_DataFlg = '1' and n_dRst = '0' and n_d_invld_in = '0') then						-- From Sending Router
 			n_data_flg_set <= '1';
-			n_buffer <= n_rnaCtrl;
+			n_dbuffer <= n_rnaCtrl;
 		end if;
 		
-		if(n_CtrlFlg = '1' and n_rst = '0' and n_invld_in = '0') then						-- From Sending Router
+		if(n_CtrlFlg = '1' and n_cRst = '0' and n_c_invld_in = '0') then						-- From Sending Router
 			n_ctrl_flg_set <= '1';
-			n_buffer <= n_rnaCtrl;
+			n_cbuffer <= n_rnaCtrl;
 		end if;
 		
-		if(s_CTRinFlg = '1' and n_rst = '0' and internal_invld_set_s = '0') then		--ACK back from receving 
+		if(s_CTRinFlg = '1' and n_cRst = '0' and internal_invld_set_s = '0') then		--ACK back from receving 
 			n_ctrl_in_flg_set <= '1';
 		end if;
 		
 	end process;
 	
 	--Monitors signal activity on EAST port
-	east_monitor_process: process(e_rst, e_CtrlFlg, e_DataFlg, w_CTRinFlg, e_invld_in)
+	east_monitor_process: process(e_dRst, e_cRst, e_CtrlFlg, e_DataFlg, w_CTRinFlg, e_d_invld_in, e_c_invld_in)
 	begin
-		if(e_rst = '1' or e_invld_in = '1') then
+		if(e_dRst = '1' or e_d_invld_in = '1') then
 			e_data_flg_set <= '0';
+		end if;
+		
+		if(e_cRst = '1' or e_c_invld_in = '1') then
 			e_ctrl_flg_set <= '0';
 			e_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(e_DataFlg = '1' and e_rst = '0' and e_invld_in = '0') then
+		if(e_DataFlg = '1' and e_dRst = '0' and e_d_invld_in = '0') then
 			e_data_flg_set <= '1';
-			e_buffer <= e_rnaCtrl;
+			e_dbuffer <= e_rnaCtrl;
 		end if;
 		
-		if(e_CtrlFlg = '1' and e_rst = '0' and e_invld_in = '0') then
+		if(e_CtrlFlg = '1' and e_cRst = '0' and e_c_invld_in = '0') then
 			e_ctrl_flg_set <= '1';
-			e_buffer <= e_rnaCtrl;
+			e_cbuffer <= e_rnaCtrl;
 		end if;
 		
-		if(w_CTRinFlg = '1' and e_rst = '0' and internal_invld_set_w = '0') then
+		if(w_CTRinFlg = '1' and e_cRst = '0' and internal_invld_set_w = '0') then
 			e_ctrl_in_flg_set <= '1';
 		end if;
 		
 	end process;
 	
 	--Monitors signal activity on SOUTH port
-	south_monitor_process: process(s_rst, s_CtrlFlg, s_DataFlg, n_CTRinFlg, s_invld_in)
+	south_monitor_process: process(s_dRst, s_cRst, s_CtrlFlg, s_DataFlg, n_CTRinFlg, s_d_invld_in, s_c_invld_in)
 	begin
-		if(s_rst = '1' or s_invld_in = '1') then
+		if(s_dRst = '1' or s_d_invld_in = '1') then
 			s_data_flg_set <= '0';
+		end if;
+		
+		if(s_cRst = '1' or s_c_invld_in = '1') then
 			s_ctrl_flg_set <= '0';
 			s_ctrl_in_flg_set <= '0';
 		end if;
 		
-		if(s_DataFlg = '1' and s_rst = '0' and s_invld_in = '0') then
+		if(s_DataFlg = '1' and s_dRst = '0' and s_d_invld_in = '0') then
 			s_data_flg_set <= '1';
-			s_buffer <= s_rnaCtrl;
+			s_dbuffer <= s_rnaCtrl;
 		end if;
 		
-		if(s_CtrlFlg = '1' and s_rst = '0' and s_invld_in = '0') then
+		if(s_CtrlFlg = '1' and s_cRst = '0' and s_c_invld_in = '0') then
 			s_ctrl_flg_set <= '1';
-			s_buffer <= s_rnaCtrl;
+			s_cbuffer <= s_rnaCtrl;
 		end if;
 		
-		if(n_CTRinFlg = '1' and s_rst = '0' and internal_invld_set_n = '0') then
+		if(n_CTRinFlg = '1' and s_cRst = '0' and internal_invld_set_n = '0') then
 			s_ctrl_in_flg_set <= '1';
 		end if;
 		
 	end process;
 	
 	--Monitors signal activity on WEST port
-	west_monitor_process: process(w_rst, w_CtrlFlg, w_DataFlg, e_CTRinFlg, w_invld_in)
+	west_monitor_process: process(w_dRst, w_cRst, w_CtrlFlg, w_DataFlg, e_CTRinFlg, w_d_invld_in, w_c_invld_in)
 	begin
-		if(w_rst = '1' or w_invld_in = '1') then
+		if(w_dRst = '1' or w_d_invld_in = '1') then
 			w_data_flg_set <= '0';
+		end if;
+		
+		if(w_cRst = '1' or w_c_invld_in = '1') then
 			w_ctrl_flg_set <= '0';
 			w_ctrl_in_flg_set <= '0';
 		end if;
 	
-		if(w_DataFlg = '1' and w_rst = '0' and w_invld_in = '0') then
+		if(w_DataFlg = '1' and w_dRst = '0' and w_d_invld_in = '0') then
 			w_data_flg_set <= '1';
-			w_buffer <= w_rnaCtrl;
+			w_dbuffer <= w_rnaCtrl;
 		end if;
 
-		if(w_CtrlFlg = '1' and w_rst = '0' and w_invld_in = '0') then
+		if(w_CtrlFlg = '1' and w_cRst = '0' and w_c_invld_in = '0') then
 			w_ctrl_flg_set <= '1';
-			w_buffer <= w_rnaCtrl;
+			w_cbuffer <= w_rnaCtrl;
 		end if;
 	
-		if(e_CTRinFlg = '1' and w_rst = '0' and internal_invld_set_e = '0') then
+		if(e_CTRinFlg = '1' and w_cRst = '0' and internal_invld_set_e = '0') then
 			w_ctrl_in_flg_set <= '1';
 		end if;
 	end process;

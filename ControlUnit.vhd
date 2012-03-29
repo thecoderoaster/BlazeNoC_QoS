@@ -34,7 +34,7 @@ use work.router_library.all;
 --use UNISIM.VComponents.all;
 
 entity ControlUnit is
-	generic(cp_size		: natural;
+	generic(pkt_size		: natural;
 			  address_size : natural;
 			  rsv_size 		: natural;
 			  sch_size		: natural
@@ -44,68 +44,88 @@ entity ControlUnit is
 			rst					: in 	std_logic;
 			
 			--North Set 
-			n_rsv_data_in		: in 	std_logic_vector (rsv_size-1 downto 0);
-			n_rsv_data_out		: out std_logic_vector (rsv_size-1 downto 0);
-			n_rsv_addr_a		: out std_logic_vector (address_size-1 downto 0);
-			n_rsv_addr_b		: out std_logic_vector (address_size-1 downto 0);
+			n_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
+			n_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
+			n_rsv_addr_a		: out natural range 0 to address_size-1;
+			n_rsv_addr_b		: out natural range 0 to address_size-1;
 			n_rsv_wen_a			: out std_logic;
 			n_rsv_wen_b			: out std_logic;
 			n_rsv_table_full	: in 	std_logic;
-			n_sch_data_in		: in 	std_logic_vector (sch_size-1 downto 0);
-			n_sch_data_out		: out std_logic_vector (sch_size-1 downto 0);
-			n_sch_addr_a		: out	std_logic_vector (sch_size-1 downto 0);
-			n_sch_addr_b		: out std_logic_vector (sch_size-1 downto 0);
+			n_rsv_data_out_a	: out std_logic_vector (rsv_size-1 downto 0);
+			n_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
+			n_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
+			n_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
+			n_sch_addr_a		: out natural range 0 to address_size-1;
+			n_sch_addr_b		: out natural range 0 to address_size-1;
 			n_sch_wen_a			: out std_logic;
 			n_sch_wen_b			: out std_logic;
 			n_sch_sort			: out std_logic;
+			n_sch_table_full	: in std_logic;
+			n_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
+			n_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--East Set
-			e_rsv_data_in		: in 	std_logic_vector (rsv_size-1 downto 0);
-			e_rsv_data_out		: out std_logic_vector (rsv_size-1 downto 0);
-			e_rsv_addr_a		: out std_logic_vector (address_size-1 downto 0);
-			e_rsv_addr_b		: out std_logic_vector (address_size-1 downto 0);
+			e_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
+			e_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
+			e_rsv_addr_a		: out natural range 0 to address_size-1;
+			e_rsv_addr_b		: out natural range 0 to address_size-1;
 			e_rsv_wen_a			: out std_logic;
 			e_rsv_wen_b			: out std_logic;
 			e_rsv_table_full	: in 	std_logic;
-			e_sch_data_in		: in 	std_logic_vector (sch_size-1 downto 0);
-			e_sch_data_out		: out std_logic_vector (sch_size-1 downto 0);
-			e_sch_addr_a		: out	std_logic_vector (sch_size-1 downto 0);
-			e_sch_addr_b		: out std_logic_vector (sch_size-1 downto 0);
+			e_rsv_data_out_a	: out std_logic_vector (rsv_size-1 downto 0);
+			e_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
+			e_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
+			e_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
+			e_sch_addr_a		: out natural range 0 to address_size-1;
+			e_sch_addr_b		: out natural range 0 to address_size-1;
 			e_sch_wen_a			: out std_logic;
 			e_sch_wen_b			: out std_logic;
 			e_sch_sort			: out std_logic;
+			e_sch_table_full	: in std_logic;
+			e_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
+			e_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--South Set
-			s_rsv_data_in		: in 	std_logic_vector (rsv_size-1 downto 0);
-			s_rsv_data_out		: out std_logic_vector (rsv_size-1 downto 0);
-			s_rsv_addr_a		: out std_logic_vector (address_size-1 downto 0);
-			s_rsv_addr_b		: out std_logic_vector (address_size-1 downto 0);
+			s_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
+			s_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
+			s_rsv_addr_a		: out natural range 0 to address_size-1;
+			s_rsv_addr_b		: out natural range 0 to address_size-1;
 			s_rsv_wen_a			: out std_logic;
 			s_rsv_wen_b			: out std_logic;
 			s_rsv_table_full	: in 	std_logic;
-			s_sch_data_in		: in 	std_logic_vector (sch_size-1 downto 0);
-			s_sch_data_out		: out std_logic_vector (sch_size-1 downto 0);
-			s_sch_addr_a		: out	std_logic_vector (sch_size-1 downto 0);
-			s_sch_addr_b		: out std_logic_vector (sch_size-1 downto 0);
+			s_rsv_data_out_a	: out std_logic_vector (rsv_size-1 downto 0);
+			s_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
+			s_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
+			s_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
+			s_sch_addr_a		: out natural range 0 to address_size-1;
+			s_sch_addr_b		: out natural range 0 to address_size-1;
 			s_sch_wen_a			: out std_logic;
 			s_sch_wen_b			: out std_logic;
 			s_sch_sort			: out std_logic;
+			s_sch_table_full	: in std_logic;
+			s_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
+			s_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--West Set
-			w_rsv_data_in		: in 	std_logic_vector (rsv_size-1 downto 0);
-			w_rsv_data_out		: out std_logic_vector (rsv_size-1 downto 0);
-			w_rsv_addr_a		: out std_logic_vector (address_size-1 downto 0);
-			w_rsv_addr_b		: out std_logic_vector (address_size-1 downto 0);
+			w_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
+			w_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
+			w_rsv_addr_a		: out natural range 0 to address_size-1;
+			w_rsv_addr_b		: out natural range 0 to address_size-1;
 			w_rsv_wen_a			: out std_logic;
 			w_rsv_wen_b			: out std_logic;
 			w_rsv_table_full	: in 	std_logic;
-			w_sch_data_in		: in 	std_logic_vector (sch_size-1 downto 0);
-			w_sch_data_out		: out std_logic_vector (sch_size-1 downto 0);
-			w_sch_addr_a		: out	std_logic_vector (sch_size-1 downto 0);
-			w_sch_addr_b		: out std_logic_vector (sch_size-1 downto 0);
+			w_rsv_data_out_a	: out std_logic_vector (rsv_size-1 downto 0);
+			w_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
+			w_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
+			w_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
+			w_sch_addr_a		: out natural range 0 to address_size-1;
+			w_sch_addr_b		: out natural range 0 to address_size-1;
 			w_sch_wen_a			: out std_logic;
 			w_sch_wen_b			: out std_logic;
 			w_sch_sort			: out std_logic;
+			w_sch_table_full	: in std_logic;
+			w_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
+			w_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--Interface to other components in Router
 			n_vc_deq 			: out std_logic;
@@ -145,25 +165,25 @@ entity ControlUnit is
 			n_CtrlFlg			: in 	std_logic;
 			n_DataFlg			: in  std_logic;
 			n_arbEnq				: out std_logic;
-			n_rnaCtrl			: in 	std_logic_vector(cp_size-1 downto 0);
+			n_rnaCtrl			: in 	std_logic_vector(pkt_size downto 0);
 			e_CTRinFlg			: in  std_logic;
 			e_CTRflg				: out std_logic;
 			e_CtrlFlg			: in 	std_logic;
 			e_DataFlg			: in  std_logic;
 			e_arbEnq				: out std_logic;
-			e_rnaCtrl			: in 	std_logic_vector(cp_size-1 downto 0);
+			e_rnaCtrl			: in 	std_logic_vector(pkt_size downto 0);
 			s_CTRinFlg			: in  std_logic;
 			s_CTRflg				: out std_logic;
 			s_CtrlFlg			: in 	std_logic;
 			s_DataFlg			: in  std_logic;
 			s_arbEnq				: out std_logic;
-			s_rnaCtrl			: in 	std_logic_vector(cp_size-1 downto 0);
+			s_rnaCtrl			: in 	std_logic_vector(pkt_size downto 0);
 			w_CTRinFlg			: in  std_logic;
 			w_CTRflg				: out std_logic;
 			w_CtrlFlg			: in 	std_logic;
 			w_DataFlg			: in  std_logic;
 			w_arbEnq				: out std_logic;
-			w_rnaCtrl			: in 	std_logic_vector(cp_size-1 downto 0);
+			w_rnaCtrl			: in 	std_logic_vector(pkt_size downto 0);
 			sw_nSel				: out std_logic_vector(2 downto 0);
 			sw_eSel				: out std_logic_vector(2 downto 0);
 			sw_sSel				: out std_logic_vector(2 downto 0);
@@ -171,21 +191,20 @@ entity ControlUnit is
 			sw_ejectSel			: out std_logic_vector(2 downto 0);
 			sw_rnaCtFl			: in 	std_logic;
 			sw_rnaCtDeq			: out std_logic;
-			rna_ctrlPkt			: out std_logic_vector(cp_size-1 downto 0);
-			injt_ctrlPkt		: in 	std_logic_vector (cp_size-1 downto 0);
+			rna_ctrlPkt			: out std_logic_vector(pkt_size downto 0);
+			injt_ctrlPkt		: in 	std_logic_vector (pkt_size downto 0);
 			injt_dataGood		: out std_logic
 		);
 end ControlUnit;
 
 architecture Behavioral of ControlUnit is
-	type state_type is (start, north1, north2, north3, north4, north5, north6, north7,
-							  east1, east2, east3, east4, east5, east6, east7,
-							  south1, south2, south3, south4, south5, south6, south7,
-							  west1, west2, west3, west4, west5, west6, west7,
-							  injection1, injection2, injection3, injection4, injection5,
-							  injection6, injection7, injection8, injection9, injection10, injection11, injection12, injection13, injection14,
-							  timer_check1, timer_check2, timer_check3, timer_check4,
-							  departure1, departure2, departure3, departure4);   -- State FSM
+	type state_type is (start, north1, north2, north3, north4, north5, north6, north7, north8,
+							  east1, east2, east3, east4, east5, east6, east7, east8,
+							  south1, south2, south3, south4, south5, south6, south7, south8,
+							  west1, west2, west3, west4, west5, west6, west7, west8,
+							  injection1, injection2, injection3, injection4, injection5,injection6,
+							  north_sw1, north_sw2, east_sw1, east_sw2, south_sw1, south_sw2, west_sw1, west_sw2,
+							  injection_sw1);   -- State FSM
 	
 	signal state_north_handler: state_type;
 	signal state_east_handler: state_type;
@@ -206,19 +225,16 @@ architecture Behavioral of ControlUnit is
 	signal router_address 	: std_logic_vector(PID_WIDTH-1 downto 0);
 
 	--Timer Related Signals
-	signal globaltime			: std_logic_vector(15 downto 0);
-	signal counter 			: std_logic_vector(15 downto 0);
-	signal timeunit1 			: std_logic_vector(15 downto 0);
-	signal timeunit2 			: std_logic_vector(15 downto 0);
+	signal globaltime			: std_logic_vector(31 downto 0);
+	signal counter 			: std_logic_vector(31 downto 0);
+	signal timeunit1 			: std_logic_vector(31 downto 0);
+	signal timeunit2 			: std_logic_vector(31 downto 0);
 	signal start_timer 		: std_logic;
 	signal time_expired  	: std_logic;
 	
 	--Departure Itinerary
-	signal next_pkt_departing_from_gate	: std_logic_vector(rte_size-1 downto 0);
-	signal next_pkt_in_vcc					: std_logic_vector(2 downto 0);
-	signal next_pkt_in_vcell				: std_logic_vector(2 downto 0);
-	signal next_pkt_expires_in				: std_logic_vector(15 downto 0);
-
+	signal scheduled_pkt_expires_in : std_logic_vector(31 downto 0);
+	
 	--Arrival Related Signals
 	signal n_DpFlg				: std_logic;
 	signal e_DpFlg				: std_logic;
@@ -233,10 +249,25 @@ architecture Behavioral of ControlUnit is
 	signal start_wdt_timer	: std_logic;
 	
 	--Switch Related
-	signal sw_n_rna_ctrlPkt	: std_logic_vector(cp_size-1 downto 0);
-	signal sw_e_rna_ctrlPkt	: std_logic_vector(cp_size-1 downto 0);
-	signal sw_s_rna_ctrlPkt	: std_logic_vector(cp_size-1 downto 0);
-	signal sw_w_rna_ctrlPkt	: std_logic_vector(cp_size-1 downto 0);
+	signal sw_n_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
+	signal sw_e_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
+	signal sw_s_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
+	signal sw_w_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
+	
+	signal sw_n_rna_toggle : std_logic;
+	signal sw_e_rna_toggle : std_logic;
+	signal sw_s_rna_toggle : std_logic;
+	signal sw_w_rna_toggle : std_logic;
+	
+	signal sw_injt_pkt 		: std_logic_vector (pkt_size downto 0);
+	signal sw_injt_toggle 	: std_logic;
+	signal sw_injt_ack 		: std_logic;
+	signal sw_n_rna_ack 		: std_logic;
+	signal sw_e_rna_ack 		: std_logic;
+	signal sw_s_rna_ack		: std_logic;
+	signal sw_w_rna_ack		: std_logic;
+	
+	
 
 	
 begin
@@ -252,11 +283,11 @@ begin
 			timeunit1 <= std_logic_vector(to_unsigned(0, timeunit1'length));
 		
 		elsif rising_edge(clk) then
-			timeunit1 <= timeunit1 + "0000000000000001";
-			if(timeunit1 = "000000111110") then
+			timeunit1 <= timeunit1 + "00000000000000000000000000000001";
+			if(timeunit1 = "0000000000000000000000111110") then
 			--if(timeunit1 = "0000011000101010") then				-- 3052 periods = 30.518 us ~ 32.768 kHz (RTC)
 				globaltime <= globaltime + "0000000000000001";
-				timeunit1 <= "0000000000000000";
+				timeunit1 <= "00000000000000000000000000000000";
 			end if;
 		end if;
 	end process;
@@ -276,15 +307,15 @@ begin
 			
 		elsif rising_edge(clk) then
 			if(start_timer = '1' and time_expired = '0') then
-				timeunit2 <= timeunit2 + "0000000000000001";
+				timeunit2 <= timeunit2 + "00000000000000000000000000000001";
 				time_expired <= '0';
-				if(timeunit2 = "0000000000000110") then								-- was 1000 cycles 0000000000111110
-					counter <= counter + "0000000000000001";		--increment the counter by 1 tick
-					if(counter = next_pkt_expires_in) then
-						counter <= "0000000000000000";
+				if(timeunit2 = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
+					counter <= counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
+					if(counter = scheduled_pkt_expires_in) then
+						counter <= "00000000000000000000000000000000";
 						time_expired <= '1';
 					end if;
-					timeunit2 <= "0000000000000000";
+					timeunit2 <= "00000000000000000000000000000000";
 				end if;
 			elsif(start_timer = '0' and time_expired = '1') then
 				time_expired <= '0';
@@ -346,6 +377,7 @@ begin
 	--north_handler: Handles all incoming packets (data/control) on north port
 	--************************************************************************
 	north_handler:process(state_north_handler)
+	variable temp : std_logic_vector(1 downto 0);
 	begin
 		case state_north_handler is
 				when start =>
@@ -356,6 +388,7 @@ begin
 					
 					n_rsv_wen_a <= '0';
 					n_sch_wen_a	<= '0';
+					sw_n_rna_toggle <= '0';
 					
 					ns_north_handler <= north1;
 				when north1 =>
@@ -367,6 +400,7 @@ begin
 					end if;
 				when north2 =>
 					if(n_rsv_table_full = '0') then
+						sw_n_rna_ctrlPkt <= n_rnaCtrl;		--Make copy of packet
 						ns_north_handler <= north3;
 					else
 						ns_north_handler <= north4;			--Table is full. Try again later
@@ -378,25 +412,29 @@ begin
 					--Write bits to rsv_data_out
 					case n_rnaCtrl(12 downto 11) is
 						when "00" =>
-							n_rsv_data_out <= n_rnaCtrl(15 downto 13);
+							n_rsv_data_out_a <= n_rnaCtrl(15 downto 13);
 						when "01" =>
-							n_rsv_data_out <= n_rnaCtrl(18 downto 16);
+							n_rsv_data_out_a <= n_rnaCtrl(18 downto 16);
 						when "10" =>
-							n_rsv_data_out <= n_rnaCtrl(21 downto 19);
+							n_rsv_data_out_a <= n_rnaCtrl(21 downto 19);
 						when "11" =>
-							n_rsv_data_out <= n_rnaCtrl(24 downto 22);
+							n_rsv_data_out_a <= n_rnaCtrl(24 downto 22);
 						when others =>
 							null;
 					end case;
 					
 					--Write bits to sch_packet
-					n_sch_data_out <= (globaltime + n_rnaCtrl(cp_size-1 downto 25));
+					n_sch_data_out_a <= (globaltime + n_rnaCtrl(pkt_size downto 25));
 
 					--Send to reservation table
-					n_rsv_addr_a <= n_rnaCtrl(10 downto 3);
-					n_sch_addr_a <= n_rnaCtrl(10 downto 3);
+					n_rsv_addr_a <= conv_integer(n_rnaCtrl(10 downto 3));
+					n_sch_addr_a <= conv_integer(n_rnaCtrl(10 downto 3));
 					n_rsv_wen_a <= '1';
 					n_sch_wen_a <= '1';
+					
+					--Update count
+					temp := sw_n_rna_ctrlPkt(12 downto 11) + 1;		--Update count
+					sw_n_rna_ctrlPkt(12 downto 11) <= temp;
 					
 					ns_north_handler <= north4;
 					
@@ -405,9 +443,8 @@ begin
 					n_rsv_wen_a <= '0';
 					n_sch_wen_a <= '0';
 				
-					--Forward the Packet by checking routing table first
-					sw_n_rna_ctrlPkt <= n_rnaCtrl;
-					
+					--Forward the Packet by checking routing table first			
+					sw_n_rna_toggle <= '1';
 					ns_north_handler <= north5;
 				
 				when north5 =>
@@ -419,12 +456,12 @@ begin
 					end if;
 				when north6 =>
 					--Grab reservation table details
-					n_rsv_addr_a <= n_rnaCtrl(10 downto 3);
+					n_rsv_addr_a <= conv_integer(n_rnaCtrl(10 downto 3));
 					
 					ns_north_handler <= north7;
 				when north7 =>	
 					--Control VCC
-					case n_rsv_data_in is
+					case n_rsv_data_in_a(2 downto 0) is
 						when "001" =>
 							n_vc_rnaSelI <= "00";			--East
 						when "010" =>
@@ -454,6 +491,7 @@ begin
 	--east_handler: Handles all incoming packets (data/control) on east port
 	--************************************************************************
 	east_handler:process(state_east_handler)
+	variable temp : std_logic_vector(1 downto 0);
 	begin
 		case state_east_handler is
 				when start =>
@@ -464,6 +502,7 @@ begin
 					
 					e_rsv_wen_a <= '0';
 					e_sch_wen_a	<= '0';
+					sw_e_rna_toggle <= '0';
 					
 					ns_east_handler <= east1;
 				when east1 =>
@@ -475,6 +514,7 @@ begin
 					end if;
 				when east2 =>
 					if(e_rsv_table_full = '0') then
+						sw_e_rna_ctrlPkt <= e_rnaCtrl;
 						ns_east_handler <= east3;
 					else
 						ns_east_handler <= east4;			--Table is full. Try again later
@@ -486,25 +526,29 @@ begin
 					--Write bits to rsv_data_out
 					case e_rnaCtrl(12 downto 11) is
 						when "00" =>
-							e_rsv_data_out <= e_rnaCtrl(15 downto 13);
+							e_rsv_data_out_a <= e_rnaCtrl(15 downto 13);
 						when "01" =>
-							e_rsv_data_out <= e_rnaCtrl(18 downto 16);
+							e_rsv_data_out_a <= e_rnaCtrl(18 downto 16);
 						when "10" =>
-							e_rsv_data_out <= e_rnaCtrl(21 downto 19);
+							e_rsv_data_out_a <= e_rnaCtrl(21 downto 19);
 						when "11" =>
-							e_rsv_data_out <= e_rnaCtrl(24 downto 22);
+							e_rsv_data_out_a <= e_rnaCtrl(24 downto 22);
 						when others =>
 							null;
 					end case;
 					
 					--Write bits to sch_packet
-					e_sch_data_out <= (globaltime + e_rnaCtrl(cp_size-1 downto 25));
+					e_sch_data_out_a <= (globaltime + e_rnaCtrl(pkt_size downto 25));
 
 					--Send to reservation table
-					e_rsv_addr_a <= e_rnaCtrl(10 downto 3);
-					e_sch_addr_a <= e_rnaCtrl(10 downto 3);
+					e_rsv_addr_a <= conv_integer(e_rnaCtrl(10 downto 3));
+					e_sch_addr_a <= conv_integer(e_rnaCtrl(10 downto 3));
 					e_rsv_wen_a <= '1';
 					e_sch_wen_a <= '1';
+					
+					--Update count
+					temp := sw_e_rna_ctrlPkt(12 downto 11) + 1;		--Update count
+					sw_e_rna_ctrlPkt(12 downto 11) <= temp;
 					
 					ns_east_handler <= east4;
 				when east4 =>
@@ -512,10 +556,8 @@ begin
 					e_rsv_wen_a <= '0';
 					e_sch_wen_a <= '0';
 					
-					--Forward the Packet
-					sw_e_rna_ctrlPkt <= e_rnaCtrl;
-					
-					sw_e_rna_toggle <= '1', '0' after 1 ns;
+					--Forward the Packet	
+					sw_e_rna_toggle <= '1';
 					
 					ns_east_handler <= east5;
 				
@@ -528,12 +570,12 @@ begin
 					end if;
 				when east6 =>
 					--Grab reservation table details
-					e_rsv_addr_a <= e_rnaCtrl(10 downto 3);
+					e_rsv_addr_a <= conv_integer(e_rnaCtrl(10 downto 3));
 					
 					ns_east_handler <= east7;
 				when east7 =>	
 					--Control VCC
-					case e_rsv_data_in is
+					case e_rsv_data_in_a(2 downto 0) is
 						when "000" =>
 							e_vc_rnaSelI <= "00";			--North
 						when "010" =>
@@ -563,6 +605,7 @@ begin
 	--south_handler: Handles all incoming packets (data/control) on south port
 	--************************************************************************
 	south_cp_handler:process(state_south_handler)
+	variable temp : std_logic_vector(1 downto 0);
 	begin
 		case state_south_handler is
 				when start =>
@@ -573,6 +616,7 @@ begin
 					
 					s_rsv_wen_a <= '0';
 					s_sch_wen_a	<= '0';
+					sw_s_rna_toggle <= '0';
 					
 					ns_south_handler <= south1;
 				when south1 =>
@@ -584,6 +628,7 @@ begin
 					end if;
 				when south2 =>
 					if(s_rsv_table_full = '0') then
+						sw_s_rna_ctrlPkt <= s_rnaCtrl;
 						ns_south_handler <= south3;
 					else
 						ns_south_handler <= south4;			--Table is full. Try again later
@@ -595,28 +640,29 @@ begin
 					--Write bits to rsv_data_out
 					case s_rnaCtrl(12 downto 11) is
 						when "00" =>
-							s_rsv_data_out <= s_rnaCtrl(15 downto 13);
+							s_rsv_data_out_a <= s_rnaCtrl(15 downto 13);
 						when "01" =>
-							s_rsv_data_out <= s_rnaCtrl(18 downto 16);
+							s_rsv_data_out_a <= s_rnaCtrl(18 downto 16);
 						when "10" =>
-							s_rsv_data_out <= s_rnaCtrl(21 downto 19);
+							s_rsv_data_out_a <= s_rnaCtrl(21 downto 19);
 						when "11" =>
-							s_rsv_data_out <= s_rnaCtrl(24 downto 22);
+							s_rsv_data_out_a <= s_rnaCtrl(24 downto 22);
 						when others =>
 							null;
 					end case;
 					
 					--Write bits to sch_packet
-					s_sch_data_out <= (globaltime + s_rnaCtrl(cp_size-1 downto 25));
+					s_sch_data_out_a <= (globaltime + s_rnaCtrl(pkt_size downto 25));
 
 					--Send to reservation table
-					s_rsv_addr_a <= s_rnaCtrl(10 downto 3);
-					s_sch_addr_a <= s_rnaCtrl(10 downto 3);
+					s_rsv_addr_a <= conv_integer(s_rnaCtrl(10 downto 3));
+					s_sch_addr_a <= conv_integer(s_rnaCtrl(10 downto 3));
 					s_rsv_wen_a <= '1';
 					s_sch_wen_a <= '1';
 					
-					--Forward the Packet
-					sw_s_rna_ctrlPkt <= s_rnaCtrl;
+					--Update count
+					temp := sw_s_rna_ctrlPkt(12 downto 11) + 1;		--Update count
+					sw_s_rna_ctrlPkt(12 downto 11) <= temp;
 					
 					ns_south_handler <= south4;
 				when south4 =>
@@ -625,9 +671,7 @@ begin
 					s_sch_wen_a <= '0';
 				
 					--Forward the Packet
-					sw_s_rna_ctrlPkt <= s_rnaCtrl;
-					
-					sw_s_rna_toggle <= '1', '0' after 1 ns;
+					sw_s_rna_toggle <= '1';
 					
 					ns_south_handler <= south5;
 				
@@ -640,12 +684,12 @@ begin
 					end if;
 				when south6 =>
 					--Grab reservation table details
-					s_rsv_addr_a <= s_rnaCtrl(10 downto 3);
+					s_rsv_addr_a <= conv_integer(s_rnaCtrl(10 downto 3));
 					
 					ns_south_handler <= south7;
 				when south7 =>	
 					--Control VCC
-					case s_rsv_data_in is
+					case s_rsv_data_in_a(2 downto 0) is
 						when "000" =>
 							s_vc_rnaSelI <= "00";			--North
 						when "001" =>
@@ -675,6 +719,7 @@ begin
 	--west_handler: Handles all incoming packets (data/control) on west port
 	--************************************************************************
 	west_cp_handler:process(state_west_handler)
+	variable temp : std_logic_vector(1 downto 0);
 	begin
 		case state_west_handler is
 				when start =>
@@ -685,6 +730,7 @@ begin
 					
 					w_rsv_wen_a <= '0';
 					w_sch_wen_a	<= '0';
+					sw_w_rna_toggle <= '0';
 					
 					ns_west_handler <= west1;
 				when west1 =>
@@ -696,6 +742,7 @@ begin
 					end if;
 				when west2 =>
 					if(w_rsv_table_full = '0') then
+						sw_w_rna_ctrlPkt <= w_rnaCtrl;
 						ns_west_handler <= west3;
 					else
 						ns_west_handler <= west4;			--Table is full. Try again later
@@ -707,25 +754,29 @@ begin
 					--Write bits to rsv_data_out
 					case w_rnaCtrl(12 downto 11) is
 						when "00" =>
-							w_rsv_data_out <= w_rnaCtrl(15 downto 13);
+							w_rsv_data_out_a <= w_rnaCtrl(15 downto 13);
 						when "01" =>
-							w_rsv_data_out <= w_rnaCtrl(18 downto 16);
+							w_rsv_data_out_a <= w_rnaCtrl(18 downto 16);
 						when "10" =>
-							w_rsv_data_out <= w_rnaCtrl(21 downto 19);
+							w_rsv_data_out_a <= w_rnaCtrl(21 downto 19);
 						when "11" =>
-							w_rsv_data_out <= w_rnaCtrl(24 downto 22);
+							w_rsv_data_out_a <= w_rnaCtrl(24 downto 22);
 						when others =>
 							null;
 					end case;
 					
 					--Write bits to sch_packet
-					w_sch_data_out <= (globaltime + w_rnaCtrl(cp_size-1 downto 25));
+					w_sch_data_out_a <= (globaltime + w_rnaCtrl(pkt_size downto 25));
 
 					--Send to reservation table
-					w_rsv_addr_a <= w_rnaCtrl(10 downto 3);
-					w_sch_addr_a <= w_rnaCtrl(10 downto 3);
+					w_rsv_addr_a <= conv_integer(w_rnaCtrl(10 downto 3));
+					w_sch_addr_a <= conv_integer(w_rnaCtrl(10 downto 3));
 					w_rsv_wen_a <= '1';
 					w_sch_wen_a <= '1';
+					
+					--Update count
+					temp := sw_w_rna_ctrlPkt(12 downto 11) + 1;		--Update count
+					sw_w_rna_ctrlPkt(12 downto 11) <= temp;
 					
 					ns_west_handler <= west4;
 				when west4 =>
@@ -734,9 +785,7 @@ begin
 					w_sch_wen_a <= '0';
 				
 					--Forward the Packet
-					sw_w_rna_ctrlPkt <= w_rnaCtrl;
-					
-					sw_w_rna_toggle <= '1', '0' after 1 ns;
+					sw_w_rna_toggle <= '1';
 					
 					ns_west_handler <= west5;
 				when west5 =>
@@ -748,12 +797,12 @@ begin
 					end if;
 				when west6 =>
 					--Grab reservation table details
-					w_rsv_addr_a <= w_rnaCtrl(10 downto 3);
+					w_rsv_addr_a <= conv_integer(w_rnaCtrl(10 downto 3));
 					
 					ns_west_handler <= west7;
 				when west7 =>	
 					--Control VCC
-					case w_rsv_data_in is
+					case w_rsv_data_in_a(2 downto 0) is
 						when "000" =>
 							w_vc_rnaSelI <= "00";			--North
 						when "001" =>
@@ -786,6 +835,8 @@ begin
 	begin
 		case state_injection_handler is
 				when start =>
+					sw_injt_toggle <= '0';
+				
 					ns_injection_handler <= injection1;
 				when injection1 =>
 					--Control Packet Arrived?
@@ -818,7 +869,7 @@ begin
 					--Forward packet
 					sw_injt_pkt <= injt_ctrlPkt;
 					
-					sw_injt_toggle <= '1', '0' after 1 ns;
+					sw_injt_toggle <= '1';
 					
 					ns_injection_handler <= injection6;
 				when injection6 =>
@@ -841,8 +892,8 @@ begin
 	
 	--switch_handler - Handles all switch related tasks
 	switch_handler:process(state_switch_handler)
+		variable count : std_logic_vector(1 downto 0);
 		variable direction : std_logic_vector(2 downto 0);
-		variable temp : std_logic_vector(1 downto 0);
 	begin		
 		case state_switch_handler is
 			when start =>
@@ -850,18 +901,29 @@ begin
 				sw_e_rna_ack <= '0';
 				sw_s_rna_ack <= '0';
 				sw_w_rna_ack <= '0';
-				ns_switch_handler <= north_cp1;
-			when north_cp1 =>
+				ns_switch_handler <= north_sw1;
+			when north_sw1 =>
 				if(sw_n_rna_toggle = '1') then
 					sw_n_rna_ack <= '0';
-					direction := sw_n_rna_ctrlPkt(12 downto 11);		--Get next hop
-					temp := sw_n_rna_ctrlPkt(12 downto 11) + 1;		--Update count
-					sw_n_rna_ctrlPkt(12 downto 11) <= temp;
-					ns_switch_handler <= north_cp2;
+					count:= sw_n_rna_ctrlPkt(12 downto 11);	--Get next hop
+					case count is
+						when "00" =>	
+							direction := sw_n_rna_ctrlPkt(15 downto 13);
+						when "01" =>
+							direction := sw_n_rna_ctrlPkt(18 downto 16);
+						when "10" =>
+							direction := sw_n_rna_ctrlPkt(21 downto 19);
+						when "11" =>
+							direction := sw_n_rna_ctrlPkt(24 downto 22);
+						when others =>
+							null;
+					end case;
+					
+					ns_switch_handler <= north_sw2;
 				else
-					ns_switch_handler <= east_cp1;
+					ns_switch_handler <= east_sw1;
 				end if;
-			when north_cp2 =>
+			when north_sw2 =>
 				--Send control packet
 				rna_ctrlPkt <= sw_n_rna_ctrlPkt;
 					
@@ -881,18 +943,29 @@ begin
 				
 				--Ack
 				sw_n_rna_ack <= '1';
-				ns_switch_handler <= east_cp1;
-			when east_cp1 =>
+				ns_switch_handler <= east_sw1;
+			when east_sw1 =>
 				if(sw_e_rna_toggle = '1') then
 					sw_e_rna_ack <= '0';
-					direction := sw_e_rna_ctrlPkt(12 downto 11);		--Get next hop
-					temp := sw_e_rna_ctrlPkt(12 downto 11) + 1;		--Update count
-					sw_e_rna_ctrlPkt(12 downto 11) <= temp;
-					ns_switch_handler <= east_cp2;
+					count:= sw_e_rna_ctrlPkt(12 downto 11);	--Get next hop
+					case count is
+						when "00" =>	
+							direction := sw_e_rna_ctrlPkt(15 downto 13);
+						when "01" =>
+							direction := sw_e_rna_ctrlPkt(18 downto 16);
+						when "10" =>
+							direction := sw_e_rna_ctrlPkt(21 downto 19);
+						when "11" =>
+							direction := sw_e_rna_ctrlPkt(24 downto 22);
+						when others =>
+							null;
+					end case;
+
+					ns_switch_handler <= east_sw2;
 				else
-					ns_switch_handler <= south_cp1;
+					ns_switch_handler <= south_sw1;
 				end if;
-			when east_cp2 =>
+			when east_sw2 =>
 				--Send control packet
 				rna_ctrlPkt <= sw_e_rna_ctrlPkt;
 					
@@ -912,18 +985,29 @@ begin
 				
 				--Ack
 				sw_e_rna_ack <= '1';
-				ns_switch_handler <= south_cp1;
-			when south_cp1 =>
+				ns_switch_handler <= south_sw1;
+			when south_sw1 =>
 				if(sw_s_rna_toggle = '1') then
 					sw_s_rna_ack <= '0';
-					direction := sw_s_rna_ctrlPkt(12 downto 11);		--Get next hop
-					temp := sw_s_rna_ctrlPkt(12 downto 11) + 1;		--Update count
-					sw_s_rna_ctrlPkt(12 downto 11) <= temp;
-					ns_switch_handler <= south_cp2;
+					count:= sw_s_rna_ctrlPkt(12 downto 11);	--Get next hop
+					case count is
+						when "00" =>	
+							direction := sw_s_rna_ctrlPkt(15 downto 13);
+						when "01" =>
+							direction := sw_s_rna_ctrlPkt(18 downto 16);
+						when "10" =>
+							direction := sw_s_rna_ctrlPkt(21 downto 19);
+						when "11" =>
+							direction := sw_s_rna_ctrlPkt(24 downto 22);
+						when others =>
+							null;
+					end case;
+
+					ns_switch_handler <= south_sw2;
 				else
-					ns_switch_handler <= west_cp1;
+					ns_switch_handler <= west_sw1;
 				end if;
-			when south_cp2 =>
+			when south_sw2 =>
 				--Send control packet
 				rna_ctrlPkt <= sw_s_rna_ctrlPkt;
 					
@@ -943,18 +1027,29 @@ begin
 				
 				--Ack
 				sw_s_rna_ack <= '1';
-				ns_switch_handler <= west_cp1;
-			when west_cp1 =>
+				ns_switch_handler <= west_sw1;
+			when west_sw1 =>
 				if(sw_w_rna_toggle = '1') then
 					sw_w_rna_ack <= '0';
-					direction := sw_w_rna_ctrlPkt(12 downto 11);		--Get next hop
-					temp := sw_w_rna_ctrlPkt(12 downto 11) + 1;		--Update count
-					sw_w_rna_ctrlPkt(12 downto 11) <= temp;
-					ns_switch_handler <= west_cp2;
+					count:= sw_w_rna_ctrlPkt(12 downto 11);	--Get next hop
+					case count is
+						when "00" =>	
+							direction := sw_w_rna_ctrlPkt(15 downto 13);
+						when "01" =>
+							direction := sw_w_rna_ctrlPkt(18 downto 16);
+						when "10" =>
+							direction := sw_w_rna_ctrlPkt(21 downto 19);
+						when "11" =>
+							direction := sw_w_rna_ctrlPkt(24 downto 22);
+						when others =>
+							null;
+					end case;
+
+					ns_switch_handler <= west_sw2;
 				else
-					ns_switch_handler <= injection_p1;
+					ns_switch_handler <= injection_sw1;
 				end if;
-			when south_cp2 =>
+			when west_sw2 =>
 				--Send control packet
 				rna_ctrlPkt <= sw_w_rna_ctrlPkt;
 					
@@ -974,9 +1069,12 @@ begin
 				
 				--Ack
 				sw_w_rna_ack <= '1';
-				ns_switch_handler <= injection_p1;
+				ns_switch_handler <= injection_sw1;
+			when injection_sw1 =>
+				ns_switch_handler <= north_sw1;
+				
 			when others =>
-				null;
+				ns_switch_handler <= north_sw1;
 		end case;
 	end process;
 	

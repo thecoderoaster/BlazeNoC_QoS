@@ -30,6 +30,7 @@ USE ieee.std_logic_1164.ALL;
 use ieee.numeric_std.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
+use work.router_library.all;
  
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -59,10 +60,10 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
          done_PE1 : OUT  std_logic;
          done_PE2 : OUT  std_logic;
          done_PE3 : OUT  std_logic;
-         data_inject_PE0 : IN  std_logic_vector(33 downto 0);
-         data_inject_PE1 : IN  std_logic_vector(33 downto 0);
-         data_inject_PE2 : IN  std_logic_vector(33 downto 0);
-         data_inject_PE3 : IN  std_logic_vector(33 downto 0)
+         data_inject_PE0 : IN  std_logic_vector(WIDTH downto 0);
+         data_inject_PE1 : IN  std_logic_vector(WIDTH downto 0);
+         data_inject_PE2 : IN  std_logic_vector(WIDTH downto 0);
+         data_inject_PE3 : IN  std_logic_vector(WIDTH downto 0)
         );
     END COMPONENT;
     
@@ -75,10 +76,10 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
    signal sm_triggerPE1 : std_logic := '0';
    signal sm_triggerPE2 : std_logic := '0';
    signal sm_triggerPE3 : std_logic := '0';
-   signal data_inject_PE0 : std_logic_vector(33 downto 0) := (others => '0');
-   signal data_inject_PE1 : std_logic_vector(33 downto 0) := (others => '0');
-   signal data_inject_PE2 : std_logic_vector(33 downto 0) := (others => '0');
-   signal data_inject_PE3 : std_logic_vector(33 downto 0) := (others => '0');
+   signal data_inject_PE0 : std_logic_vector(WIDTH downto 0) := (others => '0');
+   signal data_inject_PE1 : std_logic_vector(WIDTH downto 0) := (others => '0');
+   signal data_inject_PE2 : std_logic_vector(WIDTH downto 0) := (others => '0');
+   signal data_inject_PE3 : std_logic_vector(WIDTH downto 0) := (others => '0');
 
  	--Outputs
    signal full_PE0 : std_logic;
@@ -98,9 +99,12 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal trigger_0_cp 		: std_logic;
 	signal trigger_0_dp	   : std_logic;
 	signal pe0_Ready			: std_logic;
-	signal tid_RT0 			: std_logic_vector(15 downto 0);
-	signal rsv_port_RT0		: std_logic_vector(2 downto 0);
-	signal dst_address_RT0	: std_logic_vector(3 downto 0);
+	signal tid_RT0 			: std_logic_vector(SCH_WIDTH-1 downto 0);
+	signal dir_3_RT0			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_2_RT0			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_1_RT0			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_0_RT0			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal count_RT0			: std_logic_vector(1 downto 0);
 	signal packet_type_RT0	: std_logic_vector(1 downto 0);
 	
 	--Router 1
@@ -108,9 +112,12 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal trigger_1_cp 		: std_logic;
 	signal trigger_1_dp	   : std_logic;
 	signal pe1_Ready			: std_logic;
-	signal tid_RT1 			: std_logic_vector(15 downto 0);
-	signal rsv_port_RT1		: std_logic_vector(2 downto 0);
-	signal dst_address_RT1	: std_logic_vector(3 downto 0);
+	signal tid_RT1 			: std_logic_vector(SCH_WIDTH-1 downto 0);
+	signal dir_3_RT1			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_2_RT1			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_1_RT1			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_0_RT1			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal count_RT1			: std_logic_vector(1 downto 0);
 	signal packet_type_RT1	: std_logic_vector(1 downto 0);
 	
 	--Router 2
@@ -118,9 +125,12 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal trigger_2_cp 		: std_logic;
 	signal trigger_2_dp	   : std_logic;
 	signal pe2_Ready			: std_logic;
-	signal tid_RT2 			: std_logic_vector(15 downto 0);
-	signal rsv_port_RT2		: std_logic_vector(2 downto 0);
-	signal dst_address_RT2	: std_logic_vector(3 downto 0);
+	signal tid_RT2 			: std_logic_vector(SCH_WIDTH-1 downto 0);
+	signal dir_3_RT2			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_2_RT2			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_1_RT2			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_0_RT2			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal count_RT2			: std_logic_vector(1 downto 0);
 	signal packet_type_RT2	: std_logic_vector(1 downto 0);
 	
 	--Router 3
@@ -128,9 +138,12 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal trigger_3_cp 		: std_logic;
 	signal trigger_3_dp	   : std_logic;
 	signal pe3_Ready			: std_logic;
-	signal tid_RT3 			: std_logic_vector(15 downto 0);
-	signal rsv_port_RT3		: std_logic_vector(2 downto 0);
-	signal dst_address_RT3	: std_logic_vector(3 downto 0);
+	signal tid_RT3 			: std_logic_vector(SCH_WIDTH-1 downto 0);
+	signal dir_3_RT3			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_2_RT3			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_1_RT3			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal dir_0_RT3			: std_logic_vector(RSV_WIDTH-1 downto 0);
+	signal count_RT3			: std_logic_vector(1 downto 0);
 	signal packet_type_RT3	: std_logic_vector(1 downto 0);
 	
    -- Clock period definitions
@@ -220,67 +233,33 @@ BEGIN
 			
 			wait for clk_period_pe*2;
 			
-			--******************************--
-			--**Setup Router Watchdog Seed**--
-			--******************************--
-			tid_RT0 <= "0000000000001111";				--Router 0
-			rsv_port_RT0 <= "000";
-			dst_address_RT0 <= "0000";
-			packet_type_RT0 <= "11";
-			trigger_0_cp <= '1', '0' after 1 ns;
+--			--******************************--
+--			--**Setup Router Watchdog Seed**--
+--			--******************************--
+--			tid_RT0 <= "0000000000001111";				--Router 0
+--			rsv_port_RT0 <= "000";
+--			dst_address_RT0 <= "0000";
+--			packet_type_RT0 <= "11";
+--			trigger_0_cp <= '1', '0' after 1 ns;
+--			
+--			wait until pe0_Ready = '1';
+--			wait for clk_period_pe*2;
+--			
+--			-- Resets Internal Counters
+--			reset_RT0 <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*4;
 			
-			wait until pe0_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			-- Resets Internal Counters
-			reset_RT0 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*4;
-			
-			--***********************--
-			--**Setup Routing Table**--
-			--***********************--
-			
-			--**Routing Table[0]**--
-			tid_RT0 <= "0000000000001111";				--Router 0 [Direction for: RT0 (Go Ejection)]
-			packet_type_RT0 <= "10";
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait until pe0_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[1]**--
-			tid_RT0 <= "0000000000000011";				--Router 0 [Direction for: RT1 (Go East)]
-			packet_type_RT0 <= "10";
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait until pe0_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[2]**--
-			tid_RT0 <= "0000000000000101";				--Router 0 [Direction for: RT2 (Go South)]
-			packet_type_RT0 <= "10";
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait until pe0_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[3]**--
-			tid_RT0 <= "0000000000000011";				--Router 0 [Direction for: RT3 (Go East)]
-			packet_type_RT0 <= "10";
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait until pe0_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			reset_RT0 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*4;
 
 			--************************--
 			--**Setup Router Address**--
 			--************************--
-			tid_RT0 <= "0000000000000000";				--Router 0 [Address: 0]
+			tid_RT0 <= "00000000000000000000000000000000";				--Router 0 [Address: 0]
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "000";		--Not used
+			dir_1_RT0 <= "000";		--Not used
+			dir_0_RT0 <= "000";		--Not used
+			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "01";
 			trigger_0_cp <= '1', '0' after 1 ns;
 	
@@ -297,10 +276,13 @@ BEGIN
 	
 		if(router_start = '1') then
 			
-			--Send a control packet
-			tid_RT0 <= "0000000100000011";
-			rsv_port_RT0 <= "010";
-			dst_address_RT0 <= "0001";
+			--Send a control packet	
+			tid_RT0 <= "00000000000000000000000100000011";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
@@ -312,9 +294,12 @@ BEGIN
 			wait for clk_period_pe*2;
 			
 			--Send a control packet
-			tid_RT0 <= "1100000110000011";
-			rsv_port_RT0 <= "111";
-			dst_address_RT0 <= "0011";
+			tid_RT0 <= "00000000000000001100000110000011";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
@@ -326,8 +311,12 @@ BEGIN
 			wait for clk_period_pe*20;
 			
 			--Send its data packet
-			rsv_port_RT0 <= "010";
-			dst_address_RT0 <= "0001";
+			tid_RT0 <= "10000000000000000000000000000001";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
 			trigger_0_dp <= '1', '0' after 1 ns;
 			
@@ -356,67 +345,33 @@ BEGIN
 			
 			wait for clk_period_pe*2;
 			
-			--******************************--
-			--**Setup Router Watchdog Seed**--
-			--******************************--
-			tid_RT1 <= "0000000001000000";				--Router 1
-			rsv_port_RT1 <= "000";
-			dst_address_RT1 <= "0000";
-			packet_type_RT1 <= "11";
-			trigger_1_cp <= '1', '0' after 1 ns;
+--			--******************************--
+--			--**Setup Router Watchdog Seed**--
+--			--******************************--
+--			tid_RT1 <= "0000000001000000";				--Router 1
+--			rsv_port_RT1 <= "000";
+--			dst_address_RT1 <= "0000";
+--			packet_type_RT1 <= "11";
+--			trigger_1_cp <= '1', '0' after 1 ns;
+--			
+--			wait until pe1_Ready = '1';
+--			wait for clk_period_pe*2;
+--			
+--			-- Resets Internal Counters
+--			reset_RT1<= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*4;
 			
-			wait until pe1_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			-- Resets Internal Counters
-			reset_RT1<= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*4;
-			
-			--***********************--
-			--**Setup Routing Table**--
-			--***********************--
-			
-			--**Routing Table[0]**--
-			tid_RT1 <= "0000000000000111";				--Router 1 [Direction for: RT0 (Go West)]
-			packet_type_RT1 <= "10";
-			trigger_1_cp <= '1', '0' after 1 ns;
-			
-			wait until pe1_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[1]**--
-			tid_RT1 <= "0000000000001111";				--Router 1 [Direction for: RT1 (Go Ejection)]
-			packet_type_RT1 <= "10";
-			trigger_1_cp <= '1', '0' after 1 ns;
-			
-			wait until pe1_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[2]**--		
-			tid_RT1 <= "0000000000000111";				--Router 1 [Direction for: RT2 (Go West)]
-			packet_type_RT1 <= "10";
-			trigger_1_cp <= '1', '0' after 1 ns;
-			
-			wait until pe1_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[3]**--	
-			tid_RT1 <= "0000000000000101";				--Router 1 [Direction for: RT3 (Go South)]
-			packet_type_RT1 <= "10";
-			trigger_1_cp <= '1', '0' after 1 ns;
-			
-			wait until pe1_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			reset_RT1 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*4;
 
 			--************************--
 			--**Setup Router Address**--
 			--************************--
-			tid_RT1 <= "0000000000000001";				--Router 1 [Address: 1]
+			tid_RT1 <= "00000000000000000000000000000001";				--Router 1 [Address: 1]
+			dir_3_RT1 <= "000";		--Not used
+			dir_2_RT1 <= "000";		--Not used
+			dir_1_RT1 <= "000";		--Not used
+			dir_0_RT1 <= "000";		--Not used
+			count_RT1 <= "00";		--Default
 			packet_type_RT1 <= "01";
 			trigger_1_cp <= '1', '0' after 1 ns;
 		
@@ -437,14 +392,14 @@ BEGIN
 			
 			wait for clk_period_pe*2;
 			
-			loop
-				--Send GARBAGE data to Router 3
-				rsv_port_RT1 <= "010";
-				dst_address_RT1 <= "0011";
-				packet_type_RT1 <= "00";
-				trigger_1_dp <= '1', '0' after 1 ns;
-				wait until pe1_Ready = '1';
-			end loop;
+--			loop
+--				--Send GARBAGE data to Router 3
+--				rsv_port_RT1 <= "010";
+--				dst_address_RT1 <= "0011";
+--				packet_type_RT1 <= "00";
+--				trigger_1_dp <= '1', '0' after 1 ns;
+--				wait until pe1_Ready = '1';
+--			end loop;
 			--Done
 			router_start := '0';	
 			
@@ -471,67 +426,33 @@ BEGIN
 			
 			wait for clk_period_pe*2;
 			
-			--******************************--
-			--**Setup Router Watchdog Seed**--
-			--******************************--
-			tid_RT2 <= "0000000000001001";				--Router 2
-			rsv_port_RT2 <= "000";
-			dst_address_RT2 <= "0000";
-			packet_type_RT2 <= "11";
-			trigger_2_cp <= '1', '0' after 1 ns;
+--			--******************************--
+--			--**Setup Router Watchdog Seed**--
+--			--******************************--
+--			tid_RT2 <= "0000000000001001";				--Router 2
+--			rsv_port_RT2 <= "000";
+--			dst_address_RT2 <= "0000";
+--			packet_type_RT2 <= "11";
+--			trigger_2_cp <= '1', '0' after 1 ns;
+--			
+--			wait until pe2_Ready = '1';
+--			wait for clk_period_pe*2;
+--			
+--			-- Resets Internal Counters
+--			reset_RT2 <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*4;
 			
-			wait until pe2_Ready = '1';
-			wait for clk_period_pe*2;
 			
-			-- Resets Internal Counters
-			reset_RT2 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*4;
-			
-			--***********************--
-			--**Setup Routing Table**--
-			--***********************--
-			
-			--**Routing Table[0]**--
-			tid_RT2 <= "0000000000000001";				--Router 2 [Direction for: RT0 (Go North)]
-			packet_type_RT2 <= "10";
-			trigger_2_cp <= '1', '0' after 1 ns;
-			
-			wait until pe2_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[1]**--
-			tid_RT2 <= "0000000000000011";				--Router 2 [Direction for: RT1 (Go East)]
-			packet_type_RT2 <= "10";
-			trigger_2_cp <= '1', '0' after 1 ns;
-			
-			wait until pe2_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[2]**--
-			tid_RT2 <= "0000000000001111";				--Router 2 [Direction for: RT2 (Go Ejection)]
-			packet_type_RT2 <= "10";
-			trigger_2_cp <= '1', '0' after 1 ns;
-			
-			wait until pe2_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[3]**--
-			tid_RT2 <= "0000000000000011";				--Router 2 [Direction for: RT3 (Go East)]
-			packet_type_RT2 <= "10";
-			trigger_2_cp <= '1', '0' after 1 ns;
-	
-			wait until pe2_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			reset_RT2 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*4;
-
 			--************************--
 			--**Setup Router Address**--
 			--************************--
-			tid_RT2 <= "0000000000000010";				--Router 2 [Address: 2]
+			tid_RT2 <= "00000000000000000000000000000010";				--Router 2 [Address: 2]
+			dir_3_RT2 <= "000";		--Not used
+			dir_2_RT2 <= "000";		--Not used
+			dir_1_RT2 <= "000";		--Not used
+			dir_0_RT2 <= "000";		--Not used
+			count_RT2 <= "00";		--Default
 			packet_type_RT2 <= "01";
 			trigger_2_cp <= '1', '0' after 1 ns;
 			
@@ -548,14 +469,14 @@ BEGIN
 	
 		if(router_start = '1') then
 						
-			loop
-				--Send GARBAGE data to Router 3
-				rsv_port_RT2 <= "010";
-				dst_address_RT2 <= "0000";
-				packet_type_RT2 <= "00";
-				trigger_2_dp <= '1', '0' after 1 ns;
-				wait until pe2_Ready = '1';
-			end loop;
+--			loop
+--				--Send GARBAGE data to Router 3
+--				rsv_port_RT2 <= "010";
+--				dst_address_RT2 <= "0000";
+--				packet_type_RT2 <= "00";
+--				trigger_2_dp <= '1', '0' after 1 ns;
+--				wait until pe2_Ready = '1';
+--			end loop;
 			--Done
 			router_start := '0';	
 			
@@ -582,67 +503,32 @@ BEGIN
 			
 			wait for clk_period_pe*2;
 			
-			--******************************--
-			--**Setup Router Watchdog Seed**--
-			--******************************--
-			tid_RT3 <= "0000000000011001";				--Router 3
-			rsv_port_RT3 <= "000";
-			dst_address_RT3 <= "0000";
-			packet_type_RT3 <= "11";
-			trigger_3_cp <= '1', '0' after 1 ns;
-			
-			wait until pe3_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			-- Resets Internal Counters
-			reset_RT3 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*4;
-			
-			--***********************--
-			--**Setup Routing Table**--
-			--***********************--
-			
-			--**Routing Table[0]**--	
-			tid_RT3 <= "0000000000000001";				--Router 3 [Direction for: RT0 (Go North)]
-			packet_type_RT3 <= "10";
-			trigger_3_cp <= '1', '0' after 1 ns;
-			
-			wait until pe3_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[1]**--
-			tid_RT3 <= "0000000000000001";				--Router 3 [Direction for: RT1 (Go North)]
-			packet_type_RT3 <= "10";
-			trigger_3_cp <= '1', '0' after 1 ns;
-			
-			wait until pe3_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[2]**--
-			tid_RT3 <= "0000000000000111";				--Router 3 [Direction for: RT2 (Go West)]
-			packet_type_RT3 <= "10";
-			trigger_3_cp <= '1', '0' after 1 ns;
-			
-			wait until pe3_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			--**Routing Table[3]**--	
-			tid_RT3 <= "0000000000001111";				--Router 3 [Direction for: RT3 (Go West)]
-			packet_type_RT3 <= "10";
-			trigger_3_cp <= '1', '0' after 1 ns;
-			
-			wait until pe3_Ready = '1';
-			wait for clk_period_pe*2;
-			
-			reset_RT3 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*4;
+--			--******************************--
+--			--**Setup Router Watchdog Seed**--
+--			--******************************--
+--			tid_RT3 <= "0000000000011001";				--Router 3
+--			rsv_port_RT3 <= "000";
+--			dst_address_RT3 <= "0000";
+--			packet_type_RT3 <= "11";
+--			trigger_3_cp <= '1', '0' after 1 ns;
+--			
+--			wait until pe3_Ready = '1';
+--			wait for clk_period_pe*2;
+--			
+--			-- Resets Internal Counters
+--			reset_RT3 <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*4;
 
 			--************************--
 			--**Setup Router Address**--
 			--************************--
-			tid_RT3 <= "0000000000000011";				--Router 3 [Address: 3]
+			tid_RT3 <= "00000000000000000000000000000011";				--Router 3 [Address: 3]
+			dir_3_RT3 <= "000";		--Not used
+			dir_2_RT3 <= "000";		--Not used
+			dir_1_RT3 <= "000";		--Not used
+			dir_0_RT3 <= "000";		--Not used
+			count_RT3 <= "00";		--Default
 			packet_type_RT3 <= "01";
 			trigger_3_cp <= '1', '0' after 1 ns;
 			
@@ -684,15 +570,6 @@ BEGIN
 		
 	end process;
 
---*************************--
---**HOT INJECTION PROCESS**--
---*************************--
---	hot_inject: process(stim_start)
---	begin
---		if (stim_start = '1') then
---		
---		end if;
---	end process;
 
 --*****************************--
 --**ROUTER 0 STIMULUS PROCESS**--
@@ -716,13 +593,12 @@ BEGIN
 			pe0_Ready <= '1', '0' after 1 ns;
 		end if;
 		
-		
 		if (trigger_0_cp = '1' and done_PE0 = '0' and full_PE0 = '0') then
-			--**************************************************************************************************************************************************--
+			--****************************************************************************************************************************************************************--
 			--CONTROL PACKET
-			--PAYLOAD = 0xUUU (TID) : MID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0xUUU (RESERVE SOUTH) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00
-			--**************************************************************************************************************************************************--
-			data_inject_PE0 <= tid_RT0 & "0000" & c_pid & rsv_port_RT0 & dst_address_RT0 & packet_type_RT0 & "1";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 1
+			--****************************************************************************************************************************************************************--
+			data_inject_PE0 <= tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & c_pid & "0000" & packet_type_RT0 & "1";
 			sm_triggerPE0 <= '1';
 			
 			c_pid := c_pid + "0001";
@@ -730,11 +606,11 @@ BEGIN
 		end if;
 		
 		if (trigger_0_dp = '1' and done_PE0 = '0' and full_PE0 = '0') then
-			--**************************************************************************************************************************************************--
+			--****************************************************************************************************************************************************************--
 			--DATA PACKET
-			--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0xUUU (SOUTH RESERVED) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00
-			--**************************************************************************************************************************************************--
-			data_inject_PE0 <= "0000000000000000" & "0000" & d_pid & rsv_port_RT0 & dst_address_RT0 & packet_type_RT0 & "0";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 0
+			--****************************************************************************************************************************************************************--
+			data_inject_PE0 <= tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & c_pid & "0000" & packet_type_RT0 & "0";
 			sm_triggerPE0 <= '1';
 			
 			
@@ -769,11 +645,11 @@ end process;
 		
 		
 		if (trigger_1_cp = '1' and done_PE1 = '0' and full_PE1 = '0') then
-			--**************************************************************************************************************************************************--
+			--****************************************************************************************************************************************************************--
 			--CONTROL PACKET
-			--PAYLOAD = 0xUUU (TID) : MID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0xUUU (RESERVE SOUTH) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00
-			--**************************************************************************************************************************************************--
-			data_inject_PE1 <= tid_RT1 & "0000" & c_pid & rsv_port_RT1 & dst_address_RT1 & packet_type_RT1 & "1";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 1
+			--****************************************************************************************************************************************************************--
+			data_inject_PE1 <= tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & c_pid & "0001" & packet_type_RT1 & "1";
 			sm_triggerPE1 <= '1';
 			
 			c_pid := c_pid + "0001";
@@ -781,11 +657,11 @@ end process;
 		end if;
 		
 		if (trigger_1_dp = '1' and done_PE1 = '0' and full_PE1 = '0') then
-			--**************************************************************************************************************************************************--
+			--****************************************************************************************************************************************************************--
 			--DATA PACKET
-			--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0xUUU (SOUTH RESERVED) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00
-			--**************************************************************************************************************************************************--
-			data_inject_PE1 <= "0000000000000000" & "0000" & d_pid & rsv_port_RT1 & dst_address_RT1 & packet_type_RT1 & "0";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 0
+			--****************************************************************************************************************************************************************--
+			data_inject_PE1 <= tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & c_pid & "0001" & packet_type_RT1 & "0";
 			sm_triggerPE1 <= '1';
 			
 			
@@ -819,11 +695,11 @@ end process;
 		
 		
 		if (trigger_2_cp = '1' and done_PE2 = '0' and full_PE2 = '0') then
-			--**************************************************************************************************************************************************--
+			--****************************************************************************************************************************************************************--
 			--CONTROL PACKET
-			--PAYLOAD = 0xUUU (TID) : MID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0xUUU (RESERVE SOUTH) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00
-			--**************************************************************************************************************************************************--
-			data_inject_PE2 <= tid_RT2 & "0000" & c_pid & rsv_port_RT2 & dst_address_RT2 & packet_type_RT2 & "1";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 1
+			--****************************************************************************************************************************************************************--
+			data_inject_PE2 <= tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & c_pid & "0010" & packet_type_RT2 & "1";
 			sm_triggerPE2 <= '1';
 			
 			c_pid := c_pid + "0001";
@@ -831,11 +707,11 @@ end process;
 		end if;
 		
 		if (trigger_2_dp = '1' and done_PE2 = '0' and full_PE2 = '0') then
-			--**************************************************************************************************************************************************--
+			--****************************************************************************************************************************************************************--
 			--DATA PACKET
-			--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0xUUU (SOUTH RESERVED) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00
-			--**************************************************************************************************************************************************--
-			data_inject_PE2 <= "0000000000000000" & "0000" & d_pid & rsv_port_RT2 & dst_address_RT2 & packet_type_RT2 & "0";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 0
+			--****************************************************************************************************************************************************************--
+			data_inject_PE2 <= tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & c_pid & "0010" & packet_type_RT2 & "0";
 			sm_triggerPE2 <= '1';
 			
 			
@@ -869,11 +745,11 @@ end process;
 		
 		
 		if (trigger_3_cp = '1' and done_PE3 = '0' and full_PE3 = '0') then
-			--**************************************************************************************************************************************************--
+			--****************************************************************************************************************************************************************--
 			--CONTROL PACKET
-			--PAYLOAD = 0xUUU (TID) : MID = 0x01 (SOURCE)	: PID = 0x01 (PKT ID) :	DIR = 0xUUU (RESERVE SOUTH) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00
-			--**************************************************************************************************************************************************--
-			data_inject_PE3 <= tid_RT3 & "0000" & c_pid & rsv_port_RT3 & dst_address_RT3 & packet_type_RT3 & "1";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 1
+			--****************************************************************************************************************************************************************--
+			data_inject_PE3 <= tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & c_pid & "0011" & packet_type_RT3 & "1";
 			sm_triggerPE3 <= '1';
 			
 			c_pid := c_pid + "0001";
@@ -881,11 +757,11 @@ end process;
 		end if;
 		
 		if (trigger_3_dp = '1' and done_PE3 = '0' and full_PE3 = '0') then
-			--**************************************************************************************************************************************************--
+			--****************************************************************************************************************************************************************--
 			--DATA PACKET
-			--PAYLOAD = DON'T CARE (ANYTHING) : MID = 0x01 (SOURCE) : PID = 0x01 (PKT ID) : DIR = 0xUUU (SOUTH RESERVED) : ADDR = 0xUU (DST ROUTER ADDRESS) : COND = 0x00
-			--**************************************************************************************************************************************************--
-			data_inject_PE3 <= "0000000000000000" & "0000" & d_pid & rsv_port_RT3 & dst_address_RT3 & packet_type_RT3 & "0";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 0
+			--****************************************************************************************************************************************************************--
+			data_inject_PE3 <= tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & c_pid & "0011" & packet_type_RT3 & "0";
 			sm_triggerPE3 <= '1';
 			
 			

@@ -250,27 +250,6 @@ BEGIN
 --			
 --			wait for clk_period_pe*4;
 			
-
-			--************************--
-			--**Setup Router Address**--
-			--************************--
-			tid_RT0 <= "00000000000000000000000000000000";				--Router 0 [Address: 0]
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "000";		--Not used
-			dir_1_RT0 <= "000";		--Not used
-			dir_0_RT0 <= "000";		--Not used
-			count_RT0 <= "00";		--Default
-			packet_type_RT0 <= "01";
-			trigger_0_cp <= '1', '0' after 1 ns;
-	
-			wait until pe0_Ready = '1';						
-			wait for clk_period_pe*2;
-			
-			-- Resets Internal Counters			
-			reset_RT0 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*2;
-			
 			router_start := '1';
 		end if;
 	
@@ -362,26 +341,6 @@ BEGIN
 --			
 --			wait for clk_period_pe*4;
 			
-
-			--************************--
-			--**Setup Router Address**--
-			--************************--
-			tid_RT1 <= "00000000000000000000000000000001";				--Router 1 [Address: 1]
-			dir_3_RT1 <= "000";		--Not used
-			dir_2_RT1 <= "000";		--Not used
-			dir_1_RT1 <= "000";		--Not used
-			dir_0_RT1 <= "000";		--Not used
-			count_RT1 <= "00";		--Default
-			packet_type_RT1 <= "01";
-			trigger_1_cp <= '1', '0' after 1 ns;
-		
-			wait until pe1_Ready = '1';						
-			wait for clk_period_pe*2;
-			
-			-- Resets Internal Counters			
-			reset_RT1 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*2;
 			
 			router_start := '1';
 		end if;
@@ -443,27 +402,6 @@ BEGIN
 --			
 --			wait for clk_period_pe*4;
 			
-			
-			--************************--
-			--**Setup Router Address**--
-			--************************--
-			tid_RT2 <= "00000000000000000000000000000010";				--Router 2 [Address: 2]
-			dir_3_RT2 <= "000";		--Not used
-			dir_2_RT2 <= "000";		--Not used
-			dir_1_RT2 <= "000";		--Not used
-			dir_0_RT2 <= "000";		--Not used
-			count_RT2 <= "00";		--Default
-			packet_type_RT2 <= "01";
-			trigger_2_cp <= '1', '0' after 1 ns;
-			
-			wait until pe2_Ready = '1';						
-			wait for clk_period_pe*2;
-			
-			-- Resets Internal Counters			
-			reset_RT2 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*2;
-			
 			router_start := '1';
 		end if;
 	
@@ -519,26 +457,6 @@ BEGIN
 --			reset_RT3 <= '1', '0' after 1 ns;
 --			
 --			wait for clk_period_pe*4;
-
-			--************************--
-			--**Setup Router Address**--
-			--************************--
-			tid_RT3 <= "00000000000000000000000000000011";				--Router 3 [Address: 3]
-			dir_3_RT3 <= "000";		--Not used
-			dir_2_RT3 <= "000";		--Not used
-			dir_1_RT3 <= "000";		--Not used
-			dir_0_RT3 <= "000";		--Not used
-			count_RT3 <= "00";		--Default
-			packet_type_RT3 <= "01";
-			trigger_3_cp <= '1', '0' after 1 ns;
-			
-			wait until pe3_Ready = '1';						
-			wait for clk_period_pe*2;
-			
-			-- Resets Internal Counters			
-			reset_RT3 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*2;
 			
 			router_start := '1';
 		end if;

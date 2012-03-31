@@ -58,8 +58,7 @@ begin
 				slots_taken := slots_taken + 1;			--Increment
 			end if;
 			
-			if(purge = '1') then
-				rsv_table(addr_a) := "UUU";
+			if(we_a = '1' and purge = '1') then
 				slots_taken := slots_taken - 1;			--Decrement
 			end if;
 			
@@ -73,13 +72,9 @@ begin
 		if(rising_edge(clk)) then
 			if(we_b = '1' and table_full = '0' and purge = '0') then
 				rsv_table(addr_b) := data_b;
-				slots_taken := slots_taken + 1;			--Increment
+				--slots_taken := slots_taken + 1;			--Increment
 			end if;
 			
-			if(purge = '1') then
-				rsv_table(addr_b) := "UUU";
-				slots_taken := slots_taken - 1;			--Decrement
-			end if;
 			q_b <= rsv_table(addr_b);
 		end if;
 	end process;

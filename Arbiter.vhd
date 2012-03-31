@@ -139,8 +139,8 @@ architecture rtl of Arbiter is
 			  address_size	: natural);
    port (  	data_a 	: in	std_logic_vector(word_size-1 downto 0);
 				data_b	: in 	std_logic_vector(word_size-1 downto 0);
-			  	addr_a 	: in 	natural range 0 to address_size-1;
-				addr_b	: in 	natural range 0 to address_size-1;
+			  	addr_a 	: in 	natural range 0 to 2**address_size-1;
+				addr_b	: in 	natural range 0 to 2**address_size-1;
 				we_a		: in	std_logic := '1';
 				we_b		: in 	std_logic := '1';
 				clk		: in	std_logic;
@@ -156,8 +156,8 @@ architecture rtl of Arbiter is
 			  address_size : natural);
 	port ( 	data_a 	: in	std_logic_vector(word_size-1 downto 0);
 				data_b	: in 	std_logic_vector(word_size-1 downto 0);
-				addr_a 	: in 	natural range 0 to address_size-1;
-				addr_b	: in 	natural range 0 to address_size-1;
+				addr_a 	: in 	natural range 0 to 2**address_size-1;
+				addr_b	: in 	natural range 0 to 2**address_size-1;
 				we_a		: in	std_logic := '1';
 				we_b		: in 	std_logic := '1';
 				clk		: in	std_logic;

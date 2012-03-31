@@ -255,13 +255,13 @@ architecture Behavioral of ControlUnit is
 	
 	--Port Signal Handler Related
 	signal n_rst				: std_logic;
-	signal n_data_in_flg_set : std_logic;
+	signal n_pkt_in_flg_set : std_logic;
 	signal e_rst				: std_logic;
-	signal e_data_in_flg_set : std_logic;
+	signal e_pkt_in_flg_set : std_logic;
 	signal s_rst				: std_logic;
-	signal s_data_in_flg_set : std_logic;
+	signal s_pkt_in_flg_set : std_logic;
 	signal w_rst				: std_logic;
-	signal w_data_in_flg_set : std_logic;
+	signal w_pkt_in_flg_set : std_logic;
 	
 	--Switch Related
 	signal sw_n_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
@@ -879,9 +879,7 @@ begin
 		case state_injection_handler is
 				when start =>
 					sw_injt_toggle <= '0';
-					
-					sw_rnaCtDeq <= '0';
-					
+						
 					ns_injection_handler <= injection1;
 				when wait_state =>
 					ns_injection_handler <= injection1;
@@ -903,8 +901,7 @@ begin
 					ns_injection_handler <= injection5;
 				when injection5 =>
 					if(sw_injt_ack = '1') then
-						sw_rnaCtDeq <= '1', '0' after 1 ns;
-						ns_injection_handler <= injection1;
+						ns_injection_handler <= wait_state;
 					else
 						ns_injection_handler <= injection4;	--Keep trying (might need WDT eventually)
 					end if;
@@ -955,6 +952,9 @@ begin
 				e_invld_out <= '0';
 				s_invld_out <= '0';
 				w_invld_out <= '0';
+				
+				injt_dataGood <= '0';
+				sw_rnaCtDeq <= '0';
 				
 				ns_switch_handler <= north_sw1;
 			when north_sw1 =>
@@ -1128,8 +1128,7 @@ begin
 			when injection_sw1 =>
 				if(sw_injt_toggle = '1') then
 					sw_injt_ack <= '0';
-					injt_dataGood <= '0';
-					
+				
 					count:= sw_injt_pkt(12 downto 11);	--Get next hop
 					case count is
 						when "00" =>	
@@ -1149,11 +1148,13 @@ begin
 					ns_switch_handler <= north_sw1;
 				end if;
 			when injection_sw2 =>
-				--Send control packet
-				rna_ctrlPkt <= sw_injt_pkt;
-				
+			
 				if(sw_injt_pkt(0) = '1') then
 					--Configure the switch for CONTROL PACKETS
+					
+					--Send control packet
+					rna_ctrlPkt <= sw_injt_pkt;
+					
 					case direction is
 						when "000" =>
 							sw_nSel <= "111";			-- "00" North FIFO								
@@ -1166,8 +1167,6 @@ begin
 						when others =>	
 							null;
 					end case;
-					sw_injt_ack <= '1';
-					ns_switch_handler <= north_sw1;
 				else
 					--Configure the switch for DATA PACKETS
 					case direction is
@@ -1184,32 +1183,45 @@ begin
 					end case;
 					
 					injt_dataGood <= '1';
-					ns_switch_handler <= injection_sw3;
-				end if;
 				
+				end if;
+				ns_switch_handler <= injection_sw3;
+			
 			when injection_sw3 =>
 				ns_switch_handler <= injection_sw4;
 				
 			when injection_sw4 =>	
 					
-				if(n_data_in_flg_set = '1') then
-					--Ack
+				if(n_pkt_in_flg_set = '1') then
+					--Ack & Reset Signals
 					sw_injt_ack <= '1';
+					rna_CtrlPkt(0) <= '0';
+					injt_dataGood <= '0';
+					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					n_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= north_sw1;
-				elsif(e_data_in_flg_set = '1') then
-					--Ack
+				elsif(e_pkt_in_flg_set = '1') then
+					--Ack & Reset Signals
 					sw_injt_ack <= '1';
+					rna_CtrlPkt(0) <= '0';
+					injt_dataGood <= '0';
+					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					e_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= north_sw1;
-				elsif(s_data_in_flg_set = '1') then
-					--Ack
+				elsif(s_pkt_in_flg_set = '1') then
+					--Ack & Reset Signals
 					sw_injt_ack <= '1';
+					rna_CtrlPkt(0) <= '0';
+					injt_dataGood <= '0';
+					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					s_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= north_sw1;
-				elsif(w_data_in_flg_set = '1') then
-					--Ack
+				elsif(w_pkt_in_flg_set = '1') then
+					--Ack & Reset Signals
 					sw_injt_ack <= '1';
+					rna_CtrlPkt(0) <= '0';
+					injt_dataGood <= '0';
+					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					w_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= north_sw1;
 				else
@@ -1224,14 +1236,14 @@ begin
 	--************************************************************************
 	--north_signal_handler: Handles synchronization signals with neighbor
 	--************************************************************************
-	north_signal_handler:process(n_rst, s_CTRinFlg)
+	north_signal_handler:process(n_rst, n_CTRinFlg)
 	begin
 		if(n_rst = '1') then
-			n_data_in_flg_set <= '0';
+			n_pkt_in_flg_set <= '0';
 		end if;
 				
-		if(s_CTRinFlg = '1') then		--ACK back from SOUTH port (receiver)
-			n_data_in_flg_set <= '1';
+		if(n_CTRinFlg = '1') then		--ACK back from SOUTH port (receiver)
+			n_pkt_in_flg_set <= '1';
 		end if;
 	
 	end process;
@@ -1239,14 +1251,14 @@ begin
 	--************************************************************************
 	--east_signal_handler: Handles synchronization signals with neighbor
 	--************************************************************************
-	east_signal_handler:process(e_rst, w_CTRinFlg)
+	east_signal_handler:process(e_rst, e_CTRinFlg)
 	begin
 		if(e_rst = '1') then
-			e_data_in_flg_set <= '0';
+			e_pkt_in_flg_set <= '0';
 		end if;
 				
-		if(w_CTRinFlg = '1') then		--ACK back from WEST port (receiver)
-			e_data_in_flg_set <= '1';
+		if(e_CTRinFlg = '1') then		--ACK back from WEST port (receiver)
+			e_pkt_in_flg_set <= '1';
 		end if;
 	
 	end process;
@@ -1254,14 +1266,14 @@ begin
 	--************************************************************************
 	--south_signal_handler: Handles synchronization signals with neighbor
 	--************************************************************************
-	south_signal_handler:process(s_rst, n_CTRinFlg)
+	south_signal_handler:process(s_rst, s_CTRinFlg)
 	begin
 		if(s_rst = '1') then
-			s_data_in_flg_set <= '0';
+			s_pkt_in_flg_set <= '0';
 		end if;
 				
-		if(n_CTRinFlg = '1') then		--ACK back from NORTH port (receiver)
-			s_data_in_flg_set <= '1';
+		if(s_CTRinFlg = '1') then		--ACK back from NORTH port (receiver)
+			s_pkt_in_flg_set <= '1';
 		end if;
 	
 	end process;
@@ -1269,14 +1281,14 @@ begin
 	--************************************************************************
 	--west_signal_handler: Handles synchronization signals with neighbor
 	--************************************************************************
-	west_signal_handler:process(w_rst, e_CTRinFlg)
+	west_signal_handler:process(w_rst, w_CTRinFlg)
 	begin
 		if(w_rst = '1') then
-			w_data_in_flg_set <= '0';
+			w_pkt_in_flg_set <= '0';
 		end if;
 				
-		if(e_CTRinFlg = '1') then		--ACK back from EAST port (receiver)
-			w_data_in_flg_set <= '1';
+		if(w_CTRinFlg = '1') then		--ACK back from EAST port (receiver)
+			w_pkt_in_flg_set <= '1';
 		end if;
 	
 	end process;

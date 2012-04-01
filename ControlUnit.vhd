@@ -268,6 +268,15 @@ architecture Behavioral of ControlUnit is
 	signal i_rst				: std_logic;
 	signal i_pkt_in_flg_set : std_logic;
 	
+	--Signal synchronization
+	signal n_sync_rst			: std_logic;
+	signal n_sync_signal		: std_logic;
+	signal e_sync_rst			: std_logic;
+	signal e_sync_signal		: std_logic;
+	signal s_sync_rst			: std_logic;
+	signal s_sync_signal		: std_logic;
+	signal w_sync_rst			: std_logic;
+	signal w_sync_signal		: std_logic;
 	
 	--Switch Related
 	signal sw_n_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
@@ -421,6 +430,8 @@ begin
 					n_sch_table_purge <= '0';
 					sw_n_rna_toggle <= '0';
 					
+					n_sync_rst <= '1', '0' after 1 ns;
+					
 					ns_north_handler <= north1;
 				
 				when wait_state =>
@@ -486,8 +497,9 @@ begin
 				when north6 =>
 					ns_north_handler <= north7;
 				when north7 =>
-					if(sw_n_rna_ack = '1') then
+					if(n_sync_signal = '1') then
 						sw_n_rna_toggle <= '0';
+						n_sync_rst <= '1', '0' after 1 ns;
 						n_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
 						ns_north_handler <= north8;
 					else
@@ -551,6 +563,8 @@ begin
 					e_sch_wen_a	<= '0';
 					e_sch_table_purge <= '0';
 					sw_e_rna_toggle <= '0';
+					
+					e_sync_rst <= '1', '0' after 1 ns;
 					
 					ns_east_handler <= east1;
 				
@@ -616,8 +630,9 @@ begin
 				when east6 =>
 					ns_east_handler <= east7;
 				when east7 =>
-					if(sw_e_rna_ack = '1') then
+					if(e_sync_signal = '1') then
 						sw_e_rna_toggle <= '0';
+						e_sync_rst <= '1', '0' after 1 ns;
 						e_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 						ns_east_handler <= east8;
 					else
@@ -682,6 +697,8 @@ begin
 					s_sch_table_purge <= '0';
 					sw_s_rna_toggle <= '0';
 					
+					s_sync_rst <= '1', '0' after 1 ns;
+					
 					ns_south_handler <= south1;
 				when wait_state =>
 					ns_south_handler <= south1;
@@ -745,8 +762,9 @@ begin
 				when south6 =>
 					ns_south_handler <= south7;
 				when south7 =>
-					if(sw_s_rna_ack = '1') then
+					if(s_sync_signal = '1') then
 						sw_s_rna_toggle <= '0';
+						s_sync_rst <= '1', '0' after 1 ns;
 						s_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 						ns_south_handler <= south8;
 					else
@@ -811,6 +829,8 @@ begin
 					w_sch_table_purge <= '0';
 					sw_w_rna_toggle <= '0';
 					
+					w_sync_rst <= '1', '0' after 1 ns;
+					
 					ns_west_handler <= west1;
 				when wait_state =>
 					ns_west_handler <= west1;
@@ -873,8 +893,9 @@ begin
 				when west6 =>
 					ns_west_handler <= west7;
 				when west7 =>
-					if(sw_w_rna_ack = '1') then
+					if(w_sync_signal = '1') then
 						sw_w_rna_toggle <= '0';
+						w_sync_rst <= '1', '0' after 1 ns;
 						w_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 						ns_west_handler <= west8;
 					else
@@ -1013,7 +1034,6 @@ begin
 				ns_switch_handler <= north_sw1;
 			when north_sw1 =>
 				if(sw_n_rna_toggle = '1') then
-					sw_n_rna_ack <= '0';
 					count:= sw_n_rna_ctrlPkt(12 downto 11);	--Get next hop
 					case count is
 						when "00" =>	
@@ -1054,7 +1074,7 @@ begin
 				
 				if(direction = "111") then
 					--Ejection
-					sw_n_rna_ack <= '1';
+					sw_n_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					ns_switch_handler <= east_sw1;
 				else
@@ -1068,25 +1088,25 @@ begin
 					
 				if(n_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_n_rna_ack <= '1';
+					sw_n_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					n_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= east_sw1;
 				elsif(e_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_n_rna_ack <= '1';
+					sw_n_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					e_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= east_sw1;
 				elsif(s_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_n_rna_ack <= '1';
+					sw_n_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					s_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= east_sw1;
 				elsif(w_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_n_rna_ack <= '1';
+					sw_n_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					w_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= east_sw1;
@@ -1137,7 +1157,7 @@ begin
 				
 				if(direction = "111") then
 					--Ejection
-					sw_e_rna_ack <= '1';
+					sw_e_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					ns_switch_handler <= south_sw1;
 				else
@@ -1151,25 +1171,25 @@ begin
 					
 				if(n_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_e_rna_ack <= '1';
+					sw_e_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					n_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= south_sw1;
 				elsif(e_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_e_rna_ack <= '1';
+					sw_e_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					e_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= south_sw1;
 				elsif(s_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_e_rna_ack <= '1';
+					sw_e_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					s_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= south_sw1;
 				elsif(w_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_e_rna_ack <= '1';
+					sw_e_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					w_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= south_sw1;
@@ -1220,7 +1240,7 @@ begin
 				
 				if(direction = "111") then
 					--Ejection
-					sw_s_rna_ack <= '1';
+					sw_s_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					ns_switch_handler <= west_sw1;
 				else
@@ -1234,25 +1254,25 @@ begin
 					
 				if(n_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_s_rna_ack <= '1';
+					sw_s_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					n_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= west_sw1;
 				elsif(e_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_s_rna_ack <= '1';
+					sw_s_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					e_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= west_sw1;
 				elsif(s_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_s_rna_ack <= '1';
+					sw_s_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					s_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= west_sw1;
 				elsif(w_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_s_rna_ack <= '1';
+					sw_s_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					w_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= west_sw1;
@@ -1303,7 +1323,7 @@ begin
 				
 				if(direction = "111") then
 					--Ejection
-					sw_w_rna_ack <= '1';
+					sw_w_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					ns_switch_handler <= injection_sw1;
 				else
@@ -1317,25 +1337,25 @@ begin
 					
 				if(n_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_w_rna_ack <= '1';
+					sw_w_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					n_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= injection_sw1;
 				elsif(e_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_w_rna_ack <= '1';
+					sw_w_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					e_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= injection_sw1;
 				elsif(s_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_w_rna_ack <= '1';
+					sw_w_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					s_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= injection_sw1;
 				elsif(w_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
-					sw_w_rna_ack <= '1';
+					sw_w_rna_ack <= '1', '0' after 1 ns;
 					rna_CtrlPkt(0) <= '0';
 					w_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= injection_sw1;
@@ -1513,7 +1533,7 @@ begin
 	--************************************************************************
 	--inject_signal_handler: Handles synchronization signals for injection
 	--************************************************************************
-	injection_signal_handler:process(i_rst, sw_injt_ack)
+	injection_signal_sync:process(i_rst, sw_injt_ack)
 	begin
 		if(i_rst = '1') then
 			i_pkt_in_flg_set <= '0';
@@ -1523,5 +1543,62 @@ begin
 			i_pkt_in_flg_set <= '1';
 		end if;
 	
+	end process;
+	
+	
+	--************************************************************************
+	--north_signal_sync: Handles synchronization signals for north
+	--************************************************************************
+	north_signal_sync:process(n_sync_rst, sw_n_rna_ack)
+	begin
+		if(n_sync_rst = '1') then
+			n_sync_signal <= '0';
+		end if;
+		
+		if(sw_n_rna_ack = '1') then
+			n_sync_signal <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--east_signal_sync: Handles synchronization signals for north
+	--************************************************************************
+	east_signal_sync:process(e_sync_rst, sw_e_rna_ack)
+	begin
+		if(e_sync_rst = '1') then
+			e_sync_signal <= '0';
+		end if;
+		
+		if(sw_e_rna_ack = '1') then
+			e_sync_signal <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--south_signal_sync: Handles synchronization signals for north
+	--************************************************************************
+	south_signal_sync:process(s_sync_rst, sw_s_rna_ack)
+	begin
+		if(s_sync_rst = '1') then
+			s_sync_signal <= '0';
+		end if;
+		
+		if(sw_s_rna_ack = '1') then
+			s_sync_signal <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--west_signal_sync: Handles synchronization signals for north
+	--************************************************************************
+	west_signal_sync:process(w_sync_rst, sw_w_rna_ack)
+	begin
+		if(w_sync_rst = '1') then
+			w_sync_signal <= '0';
+		end if;
+		
+		if(sw_w_rna_ack = '1') then
+			w_sync_signal <= '1';
+		end if;
 	end process;
 end Behavioral;

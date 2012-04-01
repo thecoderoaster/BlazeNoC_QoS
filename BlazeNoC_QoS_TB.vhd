@@ -270,7 +270,7 @@ BEGIN
 			-- Resets Internal Counters			
 			reset_RT0 <= '1', '0' after 1 ns;
 			
-			wait for clk_period_pe*2;
+			wait for clk_period_pe*10;
 			
 			--Send a control packet
 			tid_RT0 <= "00000000000000001100000110000011";

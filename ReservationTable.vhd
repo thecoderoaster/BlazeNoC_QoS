@@ -34,6 +34,7 @@ entity ReservationTable is
 				we_a		: in	std_logic := '1';
 				we_b		: in 	std_logic := '1';
 				clk		: in	std_logic;
+				rst		: in  std_logic;
 				full		: out std_logic;
 				purge		: in  std_logic;
 				q_a 		: out std_logic_vector(word_size-1 downto 0);
@@ -46,20 +47,30 @@ architecture Behavioral of ReservationTable is
 	shared variable rsv_table : memory_type;
 	shared variable slots_taken : natural range 0 to 2**address_size-1;
 	signal table_full : std_logic;
+	signal portAWrite : std_logic;
+	signal portBWrite : std_logic; 
+	signal purgeA		: std_logic; 
+	signal purgeB		: std_logic;
 	
 begin
 
 	--Port A
-	process(clk)
+	process(clk, rst)
 	begin
+		
+		if(rising_edge(rst)) then
+			portAWrite <= '0';
+			purgeA <= '0';
+		end if;
+		
 		if(rising_edge(clk)) then
-			if(we_a = '1' and table_full = '0' and purge = '0') then
+			if(we_a = '1' and table_full = '0') then
 				rsv_table(addr_a) := data_a;
-				slots_taken := slots_taken + 1;			--Increment
+				portAWrite <= '1', '0' after 1 ns;
 			end if;
 			
-			if(we_a = '1' and purge = '1') then
-				slots_taken := slots_taken - 1;			--Decrement
+			if(purge = '1') then
+				purgeA <= '1', '0' after 1 ns;
 			end if;
 			
 			q_a <= rsv_table(addr_a);
@@ -67,19 +78,53 @@ begin
 	end process;
 	
 	--Port B
-	process(clk)
+	process(clk, rst)
 	begin
+		
+		if(rising_edge(rst)) then
+			portBWrite <= '0';
+			purgeB <= '0';
+		end if;
+	
 		if(rising_edge(clk)) then
-			if(we_b = '1' and table_full = '0' and purge = '0') then
+			if(we_b = '1' and table_full = '0') then
 				rsv_table(addr_b) := data_b;
-				--slots_taken := slots_taken + 1;			--Increment
+				portBWrite <= '1', '0' after 1 ns;
+			end if;
+			
+			if(purge = '1') then
+				purgeB <= '1', '0' after 1 ns;
 			end if;
 			
 			q_b <= rsv_table(addr_b);
 		end if;
 	end process;
 	
-	--Check Capacity of Table
+	--Capacity Monitor
+	process(rst, portAWrite, portBWrite, purgeA, purgeB)
+	begin
+		if(rst = '1') then
+			slots_taken := 0;
+		end if;
+	
+		if(portAWrite = '1' and purgeA = '0') then
+			slots_taken := slots_taken + 1;
+		end if;
+		
+		if(portBWrite = '1' and purgeA = '0') then
+			slots_taken := slots_taken + 1;
+		end if;
+		
+		if(portAWrite = '0' and purgeA = '1') then
+			slots_taken := slots_taken - 1;
+		end if;
+		
+		if(portBWrite = '0' and purgeB = '1') then
+			slots_taken := slots_taken - 1;
+		end if;
+	end process;
+	
+	--Always notify table capacity status
 	table_full <= '1' when (slots_taken = 256) else '0';
 	full <= '1' when (slots_taken = 256) else '0';
 	

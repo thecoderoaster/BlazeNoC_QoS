@@ -1,0 +1,5 @@
+vhdl work "BlazePackage.vhd"
+vhdl work "SchedulerTable.vhd"
+vhdl work "ReservationTable.vhd"
+vhdl work "ControlUnit.vhd"
+vhdl work "Arbiter.vhd"

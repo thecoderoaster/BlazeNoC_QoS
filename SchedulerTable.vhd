@@ -38,6 +38,7 @@ entity SchedulerTable is
 				rst		: in  std_logic;
 				full		: out std_logic;
 				purge		: in 	std_logic;
+				count		: out natural range 0 to 2**address_size-1;
 				q_a 		: out std_logic_vector(word_size-1 downto 0);
 				q_b 		: out std_logic_vector(word_size-1 downto 0));
 end SchedulerTable;
@@ -46,7 +47,8 @@ architecture Behavioral of SchedulerTable is
 	type memory_type is array(0 to 2**address_size-1) of
 		std_logic_vector(word_size-1 downto 0);
 	shared variable sch_table: memory_type;
-	shared variable slots_taken : natural range 0 to 2**address_size-1;
+	--shared variable slots_taken : natural range 0 to 2**address_size-1;
+	signal slots_taken : natural range 0 to 2**address_size-1;
 	signal table_full : std_logic;
 	signal portAWrite : std_logic;
 	signal portBWrite : std_logic; 
@@ -99,29 +101,30 @@ begin
 	process(rst, portAWrite, portBWrite, purgeA, purgeB)
 	begin
 		if(rst = '1') then
-			slots_taken := 0;
+			slots_taken <= 0;
 		end if;
 		
 		if(portAWrite = '1' and purgeA = '0') then
-			slots_taken := slots_taken + 1;
+			slots_taken <= slots_taken + 1;
 		end if;
 		
 		if(portBWrite = '1' and purgeA = '0') then
-			slots_taken := slots_taken + 1;
+			slots_taken <= slots_taken + 1;
 		end if;
 		
 		if(portAWrite = '0' and purgeA = '1') then
-			slots_taken := slots_taken - 1;
+			slots_taken <= slots_taken - 1;
 		end if;
 		
 		if(portBWrite = '0' and purgeB = '1') then
-			slots_taken := slots_taken - 1;
+			slots_taken <= slots_taken - 1;
 		end if;
 	end process;
 	
 	--Always notify table capacity status
 	table_full <= '1' when (slots_taken = 256) else '0';
 	full <= '1' when (slots_taken = 256) else '0';
+	count <= slots_taken;
 		
 end Behavioral;
 

@@ -165,6 +165,7 @@ architecture rtl of Arbiter is
 				rst		: in  std_logic;
 				full		: out std_logic;
 				purge		: in 	std_logic;
+				count		: out natural range 0 to 2**address_size-1;
 				q_a 		: out std_logic_vector(word_size-1 downto 0);
 				q_b 		: out std_logic_vector(word_size-1 downto 0)
 		   );
@@ -182,8 +183,8 @@ architecture rtl of Arbiter is
 			--North Set 
 			n_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
 			n_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
-			n_rsv_addr_a		: out natural range 0 to address_size-1;
-			n_rsv_addr_b		: out natural range 0 to address_size-1;
+			n_rsv_addr_a		: out natural range 0 to 2**address_size-1;
+			n_rsv_addr_b		: out natural range 0 to 2**address_size-1;
 			n_rsv_wen_a			: out std_logic;
 			n_rsv_wen_b			: out std_logic;
 			n_rsv_table_full	: in 	std_logic;
@@ -192,20 +193,21 @@ architecture rtl of Arbiter is
 			n_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
 			n_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
 			n_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
-			n_sch_addr_a		: out natural range 0 to address_size-1;
-			n_sch_addr_b		: out natural range 0 to address_size-1;
+			n_sch_addr_a		: out natural range 0 to 2**address_size-1;
+			n_sch_addr_b		: out natural range 0 to 2**address_size-1;
 			n_sch_wen_a			: out std_logic;
 			n_sch_wen_b			: out std_logic;
 			n_sch_table_full	: in std_logic;
 			n_sch_table_purge	: out std_logic;
+			n_sch_table_count	: in natural range 0 to 2**address_size-1;
 			n_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
 			n_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--East Set
 			e_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
 			e_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
-			e_rsv_addr_a		: out natural range 0 to address_size-1;
-			e_rsv_addr_b		: out natural range 0 to address_size-1;
+			e_rsv_addr_a		: out natural range 0 to 2**address_size-1;
+			e_rsv_addr_b		: out natural range 0 to 2**address_size-1;
 			e_rsv_wen_a			: out std_logic;
 			e_rsv_wen_b			: out std_logic;
 			e_rsv_table_full	: in 	std_logic;
@@ -214,20 +216,21 @@ architecture rtl of Arbiter is
 			e_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
 			e_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
 			e_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
-			e_sch_addr_a		: out natural range 0 to address_size-1;
-			e_sch_addr_b		: out natural range 0 to address_size-1;
+			e_sch_addr_a		: out natural range 0 to 2**address_size-1;
+			e_sch_addr_b		: out natural range 0 to 2**address_size-1;
 			e_sch_wen_a			: out std_logic;
 			e_sch_wen_b			: out std_logic;
 			e_sch_table_full	: in std_logic;
 			e_sch_table_purge	: out std_logic;
+			e_sch_table_count	: in natural range 0 to 2**address_size-1;
 			e_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
 			e_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--South Set
 			s_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
 			s_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
-			s_rsv_addr_a		: out natural range 0 to address_size-1;
-			s_rsv_addr_b		: out natural range 0 to address_size-1;
+			s_rsv_addr_a		: out natural range 0 to 2**address_size-1;
+			s_rsv_addr_b		: out natural range 0 to 2**address_size-1;
 			s_rsv_wen_a			: out std_logic;
 			s_rsv_wen_b			: out std_logic;
 			s_rsv_table_full	: in 	std_logic;
@@ -236,20 +239,21 @@ architecture rtl of Arbiter is
 			s_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
 			s_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
 			s_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
-			s_sch_addr_a		: out natural range 0 to address_size-1;
-			s_sch_addr_b		: out natural range 0 to address_size-1;
+			s_sch_addr_a		: out natural range 0 to 2**address_size-1;
+			s_sch_addr_b		: out natural range 0 to 2**address_size-1;
 			s_sch_wen_a			: out std_logic;
 			s_sch_wen_b			: out std_logic;
 			s_sch_table_full	: in std_logic;
 			s_sch_table_purge	: out std_logic;
+			s_sch_table_count	: in natural range 0 to 2**address_size-1;
 			s_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
 			s_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--West Set
 			w_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
 			w_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
-			w_rsv_addr_a		: out natural range 0 to address_size-1;
-			w_rsv_addr_b		: out natural range 0 to address_size-1;
+			w_rsv_addr_a		: out natural range 0 to 2**address_size-1;
+			w_rsv_addr_b		: out natural range 0 to 2**address_size-1;
 			w_rsv_wen_a			: out std_logic;
 			w_rsv_wen_b			: out std_logic;
 			w_rsv_table_full	: in 	std_logic;
@@ -258,12 +262,13 @@ architecture rtl of Arbiter is
 			w_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
 			w_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
 			w_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
-			w_sch_addr_a		: out natural range 0 to address_size-1;
-			w_sch_addr_b		: out natural range 0 to address_size-1;
+			w_sch_addr_a		: out natural range 0 to 2**address_size-1;
+			w_sch_addr_b		: out natural range 0 to 2**address_size-1;
 			w_sch_wen_a			: out std_logic;
 			w_sch_wen_b			: out std_logic;
 			w_sch_table_full	: in std_logic;
 			w_sch_table_purge	: out std_logic;
+			w_sch_table_count	: in natural range 0 to 2**address_size-1;
 			w_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
 			w_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
@@ -340,8 +345,8 @@ architecture rtl of Arbiter is
 	--ReservationTable Related
 	signal n_rsv_data_in_a		: std_logic_vector (RSV_WIDTH-1 downto 0);
 	signal n_rsv_data_in_b		: std_logic_vector (RSV_WIDTH-1 downto 0);
-	signal n_rsv_addr_a			: natural range 0 to ADDR_WIDTH-1;
-	signal n_rsv_addr_b			: natural range 0 to ADDR_WIDTH-1;
+	signal n_rsv_addr_a			: natural range 0 to 2**ADDR_WIDTH-1;
+	signal n_rsv_addr_b			: natural range 0 to 2**ADDR_WIDTH-1;
 	signal n_rsv_we_a				: std_logic;
 	signal n_rsv_we_b				: std_logic;
 	signal n_rsv_table_full		: std_logic;
@@ -351,8 +356,8 @@ architecture rtl of Arbiter is
 	
 	signal e_rsv_data_in_a		: std_logic_vector (RSV_WIDTH-1 downto 0);
 	signal e_rsv_data_in_b		: std_logic_vector (RSV_WIDTH-1 downto 0);
-	signal e_rsv_addr_a			: natural range 0 to ADDR_WIDTH-1;
-	signal e_rsv_addr_b			: natural range 0 to ADDR_WIDTH-1;
+	signal e_rsv_addr_a			: natural range 0 to 2**ADDR_WIDTH-1;
+	signal e_rsv_addr_b			: natural range 0 to 2**ADDR_WIDTH-1;
 	signal e_rsv_we_a				: std_logic;
 	signal e_rsv_we_b				: std_logic;
 	signal e_rsv_table_full		: std_logic;
@@ -362,8 +367,8 @@ architecture rtl of Arbiter is
 	
 	signal s_rsv_data_in_a		: std_logic_vector (RSV_WIDTH-1 downto 0);
 	signal s_rsv_data_in_b		: std_logic_vector (RSV_WIDTH-1 downto 0);
-	signal s_rsv_addr_a			: natural range 0 to ADDR_WIDTH-1;
-	signal s_rsv_addr_b			: natural range 0 to ADDR_WIDTH-1;
+	signal s_rsv_addr_a			: natural range 0 to 2**ADDR_WIDTH-1;
+	signal s_rsv_addr_b			: natural range 0 to 2**ADDR_WIDTH-1;
 	signal s_rsv_we_a				: std_logic;
 	signal s_rsv_we_b				: std_logic;
 	signal s_rsv_table_full		: std_logic;
@@ -373,8 +378,8 @@ architecture rtl of Arbiter is
 	
 	signal w_rsv_data_in_a		: std_logic_vector (RSV_WIDTH-1 downto 0);
 	signal w_rsv_data_in_b		: std_logic_vector (RSV_WIDTH-1 downto 0);
-	signal w_rsv_addr_a			: natural range 0 to ADDR_WIDTH-1;
-	signal w_rsv_addr_b			: natural range 0 to ADDR_WIDTH-1;
+	signal w_rsv_addr_a			: natural range 0 to 2**ADDR_WIDTH-1;
+	signal w_rsv_addr_b			: natural range 0 to 2**ADDR_WIDTH-1;
 	signal w_rsv_we_a				: std_logic;
 	signal w_rsv_we_b				: std_logic;
 	signal w_rsv_table_full		: std_logic;
@@ -385,45 +390,49 @@ architecture rtl of Arbiter is
 	--SchedulerTable Related
 	signal n_sch_data_in_a		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	signal n_sch_data_in_b		: std_logic_vector (SCH_WIDTH-1 downto 0);
-	signal n_sch_addr_a			: natural range 0 to ADDR_WIDTH-1;
-	signal n_sch_addr_b			: natural range 0 to ADDR_WIDTH-1;
+	signal n_sch_addr_a			: natural range 0 to 2**ADDR_WIDTH-1;
+	signal n_sch_addr_b			: natural range 0 to 2**ADDR_WIDTH-1;
 	signal n_sch_we_a				: std_logic;
 	signal n_sch_we_b				: std_logic;
 	signal n_sch_table_full		: std_logic;
 	signal n_sch_table_purge	: std_logic;
+	signal n_sch_table_count	: natural range 0 to 2**ADDR_WIDTH-1;
 	signal n_sch_data_out_a		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	signal n_sch_data_out_b		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	
 	signal e_sch_data_in_a		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	signal e_sch_data_in_b		: std_logic_vector (SCH_WIDTH-1 downto 0);
-	signal e_sch_addr_a			: natural range 0 to ADDR_WIDTH-1;
-	signal e_sch_addr_b			: natural range 0 to ADDR_WIDTH-1;
+	signal e_sch_addr_a			: natural range 0 to 2**ADDR_WIDTH-1;
+	signal e_sch_addr_b			: natural range 0 to 2**ADDR_WIDTH-1;
 	signal e_sch_we_a				: std_logic;
 	signal e_sch_we_b				: std_logic;
 	signal e_sch_table_full		: std_logic;
 	signal e_sch_table_purge	: std_logic;
+	signal e_sch_table_count	: natural range 0 to 2**ADDR_WIDTH-1;
 	signal e_sch_data_out_a		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	signal e_sch_data_out_b		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	
 	signal s_sch_data_in_a		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	signal s_sch_data_in_b		: std_logic_vector (SCH_WIDTH-1 downto 0);
-	signal s_sch_addr_a			: natural range 0 to ADDR_WIDTH-1;
-	signal s_sch_addr_b			: natural range 0 to ADDR_WIDTH-1;
+	signal s_sch_addr_a			: natural range 0 to 2**ADDR_WIDTH-1;
+	signal s_sch_addr_b			: natural range 0 to 2**ADDR_WIDTH-1;
 	signal s_sch_we_a				: std_logic;
 	signal s_sch_we_b				: std_logic;
 	signal s_sch_table_full		: std_logic;
 	signal s_sch_table_purge	: std_logic;
+	signal s_sch_table_count	: natural range 0 to 2**ADDR_WIDTH-1;
 	signal s_sch_data_out_a		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	signal s_sch_data_out_b		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	
 	signal w_sch_data_in_a		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	signal w_sch_data_in_b		: std_logic_vector (SCH_WIDTH-1 downto 0);
-	signal w_sch_addr_a			: natural range 0 to ADDR_WIDTH-1;
-	signal w_sch_addr_b			: natural range 0 to ADDR_WIDTH-1;
+	signal w_sch_addr_a			: natural range 0 to 2**ADDR_WIDTH-1;
+	signal w_sch_addr_b			: natural range 0 to 2**ADDR_WIDTH-1;
 	signal w_sch_we_a				: std_logic;
 	signal w_sch_we_b				: std_logic;
 	signal w_sch_table_full		: std_logic;
 	signal w_sch_table_purge	: std_logic;
+	signal w_sch_table_count	: natural range 0 to 2**ADDR_WIDTH-1;
 	signal w_sch_data_out_a		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	signal w_sch_data_out_b		: std_logic_vector (SCH_WIDTH-1 downto 0);
 	
@@ -457,40 +466,40 @@ begin
 		generic map (SCH_WIDTH, ADDR_WIDTH)
 		port map (n_sch_data_in_a, n_sch_data_in_b, n_sch_addr_a, n_sch_addr_b,
 					 n_sch_we_a, n_sch_we_b, clk, reset, n_sch_table_full, n_sch_table_purge, 
-					 n_sch_data_out_a, n_sch_data_out_b);
+					 n_sch_table_count, n_sch_data_out_a, n_sch_data_out_b);
 	
 	E_SchTable: SchedulerTable
 		generic map (SCH_WIDTH, ADDR_WIDTH)
 		port map (e_sch_data_in_a, e_sch_data_in_b, e_sch_addr_a, e_sch_addr_b,
 					 e_sch_we_a, e_sch_we_b, clk, reset, e_sch_table_full, e_sch_table_purge, 
-					 e_sch_data_out_a, e_sch_data_out_b);
+					 e_sch_table_count, e_sch_data_out_a, e_sch_data_out_b);
 					 
 	S_SchTable: SchedulerTable
 		generic map (SCH_WIDTH, ADDR_WIDTH)
 		port map (s_sch_data_in_a, s_sch_data_in_b, s_sch_addr_a, s_sch_addr_b,
 					 s_sch_we_a, s_sch_we_b, clk, reset, s_sch_table_full, s_sch_table_purge, 
-					 s_sch_data_out_a, s_sch_data_out_b);
+					 s_sch_table_count, s_sch_data_out_a, s_sch_data_out_b);
 		
 	W_SchTable: SchedulerTable
 		generic map (SCH_WIDTH, ADDR_WIDTH)
 		port map (w_sch_data_in_a, w_sch_data_in_b, w_sch_addr_a, w_sch_addr_b,
 					 w_sch_we_a, w_sch_we_b, clk, reset, w_sch_table_full, w_sch_table_purge, 
-					 w_sch_data_out_a, w_sch_data_out_b);
+					 w_sch_table_count, w_sch_data_out_a, w_sch_data_out_b);
 	
 	Control	: ControlUnit
 		generic map (WIDTH, ADDR_WIDTH, RSV_WIDTH, SCH_WIDTH)
 		port map (clk, reset, n_rsv_data_out_a, n_rsv_data_out_b, n_rsv_addr_a, n_rsv_addr_b, n_rsv_we_a, n_rsv_we_b,
 					 n_rsv_table_full, n_rsv_table_purge, n_rsv_data_in_a, n_rsv_data_in_b, n_sch_data_out_a, n_sch_data_out_b, 
-					 n_sch_addr_a,	n_sch_addr_b, n_sch_we_a, n_sch_we_b, n_sch_table_full, n_sch_table_purge, n_sch_data_in_a, 
+					 n_sch_addr_a,	n_sch_addr_b, n_sch_we_a, n_sch_we_b, n_sch_table_full, n_sch_table_purge, n_sch_table_count, n_sch_data_in_a, 
 					 n_sch_data_in_b, e_rsv_data_out_a, e_rsv_data_out_b, e_rsv_addr_a, e_rsv_addr_b, e_rsv_we_a, e_rsv_we_b,
 					 e_rsv_table_full, e_rsv_table_purge, e_rsv_data_in_a, e_rsv_data_in_b, e_sch_data_out_a, e_sch_data_out_b, 
-					 e_sch_addr_a,	e_sch_addr_b, e_sch_we_a, e_sch_we_b, e_sch_table_full, e_sch_table_purge, e_sch_data_in_a, 
+					 e_sch_addr_a,	e_sch_addr_b, e_sch_we_a, e_sch_we_b, e_sch_table_full, e_sch_table_purge, e_sch_table_count, e_sch_data_in_a, 
 					 e_sch_data_in_b, s_rsv_data_out_a, s_rsv_data_out_b, s_rsv_addr_a, s_rsv_addr_b, s_rsv_we_a, s_rsv_we_b,
 					 s_rsv_table_full, s_rsv_table_purge, s_rsv_data_in_a, s_rsv_data_in_b, s_sch_data_out_a, s_sch_data_out_b, 
-					 s_sch_addr_a, s_sch_addr_b, s_sch_we_a, s_sch_we_b, s_sch_table_full, s_sch_table_purge, s_sch_data_in_a, 
+					 s_sch_addr_a, s_sch_addr_b, s_sch_we_a, s_sch_we_b, s_sch_table_full, s_sch_table_purge, s_sch_table_count, s_sch_data_in_a, 
 					 s_sch_data_in_b, w_rsv_data_out_a, w_rsv_data_out_b, w_rsv_addr_a, w_rsv_addr_b, w_rsv_we_a, w_rsv_we_b,
 					 w_rsv_table_full, w_rsv_table_purge, w_rsv_data_in_a, w_rsv_data_in_b, w_sch_data_out_a, w_sch_data_out_b, 
-					 w_sch_addr_a, w_sch_addr_b, w_sch_we_a, w_sch_we_b, w_sch_table_full, w_sch_table_purge, w_sch_data_in_a, 
+					 w_sch_addr_a, w_sch_addr_b, w_sch_we_a, w_sch_we_b, w_sch_table_full, w_sch_table_purge, w_sch_table_count, w_sch_data_in_a, 
 					 w_sch_data_in_b,
 					 n_vc_deq, n_vc_rnaSelI, n_vc_rnaSelO, n_vc_rnaSelS, n_vc_strq, n_vc_status, n_invld_out, n_invld_in,
 					 e_vc_deq, e_vc_rnaSelI, e_vc_rnaSelO, e_vc_rnaSelS, e_vc_strq, e_vc_status, e_invld_out, e_invld_in,

@@ -265,10 +265,9 @@ BEGIN
 			packet_type_RT0 <= "00";
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
-			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
-			reset_RT0 <= '1', '0' after 1 ns;
+			--reset_RT0 <= '1', '0' after 1 ns;
 			
 			wait for clk_period_pe*10;
 			

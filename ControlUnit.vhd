@@ -46,8 +46,8 @@ entity ControlUnit is
 			--North Set 
 			n_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
 			n_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
-			n_rsv_addr_a		: out natural range 0 to address_size-1;
-			n_rsv_addr_b		: out natural range 0 to address_size-1;
+			n_rsv_addr_a		: out natural range 0 to 2**address_size-1;
+			n_rsv_addr_b		: out natural range 0 to 2**address_size-1;
 			n_rsv_wen_a			: out std_logic;
 			n_rsv_wen_b			: out std_logic;
 			n_rsv_table_full	: in 	std_logic;
@@ -56,20 +56,21 @@ entity ControlUnit is
 			n_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
 			n_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
 			n_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
-			n_sch_addr_a		: out natural range 0 to address_size-1;
-			n_sch_addr_b		: out natural range 0 to address_size-1;
+			n_sch_addr_a		: out natural range 0 to 2**address_size-1;
+			n_sch_addr_b		: out natural range 0 to 2**address_size-1;
 			n_sch_wen_a			: out std_logic;
 			n_sch_wen_b			: out std_logic;
 			n_sch_table_full	: in std_logic;
 			n_sch_table_purge	: out std_logic;
+			n_sch_table_count	: in natural range 0 to 2**address_size-1;
 			n_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
 			n_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--East Set
 			e_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
 			e_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
-			e_rsv_addr_a		: out natural range 0 to address_size-1;
-			e_rsv_addr_b		: out natural range 0 to address_size-1;
+			e_rsv_addr_a		: out natural range 0 to 2**address_size-1;
+			e_rsv_addr_b		: out natural range 0 to 2**address_size-1;
 			e_rsv_wen_a			: out std_logic;
 			e_rsv_wen_b			: out std_logic;
 			e_rsv_table_full	: in 	std_logic;
@@ -78,20 +79,21 @@ entity ControlUnit is
 			e_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
 			e_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
 			e_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
-			e_sch_addr_a		: out natural range 0 to address_size-1;
-			e_sch_addr_b		: out natural range 0 to address_size-1;
+			e_sch_addr_a		: out natural range 0 to 2**address_size-1;
+			e_sch_addr_b		: out natural range 0 to 2**address_size-1;
 			e_sch_wen_a			: out std_logic;
 			e_sch_wen_b			: out std_logic;
 			e_sch_table_full	: in std_logic;
 			e_sch_table_purge	: out std_logic;
+			e_sch_table_count	: in natural range 0 to 2**address_size-1;
 			e_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
 			e_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--South Set
 			s_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
 			s_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
-			s_rsv_addr_a		: out natural range 0 to address_size-1;
-			s_rsv_addr_b		: out natural range 0 to address_size-1;
+			s_rsv_addr_a		: out natural range 0 to 2**address_size-1;
+			s_rsv_addr_b		: out natural range 0 to 2**address_size-1;
 			s_rsv_wen_a			: out std_logic;
 			s_rsv_wen_b			: out std_logic;
 			s_rsv_table_full	: in 	std_logic;
@@ -100,20 +102,21 @@ entity ControlUnit is
 			s_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
 			s_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
 			s_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
-			s_sch_addr_a		: out natural range 0 to address_size-1;
-			s_sch_addr_b		: out natural range 0 to address_size-1;
+			s_sch_addr_a		: out natural range 0 to 2**address_size-1;
+			s_sch_addr_b		: out natural range 0 to 2**address_size-1;
 			s_sch_wen_a			: out std_logic;
 			s_sch_wen_b			: out std_logic;
 			s_sch_table_full	: in std_logic;
 			s_sch_table_purge	: out std_logic;
+			s_sch_table_count	: in natural range 0 to 2**address_size-1;
 			s_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
 			s_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
 			--West Set
 			w_rsv_data_in_a	: in 	std_logic_vector (rsv_size-1 downto 0);
 			w_rsv_data_in_b	: in 	std_logic_vector (rsv_size-1 downto 0);
-			w_rsv_addr_a		: out natural range 0 to address_size-1;
-			w_rsv_addr_b		: out natural range 0 to address_size-1;
+			w_rsv_addr_a		: out natural range 0 to 2**address_size-1;
+			w_rsv_addr_b		: out natural range 0 to 2**address_size-1;
 			w_rsv_wen_a			: out std_logic;
 			w_rsv_wen_b			: out std_logic;
 			w_rsv_table_full	: in 	std_logic;
@@ -122,12 +125,13 @@ entity ControlUnit is
 			w_rsv_data_out_b	: out std_logic_vector (rsv_size-1 downto 0);
 			w_sch_data_in_a	: in 	std_logic_vector (sch_size-1 downto 0);
 			w_sch_data_in_b	: in 	std_logic_vector (sch_size-1 downto 0);
-			w_sch_addr_a		: out natural range 0 to address_size-1;
-			w_sch_addr_b		: out natural range 0 to address_size-1;
+			w_sch_addr_a		: out natural range 0 to 2**address_size-1;
+			w_sch_addr_b		: out natural range 0 to 2**address_size-1;
 			w_sch_wen_a			: out std_logic;
 			w_sch_wen_b			: out std_logic;
 			w_sch_table_full	: in std_logic;
 			w_sch_table_purge	: out std_logic;
+			w_sch_table_count	: in natural range 0 to 2**address_size-1;
 			w_sch_data_out_a	: out std_logic_vector (sch_size-1 downto 0);
 			w_sch_data_out_b	: out std_logic_vector (sch_size-1 downto 0);
 			
@@ -212,7 +216,9 @@ architecture Behavioral of ControlUnit is
 							  east_sw1, east_sw2, east_sw3, east_sw4,
 							  south_sw1, south_sw2, south_sw3, south_sw4,
 							  west_sw1, west_sw2, west_sw3, west_sw4,
-							  injection_sw1, injection_sw2, injection_sw3, injection_sw4);   -- State FSM
+							  injection_sw1, injection_sw2, injection_sw3, injection_sw4,
+							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
+							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9);   -- State FSM
 	
 	signal state_north_handler: state_type;
 	signal state_east_handler: state_type;
@@ -221,6 +227,8 @@ architecture Behavioral of ControlUnit is
 	signal state_injection_handler: state_type;
 	signal state_scheduler_handler: state_type;
 	signal state_switch_handler: state_type;
+	signal state_west_sorting_handler: state_type;
+	signal state_w_scheduler_handler: state_type;
 	
 	signal ns_north_handler: state_type;
 	signal ns_east_handler: state_type;
@@ -229,15 +237,15 @@ architecture Behavioral of ControlUnit is
 	signal ns_injection_handler: state_type;
 	signal ns_scheduler_handler: state_type;
 	signal ns_switch_handler: state_type;
+	signal ns_west_sorting_handler: state_type;
+	signal ns_w_scheduler_handler: state_type;
 	
 	signal router_address 	: std_logic_vector(PID_WIDTH-1 downto 0);
 
 	--Timer Related Signals
 	signal globaltime			: std_logic_vector(31 downto 0);
-	signal counter 			: std_logic_vector(31 downto 0);
 	signal timeunit1 			: std_logic_vector(31 downto 0);
 	signal timeunit2 			: std_logic_vector(31 downto 0);
-	signal start_timer 		: std_logic;
 	signal time_expired  	: std_logic;
 	
 	--Departure Itinerary
@@ -278,6 +286,23 @@ architecture Behavioral of ControlUnit is
 	signal w_sync_rst			: std_logic;
 	signal w_sync_signal		: std_logic;
 	
+	--Scheduling Related
+	signal w_index 					: natural range 0 to 2**address_size-1;
+	signal w_next_sch_job_midpid 	: natural range 0 to 2**address_size-1;
+	signal w_next_sch_job_time		: std_logic_vector(sch_size-1 downto 0);	
+	signal w_purge_sch_job			: std_logic;
+	signal w_purge_midpid			: natural range 0 to 2**address_size-1;
+	signal w_new_midpid				: natural range 0 to 2**address_size-1;
+	signal w_midgid_scheduled		: natural range 0 to 2**address_size-1;
+	signal w_new_job_ready			: std_logic;
+	signal w_request_next_job		: std_logic;
+	signal w_current_job_expired 	: std_logic;
+	signal w_pkt_expires_in			: std_logic_vector(sch_size-1 downto 0);
+	signal w_dpkt_arrived			: std_logic;
+	signal w_departed_ack			: std_logic;
+	signal w_start_timer 				: std_logic;
+	
+	
 	--Switch Related
 	signal sw_n_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
 	signal sw_e_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
@@ -288,6 +313,8 @@ architecture Behavioral of ControlUnit is
 	signal sw_e_rna_toggle : std_logic;
 	signal sw_s_rna_toggle : std_logic;
 	signal sw_w_rna_toggle : std_logic;
+	
+	signal sw_w_depart_toggle : std_logic;
 	
 	signal sw_injt_pkt 		: std_logic_vector (pkt_size downto 0);
 	signal sw_injt_toggle 	: std_logic;
@@ -302,10 +329,7 @@ architecture Behavioral of ControlUnit is
 	signal sw_s_count			: std_logic_vector (1 downto 0);
 	signal sw_w_count			: std_logic_vector (1 downto 0);
 	
-	
-	
 
-	
 begin
 
 	--************************************************************************
@@ -322,7 +346,7 @@ begin
 			timeunit1 <= timeunit1 + "00000000000000000000000000000001";
 			if(timeunit1 = "0000000000000000000000111110") then
 			--if(timeunit1 = "0000011000101010") then				-- 3052 periods = 30.518 us ~ 32.768 kHz (RTC)
-				globaltime <= globaltime + "0000000000000001";
+				globaltime <= globaltime + "00000000000000000000000000000001";
 				timeunit1 <= "00000000000000000000000000000000";
 			end if;
 		end if;
@@ -330,31 +354,34 @@ begin
 
 
 	--************************************************************************
-	--timebase_process: 	Creates a "stopwatch" for establishing a timebase that
+	--w_timebase_process: 	Creates a "stopwatch" for establishing a timebase that
 	--							the packet transfers process requires to ensure QoS.
 	--************************************************************************
-	timebase_process: process(clk, rst)
+	w_timebase_process: process(clk, rst)
+		variable counter 			: std_logic_vector(31 downto 0);
+		variable timeunit			: std_logic_vector(31 downto 0);
+		variable expires_in		: std_logic_vector(31 downto 0);
 	begin
 	
 		if rst = '1' then
-			counter <= std_logic_vector(to_unsigned(0, counter'length));
-			time_expired <= '0';
-			timeunit2 <= std_logic_vector(to_unsigned(0, timeunit2'length));
+			counter := std_logic_vector(to_unsigned(0, counter'length));
+			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
+			w_current_job_expired <= '0';
 			
 		elsif rising_edge(clk) then
-			if(start_timer = '1' and time_expired = '0') then
-				timeunit2 <= timeunit2 + "00000000000000000000000000000001";
-				time_expired <= '0';
-				if(timeunit2 = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
-					counter <= counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
-					if(counter = scheduled_pkt_expires_in) then
-						counter <= "00000000000000000000000000000000";
-						time_expired <= '1';
+			if(w_start_timer = '1' and w_current_job_expired = '0') then
+				timeunit := timeunit + "00000000000000000000000000000001";
+				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
+					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
+					if(counter = w_pkt_expires_in) then
+						counter := "00000000000000000000000000000000";
+						w_current_job_expired <= '1';
+					else
+						timeunit := "00000000000000000000000000000000";
 					end if;
-					timeunit2 <= "00000000000000000000000000000000";
 				end if;
-			elsif(start_timer = '0' and time_expired = '1') then
-				time_expired <= '0';
+			elsif(w_start_timer = '0' and w_current_job_expired = '1') then
+				w_current_job_expired <= '0';
 			end if;
 		end if;
 	end process;
@@ -400,6 +427,7 @@ begin
 			state_injection_handler <= start;
 			state_scheduler_handler <= start;
 			state_switch_handler <= start;
+			state_west_sorting_handler <= start;
 		else
 			state_north_handler <= ns_north_handler;
 			state_east_handler <= ns_east_handler;
@@ -408,6 +436,7 @@ begin
 			state_injection_handler <= ns_injection_handler;
 			state_scheduler_handler <= ns_scheduler_handler;
 			state_switch_handler <= ns_switch_handler;
+			state_west_sorting_handler <= ns_west_sorting_handler;
 		end if;
 	end process;
 	
@@ -879,6 +908,9 @@ begin
 					w_sch_addr_a <= conv_integer(w_rnaCtrl(10 downto 3));
 					w_rsv_wen_a <= '1';
 					w_sch_wen_a <= '1';
+					
+					--Notify sorting process of new job
+					w_new_midpid <= conv_integer(w_rnaCtrl(10 downto 3));
 										
 					ns_west_handler <= west5;
 				when west5 =>
@@ -936,6 +968,14 @@ begin
 				when west11 =>
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
+					
+					--Notify scheduler if this packet is set to depart soon
+					if(w_midgid_scheduled = conv_integer(w_rnaCtrl(10 downto 3))) then
+						w_dpkt_arrived <= '1';
+					else
+						w_dpkt_arrived <= '0';
+					end if;
+					
 					ns_west_handler <= wait_state;
 				when others =>
 					ns_west_handler <= wait_state;
@@ -985,11 +1025,145 @@ begin
 			end case;
 	end process;
 	
+--	--************************************************************************	
+--	--n_scheduler_handler - Handles all scheduling related tasks on North Port
+--	--************************************************************************
+--	n_scheduler_handler:process(state_scheduler_handler)
+--	begin
+--	end process;
+
 	--************************************************************************	
-	--n_scheduler_handler - Handles all scheduling related tasks on North Port
+	--w_scheduler_handler - Handles all scheduling related tasks on West Port
 	--************************************************************************
-	n_scheduler_handler:process(state_scheduler_handler)
+	w_scheduler_handler:process(state_w_scheduler_handler)
 	begin
+		case state_w_scheduler_handler is
+			when start =>
+				w_request_next_job <= '0';
+				ns_w_scheduler_handler <= schedule1;
+			when wait_state =>
+				ns_w_scheduler_handler <= schedule1;
+			when schedule1 =>
+				if(w_current_job_expired = '0') then
+					w_request_next_job <= '1';
+					ns_w_scheduler_handler <= schedule3;
+				else
+					w_request_next_job <= '0';
+					ns_w_scheduler_handler <= wait_state;
+				end if;
+			when schedule2 =>
+				ns_w_scheduler_handler <= schedule3;
+			when schedule3 =>
+				if(w_new_job_ready = '1') then
+					w_request_next_job <= '0';
+					ns_w_scheduler_handler <= schedule4;
+				else
+					ns_w_scheduler_handler <= schedule2;
+				end if;
+			when schedule4 =>
+				w_pkt_expires_in <= w_next_sch_job_time;
+				w_midgid_scheduled <= w_next_sch_job_midpid;
+				w_start_timer <= '1';
+				ns_w_scheduler_handler <= schedule6;
+			when schedule5 =>
+				ns_w_scheduler_handler <= schedule6;
+			when schedule6 =>
+				if(w_current_job_expired = '1' or w_dpkt_arrived = '1') then
+					w_start_timer <= '0';
+					ns_w_scheduler_handler <= schedule8;		--Job expired!
+				else	
+					ns_w_scheduler_handler <= schedule5;		--Not yet...
+				end if;
+			when schedule7 =>
+				ns_w_scheduler_handler <= schedule9;			--Wait for ack...
+			when schedule8 =>
+				--Initiate data packet transfer
+				sw_w_depart_toggle <= '1';
+				ns_w_scheduler_handler <= schedule9;
+			when schedule9 =>
+				if(w_departed_ack = '1') then
+					sw_w_depart_toggle <= '0';
+					ns_w_scheduler_handler <= wait_state;
+				else
+					ns_w_scheduler_handler <= schedule7;
+				end if;
+			when others =>
+				ns_w_scheduler_handler <= start;
+		end case;
+	end process;
+	
+	--************************************************************************	
+	--w_sorting_handler - Handles all schedule sorting for West Port
+	--************************************************************************
+	w_sorting_handler:process(state_west_sorting_handler)
+	
+	begin
+		case state_west_sorting_handler is
+			when start =>
+				w_sch_wen_b <= '0';
+				w_new_job_ready <= '0';
+			
+				ns_west_sorting_handler <= sort1;
+				
+			when wait_state =>
+				ns_west_sorting_handler <= sort1;
+			when sort1 =>
+				--Did job finish? Purge location in scheduler?
+				if(w_purge_sch_job = '1') then
+					w_sch_addr_b <= w_purge_midpid;
+					w_sch_data_out_b <= "00000000000000000000000000000000";
+					w_sch_wen_b <= '1';
+								
+					ns_west_sorting_handler <= sort2;
+				else
+					ns_west_sorting_handler <= sort3;
+				end if;
+			when sort2 =>
+				w_sch_wen_b <= '0';
+				--Reset Signals
+				ns_west_sorting_handler <= sort3;
+			when sort3 =>
+				if(w_sch_table_count > 0) then
+					w_sch_addr_b <= w_index;
+					ns_west_sorting_handler <= sort4;
+				else
+					w_index <= 0;
+					ns_west_sorting_handler <= wait_state;
+				end if;
+			when sort4 =>
+				--Take first item
+				w_next_sch_job_time <= w_sch_data_in_b;
+				w_next_sch_job_midpid <= w_index;
+				w_index <= w_index + 1;		
+				ns_west_sorting_handler <= sort5;
+			when sort5 =>
+				if(w_index /= 256) then
+					w_sch_addr_b <= w_index;
+					ns_west_sorting_handler <= sort6;
+				else
+					w_index <= 0;
+					ns_west_sorting_handler <= sort7;
+				end if;
+			when sort6 =>
+				if(w_sch_data_in_b < w_next_sch_job_time and (w_sch_data_in_b(31 downto 0) /= 0)) then
+					w_next_sch_job_time <= w_sch_data_in_b;
+					w_next_sch_job_midpid <= w_new_midpid;
+				end if;
+		
+				w_index <= w_index + 1;
+				ns_west_sorting_handler <= sort5;
+			when sort7 =>
+				--Is there a new job request? Issue it, if so.
+				if(w_request_next_job = '1') then
+					w_new_job_ready <= '1';
+				else
+					w_new_job_ready <= '0';
+				end if;
+						
+				ns_west_sorting_handler <= wait_state;
+			when others =>
+				ns_west_sorting_handler <= start;
+		end case;
 	end process;
 	
 	--switch_handler - Handles all switch related tasks

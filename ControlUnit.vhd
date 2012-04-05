@@ -217,6 +217,7 @@ architecture Behavioral of ControlUnit is
 							  south_sw1, south_sw2, south_sw3, south_sw4,
 							  west_sw1, west_sw2, west_sw3, west_sw4,
 							  injection_sw1, injection_sw2, injection_sw3, injection_sw4,
+							  depart_w_sw1, depart_w_sw2, depart_w_sw3, depart_w_sw4, depart_w_sw5,
 							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
 							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9);   -- State FSM
 	
@@ -291,18 +292,21 @@ architecture Behavioral of ControlUnit is
 	signal w_next_sch_job_midpid 	: natural range 0 to 2**address_size-1;
 	signal w_next_sch_job_time		: std_logic_vector(sch_size-1 downto 0);	
 	signal w_purge_sch_job			: std_logic;
+	signal w_pktprg_rst				: std_logic;
+	signal w_pktprg_signal			: std_logic;
 	signal w_purge_midpid			: natural range 0 to 2**address_size-1;
-	signal w_new_midpid				: natural range 0 to 2**address_size-1;
 	signal w_midgid_scheduled		: natural range 0 to 2**address_size-1;
 	signal w_new_job_ready			: std_logic;
 	signal w_request_next_job		: std_logic;
 	signal w_current_job_expired 	: std_logic;
 	signal w_pkt_expires_in			: std_logic_vector(sch_size-1 downto 0);
 	signal w_dpkt_arrived			: std_logic;
+	signal w_pktarr_rst				: std_logic;
+	signal w_pktarr_signal			: std_logic;
 	signal w_departed_ack			: std_logic;
-	signal w_start_timer 				: std_logic;
+	signal w_start_timer 			: std_logic;
 	
-	
+
 	--Switch Related
 	signal sw_n_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
 	signal sw_e_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
@@ -382,6 +386,10 @@ begin
 				end if;
 			elsif(w_start_timer = '0' and w_current_job_expired = '1') then
 				w_current_job_expired <= '0';
+			elsif(w_start_timer = '0' and w_current_job_expired = '0') then
+				w_current_job_expired <= '0';
+				counter := std_logic_vector(to_unsigned(0, counter'length));
+				timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			end if;
 		end if;
 	end process;
@@ -426,6 +434,7 @@ begin
 			state_west_handler <= start;
 			state_injection_handler <= start;
 			state_scheduler_handler <= start;
+			state_w_scheduler_handler <= start;
 			state_switch_handler <= start;
 			state_west_sorting_handler <= start;
 		else
@@ -435,6 +444,7 @@ begin
 			state_west_handler <= ns_west_handler;
 			state_injection_handler <= ns_injection_handler;
 			state_scheduler_handler <= ns_scheduler_handler;
+			state_w_scheduler_handler <= ns_w_scheduler_handler;
 			state_switch_handler <= ns_switch_handler;
 			state_west_sorting_handler <= ns_west_sorting_handler;
 		end if;
@@ -857,6 +867,7 @@ begin
 					w_sch_wen_a	<= '0';
 					w_sch_table_purge <= '0';
 					sw_w_rna_toggle <= '0';
+					w_dpkt_arrived <= '0';
 					
 					w_sync_rst <= '1', '0' after 1 ns;
 					
@@ -908,9 +919,6 @@ begin
 					w_sch_addr_a <= conv_integer(w_rnaCtrl(10 downto 3));
 					w_rsv_wen_a <= '1';
 					w_sch_wen_a <= '1';
-					
-					--Notify sorting process of new job
-					w_new_midpid <= conv_integer(w_rnaCtrl(10 downto 3));
 										
 					ns_west_handler <= west5;
 				when west5 =>
@@ -971,7 +979,7 @@ begin
 					
 					--Notify scheduler if this packet is set to depart soon
 					if(w_midgid_scheduled = conv_integer(w_rnaCtrl(10 downto 3))) then
-						w_dpkt_arrived <= '1';
+						w_dpkt_arrived <= '1', '0' after 1 ns;
 					else
 						w_dpkt_arrived <= '0';
 					end if;
@@ -1040,6 +1048,9 @@ begin
 		case state_w_scheduler_handler is
 			when start =>
 				w_request_next_job <= '0';
+				w_purge_sch_job <= '0';
+				w_pktarr_rst <= '0';
+				
 				ns_w_scheduler_handler <= schedule1;
 			when wait_state =>
 				ns_w_scheduler_handler <= schedule1;
@@ -1068,7 +1079,8 @@ begin
 			when schedule5 =>
 				ns_w_scheduler_handler <= schedule6;
 			when schedule6 =>
-				if(w_current_job_expired = '1' or w_dpkt_arrived = '1') then
+				if(w_current_job_expired = '1' or w_pktarr_signal = '1') then
+					w_pktarr_rst <= '1', '0' after 1 ns;
 					w_start_timer <= '0';
 					ns_w_scheduler_handler <= schedule8;		--Job expired!
 				else	
@@ -1083,6 +1095,10 @@ begin
 			when schedule9 =>
 				if(w_departed_ack = '1') then
 					sw_w_depart_toggle <= '0';
+					
+					--Purge data from scheduler
+					w_purge_sch_job <= '1', '0' after 1 ns;
+					w_purge_midpid <= w_midgid_scheduled;
 					ns_w_scheduler_handler <= wait_state;
 				else
 					ns_w_scheduler_handler <= schedule7;
@@ -1102,6 +1118,7 @@ begin
 			when start =>
 				w_sch_wen_b <= '0';
 				w_new_job_ready <= '0';
+				w_pktprg_rst <= '0';
 			
 				ns_west_sorting_handler <= sort1;
 				
@@ -1109,9 +1126,10 @@ begin
 				ns_west_sorting_handler <= sort1;
 			when sort1 =>
 				--Did job finish? Purge location in scheduler?
-				if(w_purge_sch_job = '1') then
+				if(w_pktprg_signal = '1') then
+					w_pktprg_rst <= '1', '0' after 1 ns;
 					w_sch_addr_b <= w_purge_midpid;
-					w_sch_data_out_b <= "00000000000000000000000000000000";
+					w_sch_data_out_b <= "11111111111111111111111111111111";	
 					w_sch_wen_b <= '1';
 								
 					ns_west_sorting_handler <= sort2;
@@ -1147,7 +1165,7 @@ begin
 			when sort6 =>
 				if(w_sch_data_in_b < w_next_sch_job_time and (w_sch_data_in_b(31 downto 0) /= 0)) then
 					w_next_sch_job_time <= w_sch_data_in_b;
-					w_next_sch_job_midpid <= w_new_midpid;
+					w_next_sch_job_midpid <= w_index;
 				end if;
 		
 				w_index <= w_index + 1;
@@ -1204,6 +1222,8 @@ begin
 				
 				injt_dataGood <= '0';
 				sw_rnaCtDeq <= '0';
+				
+				w_departed_ack <= '0';
 				
 				ns_switch_handler <= north_sw1;
 			when north_sw1 =>
@@ -1556,7 +1576,7 @@ begin
 					
 					ns_switch_handler <= injection_sw2;
 				else
-					ns_switch_handler <= north_sw1;
+					ns_switch_handler <= depart_w_sw1;
 				end if;
 			when injection_sw2 =>
 			
@@ -1610,7 +1630,7 @@ begin
 					injt_dataGood <= '0';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					n_rst <= '1', '0' after 1 ns;
-					ns_switch_handler <= north_sw1;
+					ns_switch_handler <= depart_w_sw1;
 				elsif(e_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
 					sw_injt_ack <= '1', '0' after 1 ns;
@@ -1618,7 +1638,7 @@ begin
 					injt_dataGood <= '0';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					e_rst <= '1', '0' after 1 ns;
-					ns_switch_handler <= north_sw1;
+					ns_switch_handler <= depart_w_sw1;
 				elsif(s_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
 					sw_injt_ack <= '1', '0' after 1 ns;
@@ -1626,7 +1646,7 @@ begin
 					injt_dataGood <= '0';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					s_rst <= '1', '0' after 1 ns;
-					ns_switch_handler <= north_sw1;
+					ns_switch_handler <= depart_w_sw1;
 				elsif(w_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
 					sw_injt_ack <= '1', '0' after 1 ns;
@@ -1634,11 +1654,63 @@ begin
 					injt_dataGood <= '0';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					w_rst <= '1', '0' after 1 ns;
-					ns_switch_handler <= north_sw1;
+					ns_switch_handler <= depart_w_sw1;
 				else
 					ns_switch_handler <= injection_sw3;
 				end if;
+			when depart_w_sw1 =>
+				if(sw_w_depart_toggle = '1') then
+					--Grab reservation table details
+					w_rsv_addr_b <= conv_integer(w_midgid_scheduled);
+					ns_switch_handler <= depart_w_sw2;
+				else
+					w_departed_ack <= '0';
+					ns_switch_handler <= north_sw1;
+				end if;
+			when depart_w_sw2 =>	
+				--Control VCC Output and Switch to move Data Packet out
+				case w_rsv_data_in_b(2 downto 0) is
+					when "000" =>
+						w_vc_rnaSelO <= "00";
+						sw_nSel <= "011"; 						--North
+					when "001" =>
+						w_vc_rnaSelO <= "01";
+						sw_eSel <= "011";							--East
+					when "010" =>
+						w_vc_rnaSelO <= "10";
+						sw_sSel <= "011";							--South
+					when "111" =>
+						w_vc_rnaSelO <= "11";
+						sw_ejectSel <= "011";					--Ejection
+					when others =>
+						null;
+				end case;
 				
+				ns_switch_handler <= depart_w_sw4;
+			when depart_w_sw3 =>
+				--Wait state
+				ns_switch_handler <= depart_w_sw4;
+			when depart_w_sw4 =>
+				--Check for ack
+				if(n_pkt_in_flg_set = '1' or e_pkt_in_flg_set = '1' or s_pkt_in_flg_set = '1' or w_pkt_in_flg_set = '1') then
+					w_departed_ack <= '1';
+					w_rst <= '1', '0' after 1 ns;
+					case w_rsv_data_in_b(2 downto 0) is
+						when "000" =>
+							n_vc_deq <= '1', '0' after 1 ns;		-- "00" North FIFO 							
+						when "001" =>	
+							e_vc_deq <= '1', '0' after 1 ns;		-- "01" East FIFO
+						when "010" =>
+							s_vc_deq <= '1', '0' after 1 ns;		-- "10" South FIFO
+						when "011" =>
+							w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
+						when others =>
+							null;
+					end case;
+					ns_switch_handler <= north_sw1;
+				else
+					ns_switch_handler <= depart_w_sw3;
+				end if;				
 			when others =>
 				ns_switch_handler <= north_sw1;
 		end case;
@@ -1773,6 +1845,34 @@ begin
 		
 		if(sw_w_rna_ack = '1') then
 			w_sync_signal <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--west_pktarrived_sync: Handles dpkt arrived signal for west
+	--************************************************************************
+	west_pktarrived_sync:process(w_pktarr_rst, w_dpkt_arrived)
+	begin
+		if(w_pktarr_rst = '1') then
+			w_pktarr_signal <= '0';
+		end if;
+		
+		if(w_dpkt_arrived = '1') then
+			w_pktarr_signal <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--west_pktpurge_sync: Handles purge signal for west
+	--************************************************************************
+	west_pktpurge_sync:process(w_pktprg_rst, w_purge_sch_job)
+	begin
+		if(w_pktprg_rst = '1') then
+			w_pktprg_signal <= '0';
+		end if;
+		
+		if(w_purge_sch_job = '1') then
+			w_pktprg_signal <= '1';
 		end if;
 	end process;
 end Behavioral;

@@ -10,3 +10,96 @@ Simulator is doing circuit initialization process.
 at 0 ps, Instance /blazenoc_qos_tb/uut/Router0/vcNorth/FIFO_A/ : Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
 Finished circuit initialization process.
 # restart
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+Stopped at time : 10865 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1130
+# restart
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+Stopped at time : 10865 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1130
+# run all
+Stopped at time : 10875 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1140
+# run all
+Stopped at time : 16015 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 21175 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 26335 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1176
+# run all
+Stopped at time : 26355 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1130
+# run all
+Stopped at time : 26365 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1140
+# run all
+Stopped at time : 31505 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 36665 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 41825 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 46985 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 52145 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 57305 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 62465 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 67625 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 72785 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 77945 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 83105 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 88265 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 93425 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 98585 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 103745 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 108905 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 114065 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 119225 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 124385 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 129545 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 134705 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 139865 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 145025 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 150185 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 155345 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 160505 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 165665 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 170825 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 175985 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 181145 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 186305 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 191465 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 196625 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 201785 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 206945 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ControlUnit.vhd" Line 1178
+# run all
+Stopped at time : 557645 ns : File "C:/Users/kor/Documents/BlazeNoC_QoS/ReservationTable.vhd" Line 84

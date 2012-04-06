@@ -1,0 +1,3 @@
+vhdl work "BlazePackage.vhd"
+vhdl work "Buffer.vhd"
+vhdl work "virtual_channel.vhd"

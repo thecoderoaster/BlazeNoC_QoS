@@ -288,7 +288,7 @@ architecture Behavioral of ControlUnit is
 	signal w_sync_signal		: std_logic;
 	
 	--Scheduling Related
-	signal w_index 					: natural range 0 to 2**address_size-1;
+	signal w_index 					: natural range 0 to 2**address_size;
 	signal w_next_sch_job_midpid 	: natural range 0 to 2**address_size-1;
 	signal w_next_sch_job_time		: std_logic_vector(sch_size-1 downto 0);	
 	signal w_purge_sch_job			: std_logic;
@@ -297,7 +297,10 @@ architecture Behavioral of ControlUnit is
 	signal w_purge_midpid			: natural range 0 to 2**address_size-1;
 	signal w_midgid_scheduled		: natural range 0 to 2**address_size-1;
 	signal w_new_job_ready			: std_logic;
+	signal w_jobrdy_rst				: std_logic;
+	signal w_jobrdy_signal			: std_logic;
 	signal w_request_next_job		: std_logic;
+	signal w_next_sch_job_valid 	: std_logic;
 	signal w_current_job_expired 	: std_logic;
 	signal w_pkt_expires_in			: std_logic_vector(sch_size-1 downto 0);
 	signal w_dpkt_arrived			: std_logic;
@@ -1050,6 +1053,7 @@ begin
 				w_request_next_job <= '0';
 				w_purge_sch_job <= '0';
 				w_pktarr_rst <= '0';
+				w_jobrdy_rst <= '0';
 				
 				ns_w_scheduler_handler <= schedule1;
 			when wait_state =>
@@ -1065,7 +1069,8 @@ begin
 			when schedule2 =>
 				ns_w_scheduler_handler <= schedule3;
 			when schedule3 =>
-				if(w_new_job_ready = '1') then
+				if(w_jobrdy_signal = '1') then
+					w_jobrdy_rst <= '1', '0' after 1 ns;
 					w_request_next_job <= '0';
 					ns_w_scheduler_handler <= schedule4;
 				else
@@ -1112,13 +1117,14 @@ begin
 	--w_sorting_handler - Handles all schedule sorting for West Port
 	--************************************************************************
 	w_sorting_handler:process(state_west_sorting_handler)
-	
+		variable w_last_scheduled : natural range 0 to 2**address_size := 256;
 	begin
 		case state_west_sorting_handler is
 			when start =>
 				w_sch_wen_b <= '0';
 				w_new_job_ready <= '0';
 				w_pktprg_rst <= '0';
+				w_next_sch_job_valid <= '0';
 			
 				ns_west_sorting_handler <= sort1;
 				
@@ -1152,7 +1158,12 @@ begin
 				--Take first item
 				w_next_sch_job_time <= w_sch_data_in_b;
 				w_next_sch_job_midpid <= w_index;
-				w_index <= w_index + 1;		
+				w_index <= w_index + 1;
+				if(w_sch_data_in_b(31 downto 0) > 0 and (w_last_scheduled /= w_index)) then
+					w_next_sch_job_valid <= '1';
+				else
+					w_next_sch_job_valid <= '0';
+				end if;
 				ns_west_sorting_handler <= sort5;
 			when sort5 =>
 				if(w_index /= 256) then
@@ -1163,17 +1174,23 @@ begin
 					ns_west_sorting_handler <= sort7;
 				end if;
 			when sort6 =>
-				if(w_sch_data_in_b < w_next_sch_job_time and (w_sch_data_in_b(31 downto 0) /= 0)) then
+				if(w_sch_data_in_b < w_next_sch_job_time and (w_sch_data_in_b(31 downto 0) > 0)) then
 					w_next_sch_job_time <= w_sch_data_in_b;
 					w_next_sch_job_midpid <= w_index;
+					if(w_index /= w_next_sch_job_midpid) then
+						w_next_sch_job_valid <= '1';			--Ensure that you're not reading the same location
+					else
+						w_next_sch_job_valid <= '0';			--If so, don't issue the request.
+					end if;
 				end if;
 		
 				w_index <= w_index + 1;
 				ns_west_sorting_handler <= sort5;
 			when sort7 =>
 				--Is there a new job request? Issue it, if so.
-				if(w_request_next_job = '1') then
-					w_new_job_ready <= '1';
+				if(w_request_next_job = '1' and w_next_sch_job_valid = '1') then
+					w_last_scheduled := w_index;
+					w_new_job_ready <= '1', '0' after 1 ns;
 				else
 					w_new_job_ready <= '0';
 				end if;
@@ -1686,31 +1703,44 @@ begin
 						null;
 				end case;
 				
+				--injt_dataGood <= '1';
 				ns_switch_handler <= depart_w_sw4;
 			when depart_w_sw3 =>
 				--Wait state
 				ns_switch_handler <= depart_w_sw4;
 			when depart_w_sw4 =>
 				--Check for ack
-				if(n_pkt_in_flg_set = '1' or e_pkt_in_flg_set = '1' or s_pkt_in_flg_set = '1' or w_pkt_in_flg_set = '1') then
+				if(n_pkt_in_flg_set = '1') then
+					w_departed_ack <= '1';
+					n_rst <= '1', '0' after 1 ns;
+					--injt_dataGood <= '0';
+					ns_switch_handler <= depart_w_sw5;
+				elsif(e_pkt_in_flg_set = '1') then
+					w_departed_ack <= '1';
+					e_rst <= '1', '0' after 1 ns;
+					--injt_dataGood <= '0';
+					ns_switch_handler <= depart_w_sw5;
+				elsif(s_pkt_in_flg_set = '1') then
+					w_departed_ack <= '1';
+					s_rst <= '1', '0' after 1 ns;
+					w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
+					sw_sSel <= "000";
+					ns_switch_handler <= north_sw1;
+					--injt_dataGood <= '0';
+					--ns_switch_handler <= depart_w_sw5;
+				elsif(w_pkt_in_flg_set = '1') then
 					w_departed_ack <= '1';
 					w_rst <= '1', '0' after 1 ns;
-					case w_rsv_data_in_b(2 downto 0) is
-						when "000" =>
-							n_vc_deq <= '1', '0' after 1 ns;		-- "00" North FIFO 							
-						when "001" =>	
-							e_vc_deq <= '1', '0' after 1 ns;		-- "01" East FIFO
-						when "010" =>
-							s_vc_deq <= '1', '0' after 1 ns;		-- "10" South FIFO
-						when "011" =>
-							w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
-						when others =>
-							null;
-					end case;
-					ns_switch_handler <= north_sw1;
+					--injt_dataGood <= '0';
+					ns_switch_handler <= depart_w_sw5;
 				else
 					ns_switch_handler <= depart_w_sw3;
-				end if;				
+				end if;
+			when depart_w_sw5 =>
+				--Dequeue
+				w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
+				
+				ns_switch_handler <= north_sw1;
 			when others =>
 				ns_switch_handler <= north_sw1;
 		end case;
@@ -1873,6 +1903,20 @@ begin
 		
 		if(w_purge_sch_job = '1') then
 			w_pktprg_signal <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--west_jobready_sync: Handles job ready signal for west
+	--************************************************************************
+	west_jobready_sync:process(w_jobrdy_rst, w_new_job_ready)
+	begin
+		if(w_jobrdy_rst = '1') then
+			w_jobrdy_signal <= '0';
+		end if;
+		
+		if(w_new_job_ready = '1') then
+			w_jobrdy_signal <= '1';
 		end if;
 	end process;
 end Behavioral;

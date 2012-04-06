@@ -53,7 +53,7 @@ end Fifo_mxn;
 architecture rtl of FIFO_MXN is
 
 	-- signals
-	signal 	hdCnt, tlCnt 				: std_logic_vector (2 downto 0);
+	signal 	hdCnt, tlCnt 				: std_logic_vector (5 downto 0);
 	signal 	fifoReg						: fifoBuf;
 	signal 	full_flag, empty_flag	: std_logic;
 	signal 	need_tlInc_flag			: std_logic;
@@ -68,7 +68,7 @@ begin
 		if(FIFO_rst = '1') then
 				almost_full_flag <= '0';
 				need_tlInc_flag <= '0';
-				tlCnt <= "000";
+				tlCnt <= "000000";
 		
 
 		-- if there is an empty condition then reset the flags
@@ -94,11 +94,11 @@ begin
 				
 				-- if we need to make an emergency inc of the tail counter before writing
 				if(need_tlInc_flag = '1' and (tlCnt + 1 /= hdCnt)) then
-					tlCnt <= tlCnt + "001";
+					tlCnt <= tlCnt + "000001";
 					need_tlInc_flag <= '0';
 					
 					-- See if we are still near full condition 
-					if(tlCnt + "001" = hdCnt) then
+					if(tlCnt + "000001" = hdCnt) then
 						almost_full_flag <= '1';
 					else
 						almost_full_flag <= '0';
@@ -109,12 +109,12 @@ begin
 				fifoReg(conv_integer(tlCnt)) <= FIFO_din;
 				
 				if(almost_full_flag = '0') then -- check if we are on the verge of filling up the buffer
-					tlCnt <= tlCnt + "001";
-					if(tlCnt + "001" = hdCnt) then
+					tlCnt <= tlCnt + "000001";
+					if(tlCnt + "000001" = hdCnt) then
 						almost_full_flag <= '1';
 					end if;
 				else 
-					if(tlCnt + "001" = hdCnt) then -- last free space filled
+					if(tlCnt + "000001" = hdCnt) then -- last free space filled
 						need_tlInc_flag <= '1';
 						almost_full_flag <= '0';
 					end if;					
@@ -129,7 +129,7 @@ begin
 	begin	
 		
 		if(FIFO_rst = '1') then
-				hdCnt <= "000";
+				hdCnt <= "000000";
 		
 	
 		elsif (rising_edge(FIFO_deq) and FIFO_rst = '0') then
@@ -141,7 +141,7 @@ begin
 			-- tell the flag processes that a read has occured
 
 			if(empty_flag = '0') then
-					hdCnt <= hdCnt + "001";
+					hdCnt <= hdCnt + "000001";
 			end if;
 		end if;
 	end process;
@@ -163,7 +163,7 @@ begin
 
 	-- check and update the full and empty flags anytime something changes
 	-- The buffer will still report full until the need_tlInc flag is cleared
-	full_flag <= '1' when (((tlCnt + "001") = hdCnt) and almost_full_flag = '0') else '0';
+	full_flag <= '1' when (((tlCnt + "000001") = hdCnt) and almost_full_flag = '0') else '0';
 	empty_flag <= '1' when (tlCnt = hdCnt) else '0';
 	FIFO_aStatus <= full_flag & empty_flag;
 

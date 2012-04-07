@@ -46,7 +46,10 @@ entity virtual_channel is
 				VC_rnaSelO 	: in  	STD_LOGIC_VECTOR (1 downto 0);		-- FIFO select for output (from RNA) 
 				VC_rnaSelS	: in		STD_LOGIC_VECTOR (1 downto 0);		-- FIFO select for status (from RNA)
 				VC_rst 		: in  	STD_LOGIC;									-- Master Reset (global)
-				VC_strq 		: in  	STD_LOGIC;									-- Status request (from RNA) (dmuxed)
+				VC_strq 	: in  	STD_LOGIC;									-- Status request (from RNA) (dmuxed)
+				VC_circEn	: in    STD_LOGIC;
+				VC_circSel	: in 	STD_LOGIC_VECTOR(1 downto 0);
+				VC_directEnq	: in	STD_LOGIC;
 				VC_qout 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Output data port (to Switch) (muxed) 
 				VC_status 	: out  	STD_LOGIC_VECTOR (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
 				VC_aFull 	: out  	STD_LOGIC;									-- Asynch full flag of pointed FIFO  (muxed)
@@ -229,16 +232,20 @@ begin
 	-- FIFO D = "11"
 	
 	-- data bus
-	dataInA <= VC_din;
-	dataInB <= VC_din;
-	dataInC <= VC_din;
-	dataInD <= VC_din;
+	dataInA <= dataOutA when (VC_circSel = "00" and VC_circEn = '1') else VC_din;
+	dataInB <= dataOutB when (VC_circSel = "01" and VC_circEn = '1') else VC_din;
+	dataInC <= dataOutC when (VC_circSel = "10" and VC_circEn = '1') else VC_din;
+	dataInD <= dataOutD when (VC_circSel = "11" and VC_circEn = '1') else VC_din;
 	
 	-- enqueue demux
-	enqA <= VC_enq when (VC_rnaSelI = "00") else '0';
-	enqB <= VC_enq when (VC_rnaSelI = "01") else '0';
-	enqC <= VC_enq when (VC_rnaSelI = "10") else '0';
-	enqD <= VC_enq when (VC_rnaSelI = "11") else '0';
+	enqA <= VC_enq when (VC_rnaSelI = "00" and VC_circEn = '0') else 
+		VC_directEnq when (VC_circSel = "00" and VC_circEn = '1') else '0';
+	enqB <= VC_enq when (VC_rnaSelI = "01" and VC_circEn = '0') else 
+		VC_directEnq when (VC_circSel = "01" and VC_circEn = '1') else '0';
+	enqC <= VC_enq when (VC_rnaSelI = "10" and VC_circEn = '0') else
+		VC_directEnq when (VC_circSel = "10" and VC_circEn = '1') else '0';
+	enqD <= VC_enq when (VC_rnaSelI = "11" and VC_circEn = '0') else 
+		VC_directEnq when (VC_circSel = "11" and VC_circEn = '1') else '0';
 	
 	-- dequeue demux
 	deqA <= VC_deq when (VC_rnaSelO = "00") else '0';

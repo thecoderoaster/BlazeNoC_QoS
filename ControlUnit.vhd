@@ -140,7 +140,10 @@ entity ControlUnit is
 			n_vc_rnaSelI 		: out std_logic_vector (1 downto 0);		 
 			n_vc_rnaSelO 		: out std_logic_vector (1 downto 0);		
 			n_vc_rnaSelS		: out	std_logic_vector (1 downto 0);		
-			n_vc_strq 			: out std_logic;									
+			n_vc_strq 			: out std_logic;
+			n_vc_circEn			: out std_logic;
+			n_vc_circSel		: out std_logic_vector(1 downto 0);
+			n_vc_directEnq		: out std_logic;			
 			n_vc_status 		: in 	std_logic_vector (1 downto 0);
 			n_invld_out			: out std_logic;
 			n_invld_in			: in  std_logic;
@@ -149,6 +152,9 @@ entity ControlUnit is
 			e_vc_rnaSelO 		: out std_logic_vector (1 downto 0);		 
 			e_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			e_vc_strq 			: out std_logic;
+			e_vc_circEn			: out std_logic;
+			e_vc_circSel		: out std_logic_vector(1 downto 0);
+			e_vc_directEnq		: out std_logic;
 			e_vc_status 		: in 	std_logic_vector (1 downto 0);
 			e_invld_out			: out std_logic;
 			e_invld_in			: in 	std_logic;
@@ -156,7 +162,10 @@ entity ControlUnit is
 			s_vc_rnaSelI 		: out std_logic_vector (1 downto 0); 
 			s_vc_rnaSelO 		: out std_logic_vector (1 downto 0); 
 			s_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
-			s_vc_strq 			: out std_logic;							
+			s_vc_strq 			: out std_logic;
+			s_vc_circEn			: out std_logic;
+			s_vc_circSel		: out std_logic_vector(1 downto 0);
+			s_vc_directEnq		: out	std_logic;			
 			s_vc_status 		: in 	std_logic_vector (1 downto 0);
 			s_invld_out			: out std_logic;
 			s_invld_in			: in  std_logic;
@@ -165,6 +174,9 @@ entity ControlUnit is
 			w_vc_rnaSelO 		: out std_logic_vector (1 downto 0); 
 			w_vc_rnaSelS		: out	std_logic_vector (1 downto 0);
 			w_vc_strq 			: out std_logic;
+			w_vc_circEn			: out std_logic;
+			w_vc_circSel		: out std_logic_vector(1 downto 0);
+			w_vc_directEnq		: out std_logic;
 			w_vc_status 		: in 	std_logic_vector (1 downto 0);
 			w_invld_out			: out std_logic;
 			w_invld_in			: in  std_logic;
@@ -465,6 +477,7 @@ begin
 					--Drive signals to default state
 					n_CTRflg <= '0';
 					n_arbEnq <= '0';
+					n_vc_circEn <= '0';
 					
 					n_rsv_wen_a <= '0';
 					n_rsv_table_purge <= '0';
@@ -599,6 +612,7 @@ begin
 					--Drive signals to default state
 					e_CTRflg <= '0';
 					e_arbEnq <= '0';
+					e_vc_circEn <= '0';
 					
 					e_rsv_wen_a <= '0';
 					e_rsv_table_purge <= '0';
@@ -732,6 +746,7 @@ begin
 					--Drive signals to default state
 					s_CTRflg <= '0';
 					s_arbEnq <= '0';
+					s_vc_circEn <= '0';
 					
 					s_rsv_wen_a <= '0';
 					s_rsv_table_purge <= '0';
@@ -864,6 +879,8 @@ begin
 					--Drive signals to default state
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
+					w_vc_circEn <= '0';
+					w_vc_directEnq <= '0';
 					
 					w_rsv_wen_a <= '0';
 					w_rsv_table_purge <= '0';
@@ -876,6 +893,8 @@ begin
 					
 					ns_west_handler <= west1;
 				when wait_state =>
+					w_vc_circEn <= '0';
+					w_vc_directEnq <= '0';
 					ns_west_handler <= west1;
 				when west1 =>
 					--Control Packet Arrived?
@@ -966,6 +985,7 @@ begin
 							w_vc_rnaSelI <= "01";			--East
 						when "010" =>
 							w_vc_rnaSelI <= "10";			--South
+							w_vc_circSel <= "10";
 						when "111" =>
 							w_vc_rnaSelI <= "11";			--Ejection
 						when others =>
@@ -986,6 +1006,10 @@ begin
 					else
 						w_dpkt_arrived <= '0';
 					end if;
+					
+					--Shift VC (TEST)
+					w_vc_circEn <= '1';
+					w_vc_directEnq <= '1';
 					
 					ns_west_handler <= wait_state;
 				when others =>

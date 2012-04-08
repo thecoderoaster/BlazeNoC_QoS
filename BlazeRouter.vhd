@@ -130,7 +130,7 @@ architecture rtl of BlazeRouter is
 	-- Router control unit
 	component Arbiter is
 		port (
-			--Internal
+				--Internal
 				clk					: in std_logic;
 				reset					: in std_logic;
 				
@@ -140,6 +140,9 @@ architecture rtl of BlazeRouter is
 				n_vc_rnaSelO 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for output (from RNA) 
 				n_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				n_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
+				n_vc_circEn			: out    std_logic;
+				n_vc_circSel		: out 	std_logic_vector(1 downto 0);
+				n_vc_directEnq		: out		std_logic;
 				n_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
 				n_invld_out			: out 	std_logic;									-- Data invalid signal (to neighbor)
 				n_invld_in			: in		std_logic;									-- Data invalid signal (from neighbor)
@@ -149,6 +152,9 @@ architecture rtl of BlazeRouter is
 				e_vc_rnaSelO 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for output (from RNA) 
 				e_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				e_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
+				e_vc_circEn			: out   	std_logic;
+				e_vc_circSel		: out 	std_logic_vector(1 downto 0);
+				e_vc_directEnq		: out		std_logic;
 				e_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
 				e_invld_out			: out 	std_logic;									-- Data invalid signal (to neighbor)
 				e_invld_in			: in		std_logic;									-- Data invalid signal (from neighbor)
@@ -158,6 +164,9 @@ architecture rtl of BlazeRouter is
 				s_vc_rnaSelO 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for output (from RNA) 
 				s_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				s_vc_strq 			: out  	std_logic;									-- Status request (from RNA) (dmuxed)
+				s_vc_circEn			: out    std_logic;
+				s_vc_circSel		: out 	std_logic_vector(1 downto 0);
+				s_vc_directEnq		: out		std_logic;
 				s_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
 				s_invld_out			: out 	std_logic;									-- Data invalid signal (to neighbor)
 				s_invld_in			: in		std_logic;									-- Data invalid signal (from neighbor)
@@ -167,6 +176,9 @@ architecture rtl of BlazeRouter is
 				w_vc_rnaSelO 		: out  	std_logic_vector (1 downto 0);		-- FIFO select for output (from RNA) 
 				w_vc_rnaSelS		: out		std_logic_vector (1 downto 0);		-- FIFO select for status (from RNA)
 				w_vc_strq 			: out 	std_logic;									-- Status request (from RNA) (dmuxed)
+				w_vc_circEn			: out    std_logic;
+				w_vc_circSel		: out 	std_logic_vector(1 downto 0);
+				w_vc_directEnq		: out		std_logic;
 				w_vc_status 		: in  	std_logic_vector (1 downto 0);		-- Latched status flags of pointed FIFO (muxed)
 				w_invld_out			: out 	std_logic;									-- Data invalid signal (to neighbor)
 				w_invld_in			: in		std_logic;									-- Data invalid signal (from neighbor)	
@@ -264,7 +276,7 @@ architecture rtl of BlazeRouter is
 				w_dStrb 			: in  	STD_LOGIC;									-- Data strobe (from neighbor)
 				w_vcFull 		: in  	STD_LOGIC;									-- Full status flag (from VC)
 				w_arbEnq			: in 		STD_LOGIC;									-- Direct Enq control (from arbiter)
-				w_invld			: in STD_LOGIC;									-- Data invalid signal (from neighbor)				
+				w_invld			: in 		STD_LOGIC;									-- Data invalid signal (from neighbor)				
 				w_vcData 		: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to VC)
 				w_rnaCtrl	 	: out  	STD_LOGIC_VECTOR (WIDTH downto 0);	-- Data port (to RNA)
 				w_rnaCtrlStrb 	: out  	STD_LOGIC;									-- Control packet strobe (to RNA)
@@ -434,6 +446,9 @@ begin
 									rnaVcNorthSelO,
 									rnaVcNorthSelS,
 									rnaVcNorthStrq,
+									rnaVcNorthCircEn,
+									rnaVcNorthCircSel,
+									rnaVcNorthDirectEnq,
 									vcRnaNorthStat,
 									north_invld_out,
 									north_invld_in,
@@ -443,6 +458,9 @@ begin
 									rnaVcEastSelO,
 									rnaVcEastSelS,
 									rnaVcEastStrq,
+									rnaVcEastCircEn,
+									rnaVcEastCircSel,
+									rnaVcEastDirectEnq,
 									vcRnaEastStat,
 									east_invld_out,
 									east_invld_in,
@@ -452,6 +470,9 @@ begin
 									rnaVcSouthSelO,
 									rnaVcSouthSelS,
 									rnaVcSouthStrq,
+									rnaVcSouthCircEn,
+									rnaVcSouthCircSel,
+									rnaVcSouthDirectEnq,
 									vcRnaSouthStat,
 									south_invld_out,
 									south_invld_in,
@@ -461,6 +482,9 @@ begin
 									rnaVcWestSelO,
 									rnaVcWestSelS,
 									rnaVcWestStrq,
+									rnaVcWestCircEn,
+									rnaVcWestCircSel,
+									rnaVcWestDirectEnq,
 									vcRnaWestStat,
 									west_invld_out,
 									west_invld_in,
@@ -571,7 +595,8 @@ begin
 													rnaVcNorthSelS,	-- FIFO select for status (from RNA)
 													reset,				-- Master Reset (global) *** 
 													rnaVcNorthStrq,	-- Status request (from RNA) (dmuxed) 
-													rnaVcNorthCircEn,	-- circular enable																					rnaVcNorthCircSel,	-- circular select
+													rnaVcNorthCircEn,	-- circular enable
+													rnaVcNorthCircSel,	-- circular select
 													rnaVcNorthDirectEnq,	-- direct enqueue
 													vcSwNorth, 			-- Output data port (to Switch) (muxed) 
 													vcRnaNorthStat,	-- Latched status flags of pointed FIFO (to RNA) (muxed)
@@ -587,7 +612,8 @@ begin
 													rnaVcEastSelS,		-- FIFO select for status (from RNA)
 													reset,				-- Master Reset (global) ***
 													rnaVcEastStrq,	-- Status request (from RNA) (dmuxed)
-													rnaVcEastCircEn,	-- circular enable																					rnaVcEastCircSel,	-- circular select
+													rnaVcEastCircEn,	-- circular enable
+													rnaVcEastCircSel,	-- circular select
 													rnaVcEastDirectEnq,	-- direct enqueue
 													vcSwEast, 			-- Output data port (to Switch) (muxed) 
 													vcRnaEastStat,		-- Latched status flags of pointed FIFO (muxed)
@@ -603,7 +629,8 @@ begin
 													rnaVcSouthSelS,	-- FIFO select for status (from RNA)
 													reset,				-- Master Reset (global) ***
 													rnaVcSouthStrq,	-- Status request (from RNA) (dmuxed)
-													rnaVcSouthCircEn,	-- circular enable																					rnaVcSouthCircSel,	-- circular select
+													rnaVcSouthCircEn,	-- circular enable
+													rnaVcSouthCircSel,	-- circular select
 													rnaVcSouthDirectEnq,	-- direct enqueue
 													vcSwSouth, 			-- Output data port (to Switch) (muxed) 
 													vcRnaSouthStat,	-- Latched status flags of pointed FIFO (muxed)
@@ -619,7 +646,8 @@ begin
 													rnaVcWestSelS,		-- FIFO select for status (from RNA)
 													reset,				-- Master Reset (global) ***
 													rnaVcWestStrq,		-- Status request (from RNA) (dmuxed)
-													rnaVcWestCircEn,	-- circular enable																					rnaVcWestCircSel,	-- circular select
+													rnaVcWestCircEn,	-- circular enable
+													rnaVcWestCircSel,	-- circular select
 													rnaVcWestDirectEnq,	-- direct enqueue
 													vcSwWest, 			-- Output data port (to Switch) (muxed) 
 													vcRnaWestStat,		-- Latched status flags of pointed FIFO (muxed)

@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2012-04-08T12:43:42</DateModified>
+  <DateModified>2012-04-08T13:47:28</DateModified>
   <ModuleName>BlazeNoC</ModuleName>
   <SummaryTimeStamp>2012-03-30T18:21:17</SummaryTimeStamp>
-  <SavedFilePath>C:/Users/kor/Documents/BlazeNoC_QoS/iseconfig/BlazeNoC.xreport</SavedFilePath>
-  <ImplementationReportsDirectory>C:/Users/kor/Documents/BlazeNoC_QoS\</ImplementationReportsDirectory>
+  <SavedFilePath>//vmware-host/shared folders/GitRepos/BlazeNoC_QoS/iseconfig/BlazeNoC.xreport</SavedFilePath>
+  <ImplementationReportsDirectory>Z:/GitRepos/BlazeNoC_QoS\</ImplementationReportsDirectory>
   <DateInitialized>2012-01-08T12:44:15</DateInitialized>
   <EnableMessageFiltering>false</EnableMessageFiltering>
  </header>

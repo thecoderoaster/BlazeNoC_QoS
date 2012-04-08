@@ -895,6 +895,7 @@ begin
 				when wait_state =>
 					w_vc_circEn <= '0';
 					w_vc_directEnq <= '0';
+					w_vc_deq <= '0';
 					ns_west_handler <= west1;
 				when west1 =>
 					--Control Packet Arrived?
@@ -1008,8 +1009,9 @@ begin
 					end if;
 					
 					--Shift VC (TEST)
-					w_vc_circEn <= '1';
+					w_vc_circEn <= '1';	-- Resets to 0 at "wait_state" Am I doing this right?	
 					w_vc_directEnq <= '1';
+					w_vc_deq <= '1';
 					
 					ns_west_handler <= wait_state;
 				when others =>
@@ -1243,7 +1245,7 @@ begin
 				e_vc_strq <= '0';
 				s_vc_deq <= '0';
 				s_vc_strq <= '0';
-				w_vc_deq <= '0';
+				--w_vc_deq <= '0';
 				w_vc_strq <= '0';
 				
 				sw_nSel <= "000";
@@ -1747,7 +1749,7 @@ begin
 				elsif(s_pkt_in_flg_set = '1') then
 					w_departed_ack <= '1';
 					s_rst <= '1', '0' after 1 ns;
-					w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
+					--w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
 					sw_sSel <= "000";
 					ns_switch_handler <= north_sw1;
 					--injt_dataGood <= '0';
@@ -1762,7 +1764,7 @@ begin
 				end if;
 			when depart_w_sw5 =>
 				--Dequeue
-				w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
+				--w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
 				
 				ns_switch_handler <= north_sw1;
 			when others =>

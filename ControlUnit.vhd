@@ -231,7 +231,8 @@ architecture Behavioral of ControlUnit is
 							  injection_sw1, injection_sw2, injection_sw3, injection_sw4,
 							  depart_w_sw1, depart_w_sw2, depart_w_sw3, depart_w_sw4, depart_w_sw5,
 							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
-							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9);   -- State FSM
+							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9,
+							  enqueue_occurred1, dequeue_occurred1, shift_occurred1, shift_occurred2, shift_occurred3);   -- State FSM
 	
 	signal state_north_handler: state_type;
 	signal state_east_handler: state_type;
@@ -242,6 +243,7 @@ architecture Behavioral of ControlUnit is
 	signal state_switch_handler: state_type;
 	signal state_west_sorting_handler: state_type;
 	signal state_w_scheduler_handler: state_type;
+	signal state_westvc_handler: state_type;
 	
 	signal ns_north_handler: state_type;
 	signal ns_east_handler: state_type;
@@ -252,6 +254,7 @@ architecture Behavioral of ControlUnit is
 	signal ns_switch_handler: state_type;
 	signal ns_west_sorting_handler: state_type;
 	signal ns_w_scheduler_handler: state_type;
+	signal ns_westvc_handler: state_type;
 	
 	signal router_address 	: std_logic_vector(PID_WIDTH-1 downto 0);
 
@@ -347,6 +350,21 @@ architecture Behavioral of ControlUnit is
 	signal sw_e_count			: std_logic_vector (1 downto 0);
 	signal sw_s_count			: std_logic_vector (1 downto 0);
 	signal sw_w_count			: std_logic_vector (1 downto 0);
+	
+	--VCC Related Signals
+	signal w_which_vcell_enq 	: std_logic_vector(1 downto 0);
+	signal w_which_vcell_deq 	: std_logic_vector(1 downto 0);
+	signal w_vcell_enq 			: std_logic;
+	signal w_vcell_enq_flg 		: std_logic;
+	signal w_vcell_enq_rst		: std_logic;
+	signal w_vcell_deq 			: std_logic;
+	signal w_vcell_deq_flg 		: std_logic;
+	signal w_vcell_deq_rst		: std_logic;
+	signal w_vcell_shift			: std_logic;
+	signal w_vcell_shift_flg 	: std_logic;
+	signal w_vcell_shift_rst 	: std_logic;
+	signal w_vcell_req_halt		: std_logic;
+	
 	
 
 begin
@@ -452,6 +470,7 @@ begin
 			state_w_scheduler_handler <= start;
 			state_switch_handler <= start;
 			state_west_sorting_handler <= start;
+			state_westvc_handler <= start;
 		else
 			state_north_handler <= ns_north_handler;
 			state_east_handler <= ns_east_handler;
@@ -462,6 +481,7 @@ begin
 			state_w_scheduler_handler <= ns_w_scheduler_handler;
 			state_switch_handler <= ns_switch_handler;
 			state_west_sorting_handler <= ns_west_sorting_handler;
+			state_westvc_handler <= ns_westvc_handler;
 		end if;
 	end process;
 	
@@ -879,8 +899,6 @@ begin
 					--Drive signals to default state
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
-					w_vc_circEn <= '0';
-					w_vc_directEnq <= '0';
 					
 					w_rsv_wen_a <= '0';
 					w_rsv_table_purge <= '0';
@@ -893,9 +911,6 @@ begin
 					
 					ns_west_handler <= west1;
 				when wait_state =>
-					w_vc_circEn <= '0';
-					w_vc_directEnq <= '0';
-					w_vc_deq <= '0';
 					ns_west_handler <= west1;
 				when west1 =>
 					--Control Packet Arrived?
@@ -987,11 +1002,15 @@ begin
 						when "010" =>
 							w_vc_rnaSelI <= "10";			--South
 							w_vc_circSel <= "10";
+							w_which_vcell_enq <= "10";
 						when "111" =>
 							w_vc_rnaSelI <= "11";			--Ejection
 						when others =>
 							null;
 					end case;
+					
+--TO DO: Notify VCC manager that a packet has enqueued succesfully.
+					w_vcell_enq_flg <= '1', '0' after 1 ns;
 					
 					--Acknowledge
 					w_CTRflg <= '1';
@@ -1004,14 +1023,11 @@ begin
 					--Notify scheduler if this packet is set to depart soon
 					if(w_midgid_scheduled = conv_integer(w_rnaCtrl(10 downto 3))) then
 						w_dpkt_arrived <= '1', '0' after 1 ns;
+--TO DO: Notify VCC Manager that a SHIFT must occur!
+
 					else
 						w_dpkt_arrived <= '0';
 					end if;
-					
-					--Shift VC (TEST)
-					w_vc_circEn <= '1';	-- Resets to 0 at "wait_state" Am I doing this right?	
-					w_vc_directEnq <= '1';
-					w_vc_deq <= '1';
 					
 					ns_west_handler <= wait_state;
 				when others =>
@@ -1245,7 +1261,6 @@ begin
 				e_vc_strq <= '0';
 				s_vc_deq <= '0';
 				s_vc_strq <= '0';
-				--w_vc_deq <= '0';
 				w_vc_strq <= '0';
 				
 				sw_nSel <= "000";
@@ -1721,6 +1736,7 @@ begin
 						sw_eSel <= "011";							--East
 					when "010" =>
 						w_vc_rnaSelO <= "10";
+						w_which_vcell_deq <= "10";
 						sw_sSel <= "011";							--South
 					when "111" =>
 						w_vc_rnaSelO <= "11";
@@ -1749,11 +1765,8 @@ begin
 				elsif(s_pkt_in_flg_set = '1') then
 					w_departed_ack <= '1';
 					s_rst <= '1', '0' after 1 ns;
-					--w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
 					sw_sSel <= "000";
-					ns_switch_handler <= north_sw1;
-					--injt_dataGood <= '0';
-					--ns_switch_handler <= depart_w_sw5;
+					ns_switch_handler <= depart_w_sw5;
 				elsif(w_pkt_in_flg_set = '1') then
 					w_departed_ack <= '1';
 					w_rst <= '1', '0' after 1 ns;
@@ -1764,7 +1777,7 @@ begin
 				end if;
 			when depart_w_sw5 =>
 				--Dequeue
-				--w_vc_deq <= '1', '0' after 1 ns;		-- "11" West FIFO
+				w_vcell_deq_flg <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				
 				ns_switch_handler <= north_sw1;
 			when others =>
@@ -1945,4 +1958,137 @@ begin
 			w_jobrdy_signal <= '1';
 		end if;
 	end process;
+	
+	--************************************************************************
+	--west_scell_handler: Manages VCC enqueues and dequeues made along with shifting
+	--************************************************************************
+	west_vcc_handler:process(state_westvc_handler)
+	variable countCell0: natural range 0 to 63 := 0;
+	variable countCell1: natural range 0 to 63 := 0;
+	variable countCell2: natural range 0 to 63 := 0;
+	variable countCell3: natural range 0 to 63 := 0;
+	variable shift: natural range 0 to 63 := 0;
+	begin
+		case state_westvc_handler is
+			when start =>
+				w_vc_circEn <= '0';
+				w_vc_directEnq <= '0';
+				w_vc_deq <= '0';
+				w_vcell_enq_rst <= '0';
+				w_vcell_deq_rst <= '0';
+				w_vcell_shift_rst <= '0';
+				
+				ns_westvc_handler <= wait_state;
+			when wait_state =>
+				ns_westvc_handler <= enqueue_occurred1;
+			when enqueue_occurred1 =>
+				if(w_vcell_enq = '1') then
+					--Reset
+					w_vcell_enq_rst <= '1', '0' after 1 ns;
+					
+					--Update Count
+					case w_which_vcell_enq is
+						when "00" =>
+							countCell0 := countCell0 + 1;
+						when "01" =>
+							countCell1 := countCell1 + 1;
+						when "10" =>
+							countCell2 := countCell2 + 1;
+						when "11" =>
+							countCell3 := countCell3 + 1;
+						when others =>
+							null;
+					end case;
+				end if;
+				ns_westvc_handler <= dequeue_occurred1;
+			when dequeue_occurred1 =>
+				if(w_vcell_deq = '1') then
+					--Dequeue
+					w_vc_deq <= '1', '0' after 1 ns;
+					
+					--Reset signals
+					w_vcell_deq_rst <= '1', '0' after 1 ns;
+					
+					--Update Count
+					case w_which_vcell_deq is
+						when "00" =>
+							countCell0 := countCell0 - 1;
+						when "01" =>
+							countCell1 := countCell1 - 1;
+						when "10" =>
+							countCell2 := countCell2 - 1;
+						when "11" =>
+							countCell3 := countCell3 - 1;
+						when others =>
+							null;
+					end case;
+				end if;
+				ns_westvc_handler <= shift_occurred1;
+			when shift_occurred1 =>
+				if(w_vcell_shift = '1') then
+					--Reset
+					shift := 0;
+					w_vcell_shift_rst <= '1', '0' after 1 ns;
+					ns_westvc_handler <= shift_occurred2;
+				else
+					ns_westvc_handler <= wait_state;
+				end if;
+			when shift_occurred2 =>
+				
+				ns_westvc_handler <= shift_occurred3;
+			when shift_occurred3 =>
+				
+				ns_westvc_handler <= wait_state;
+			when others =>
+				ns_westvc_handler <= start;
+			end case;
+	end process;
+	
+	--************************************************************************
+	--west_vcell_sync_enq: Tracks VCC enqueues on the West Port
+	--************************************************************************
+	west_vcell_sync_enq:process(w_vcell_enq_rst, w_vcell_enq_flg)
+	begin
+		if(w_vcell_enq_rst = '1') then
+			w_vcell_enq <= '0';
+		end if;
+		
+		--An item has been enqueued from the VCC buffer (update the global count)
+		if(w_vcell_enq_flg = '1') then
+			w_vcell_enq <= '1';
+		end if;
+	end process;
+
+	--************************************************************************
+	--west_vcell_sync_deq: Tracks VCC dequeues on the West Port
+	--************************************************************************
+	west_vcell_sync_deq:process(w_vcell_deq_rst, w_vcell_deq_flg)
+	begin
+		if(w_vcell_deq_rst = '1') then
+			w_vcell_deq <= '0';
+		end if;
+				
+		--An item has been dequeued from the VCC buffer (update the global count)
+		if(w_vcell_deq_flg = '1') then
+			w_vcell_deq <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--west_vcell_sync_enq: Manages shift operations in VCC circular buffer.
+	--************************************************************************
+	west_vcell_sync_shift:process(w_vcell_shift_rst, w_vcell_shift_flg)
+	begin
+		if(w_vcell_shift_rst = '1') then
+			w_vcell_shift <= '0';
+			w_vcell_req_halt <= '0';			--Tells switch to immediately halt any lower priority xfers.
+		end if;
+		
+		--Shifting Request
+		if(w_vcell_shift_flg = '1') then
+			w_vcell_shift <= '1';
+			w_vcell_req_halt <= '1';
+		end if;
+	end process;
+
 end Behavioral;

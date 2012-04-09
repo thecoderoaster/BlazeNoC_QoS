@@ -1020,6 +1020,7 @@ begin
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
 					
+					w_vcell_shift_flg <= '1', '0' after 1 ns;
 					--Notify scheduler if this packet is set to depart soon
 					if(w_midgid_scheduled = conv_integer(w_rnaCtrl(10 downto 3))) then
 						w_dpkt_arrived <= '1', '0' after 1 ns;
@@ -1980,6 +1981,8 @@ begin
 				
 				ns_westvc_handler <= wait_state;
 			when wait_state =>
+				w_vc_deq <= '0';
+				w_vc_circEn <= '0';
 				ns_westvc_handler <= enqueue_occurred1;
 			when enqueue_occurred1 =>
 				if(w_vcell_enq = '1') then
@@ -2025,19 +2028,21 @@ begin
 				end if;
 				ns_westvc_handler <= shift_occurred1;
 			when shift_occurred1 =>
-				if(w_vcell_shift = '1') then
+				if(w_vcell_shift = '1' and (countCell2 >= 2)) then
 					--Reset
 					shift := 0;
+					w_vc_circEn <= '1';
 					w_vcell_shift_rst <= '1', '0' after 1 ns;
 					ns_westvc_handler <= shift_occurred2;
 				else
 					ns_westvc_handler <= wait_state;
 				end if;
 			when shift_occurred2 =>
-				
+				w_vc_directEnq <= '1';
 				ns_westvc_handler <= shift_occurred3;
 			when shift_occurred3 =>
-				
+				w_vc_directEnq <= '0';
+				w_vc_deq <= '1';
 				ns_westvc_handler <= wait_state;
 			when others =>
 				ns_westvc_handler <= start;

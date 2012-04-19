@@ -232,7 +232,7 @@ architecture Behavioral of ControlUnit is
 							  depart_w_sw1, depart_w_sw2, depart_w_sw3, depart_w_sw4, depart_w_sw5,
 							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
 							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9,
-							  enqueue_occurred1, dequeue_occurred1, shift_occurred1, shift_occurred2, shift_occurred3);   -- State FSM
+							  enqueue_occurred1, dequeue_occurred1, dequeue_occurred2, shift_occurred1, shift_occurred2, shift_occurred3);   -- State FSM
 	
 	signal state_north_handler: state_type;
 	signal state_east_handler: state_type;
@@ -364,6 +364,9 @@ architecture Behavioral of ControlUnit is
 	signal w_vcell_shift_flg 	: std_logic;
 	signal w_vcell_shift_rst 	: std_logic;
 	signal w_vcell_req_halt		: std_logic;
+	signal w_vcell_hp_packet	: std_logic;
+	signal w_vcell_hp_packet_rst : std_logic;
+	signal w_vcell_hp_pidgid	: natural range 0 to 2**address_size-1;
 	
 	
 
@@ -1969,6 +1972,10 @@ begin
 	variable countCell2: natural range 0 to 63 := 0;
 	variable countCell3: natural range 0 to 63 := 0;
 	variable shift: natural range 0 to 63 := 0;
+	type memory_type is array(0 to 2**address_size-1) of
+		natural range 0 to 255;
+	variable vcc_lut: memory_type;
+	
 	begin
 		case state_westvc_handler is
 			when start =>
@@ -1993,12 +2000,28 @@ begin
 					case w_which_vcell_enq is
 						when "00" =>
 							countCell0 := countCell0 + 1;
+							if(w_vcell_hp_packet = '1') then
+								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
+								vcc_lut(w_vcell_hp_pidgid) := countCell0;
+							end if;
 						when "01" =>
 							countCell1 := countCell1 + 1;
+							if(w_vcell_hp_packet = '1') then
+								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
+								vcc_lut(w_vcell_hp_pidgid) := countCell1;
+							end if;
 						when "10" =>
 							countCell2 := countCell2 + 1;
+							if(w_vcell_hp_packet = '1') then
+								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
+								vcc_lut(w_vcell_hp_pidgid) := countCell2;
+							end if;
 						when "11" =>
 							countCell3 := countCell3 + 1;
+							if(w_vcell_hp_packet = '1') then
+								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
+								vcc_lut(w_vcell_hp_pidgid) := countCell3;
+							end if;
 						when others =>
 							null;
 					end case;
@@ -2026,6 +2049,12 @@ begin
 							null;
 					end case;
 				end if;
+				ns_westvc_handler <= dequeue_occurred2;
+			when dequeue_occurred2 =>
+				for i in vcc_lut'range loop
+					exit when i = 256;
+					vcc_lut(i) := vcc_lut(i) - 1;
+				end loop;
 				ns_westvc_handler <= shift_occurred1;
 			when shift_occurred1 =>
 				if(w_vcell_shift = '1' and (countCell2 >= 2)) then
@@ -2093,6 +2122,16 @@ begin
 		if(w_vcell_shift_flg = '1') then
 			w_vcell_shift <= '1';
 			w_vcell_req_halt <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--west_vcell_sync_enq: Manages shift operations in VCC circular buffer.
+	--************************************************************************
+	west_vcell_hp_packet:process(w_vcell_hp_packet_rst)
+	begin
+		if(w_vcell_hp_packet_rst = '1') then
+			w_vcell_hp_packet <= '0';
 		end if;
 	end process;
 

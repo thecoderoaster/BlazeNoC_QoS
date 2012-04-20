@@ -106,6 +106,7 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal dir_0_RT0			: std_logic_vector(RSV_WIDTH-1 downto 0);
 	signal count_RT0			: std_logic_vector(1 downto 0);
 	signal packet_type_RT0	: std_logic_vector(1 downto 0);
+	signal priority_RT0		: std_logic;
 	
 	--Router 1
 	signal reset_RT1			: std_logic;
@@ -119,6 +120,7 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal dir_0_RT1			: std_logic_vector(RSV_WIDTH-1 downto 0);
 	signal count_RT1			: std_logic_vector(1 downto 0);
 	signal packet_type_RT1	: std_logic_vector(1 downto 0);
+	signal priority_RT1		: std_logic;
 	
 	--Router 2
 	signal reset_RT2			: std_logic;
@@ -132,6 +134,7 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal dir_0_RT2			: std_logic_vector(RSV_WIDTH-1 downto 0);
 	signal count_RT2			: std_logic_vector(1 downto 0);
 	signal packet_type_RT2	: std_logic_vector(1 downto 0);
+	signal priority_RT2		: std_logic;
 	
 	--Router 3
 	signal reset_RT3			: std_logic;
@@ -145,6 +148,7 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal dir_0_RT3			: std_logic_vector(RSV_WIDTH-1 downto 0);
 	signal count_RT3			: std_logic_vector(1 downto 0);
 	signal packet_type_RT3	: std_logic_vector(1 downto 0);
+	signal priority_RT3		: std_logic;
 	
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -263,6 +267,7 @@ BEGIN
 			dir_0_RT0 <= "001";		--East
 			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
 			
@@ -279,6 +284,7 @@ BEGIN
 			dir_0_RT0 <= "001";		--East
 			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
 			wait for clk_period_pe*10;
@@ -291,6 +297,7 @@ BEGIN
 			dir_0_RT0 <= "001";		--East
 			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
 			trigger_0_cp <= '1', '0' after 1 ns;
 			
 			wait for clk_period_pe*2;
@@ -308,6 +315,7 @@ BEGIN
 			dir_0_RT0 <= "001";		--East
 			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
+			priority_RT0 <= '1';
 			trigger_0_dp <= '1', '0' after 1 ns;
 			
 			wait for clk_period_pe*20;
@@ -320,6 +328,7 @@ BEGIN
 			dir_0_RT0 <= "001";		--East
 			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
+			priority_RT0 <= '1';
 			trigger_0_dp <= '1', '0' after 1 ns;
 			
 			wait for clk_period_pe*20;
@@ -332,6 +341,7 @@ BEGIN
 			dir_0_RT0 <= "001";		--East
 			count_RT0 <= "00";		--Default
 			packet_type_RT0 <= "00";
+			priority_RT0 <= '1';
 			trigger_0_dp <= '1', '0' after 1 ns;
 			
 			--Done
@@ -547,11 +557,11 @@ BEGIN
 		end if;
 		
 		if (trigger_0_cp = '1' and done_PE0 = '0' and full_PE0 = '0') then
-			--****************************************************************************************************************************************************************--
+			--*******************************************************************************************************************************************************************************--
 			--CONTROL PACKET
-			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 1
-			--****************************************************************************************************************************************************************--
-			data_inject_PE0 <= tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & c_pid & "0000" & packet_type_RT0 & "1";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : PRIORITY = N/A : C/D = 1
+			--*******************************************************************************************************************************************************************************--
+			data_inject_PE0 <= tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & c_pid & "0000" & packet_type_RT0 & priority_RT0 & "1";
 			sm_triggerPE0 <= '1';
 			
 			c_pid := c_pid + "0001";
@@ -559,11 +569,11 @@ BEGIN
 		end if;
 		
 		if (trigger_0_dp = '1' and done_PE0 = '0' and full_PE0 = '0') then
-			--****************************************************************************************************************************************************************--
+			--*******************************************************************************************************************************************************************************--
 			--DATA PACKET
-			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 0
-			--****************************************************************************************************************************************************************--
-			data_inject_PE0 <= tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & c_pid & "0000" & packet_type_RT0 & "0";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : PRIORITY = 1|0 : C/D = 1
+			--*******************************************************************************************************************************************************************************--
+			data_inject_PE0 <= tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & c_pid & "0000" & packet_type_RT0 & priority_RT0 & "0";
 			sm_triggerPE0 <= '1';
 			
 			
@@ -598,11 +608,11 @@ end process;
 		
 		
 		if (trigger_1_cp = '1' and done_PE1 = '0' and full_PE1 = '0') then
-			--****************************************************************************************************************************************************************--
+			--*******************************************************************************************************************************************************************************--
 			--CONTROL PACKET
-			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 1
-			--****************************************************************************************************************************************************************--
-			data_inject_PE1 <= tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & c_pid & "0001" & packet_type_RT1 & "1";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : PRIORITY = N/A : C/D = 1
+			--*******************************************************************************************************************************************************************************--
+			data_inject_PE1 <= tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & c_pid & "0001" & packet_type_RT1 & priority_RT1 & "1";
 			sm_triggerPE1 <= '1';
 			
 			c_pid := c_pid + "0001";
@@ -610,11 +620,11 @@ end process;
 		end if;
 		
 		if (trigger_1_dp = '1' and done_PE1 = '0' and full_PE1 = '0') then
-			--****************************************************************************************************************************************************************--
+			--*******************************************************************************************************************************************************************************--
 			--DATA PACKET
-			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 0
-			--****************************************************************************************************************************************************************--
-			data_inject_PE1 <= tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & c_pid & "0001" & packet_type_RT1 & "0";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : PRIORITY = 1|0 : C/D = 0
+			--*******************************************************************************************************************************************************************************--
+			data_inject_PE1 <= tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & c_pid & "0001" & packet_type_RT1 & priority_RT1 & "0";
 			sm_triggerPE1 <= '1';
 			
 			
@@ -648,11 +658,11 @@ end process;
 		
 		
 		if (trigger_2_cp = '1' and done_PE2 = '0' and full_PE2 = '0') then
-			--****************************************************************************************************************************************************************--
+			--*******************************************************************************************************************************************************************************--
 			--CONTROL PACKET
-			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 1
-			--****************************************************************************************************************************************************************--
-			data_inject_PE2 <= tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & c_pid & "0010" & packet_type_RT2 & "1";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : PRIORITY = N/A : C/D = 1
+			--*******************************************************************************************************************************************************************************--
+			data_inject_PE2 <= tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & c_pid & "0010" & packet_type_RT2 & priority_RT2 & "1";
 			sm_triggerPE2 <= '1';
 			
 			c_pid := c_pid + "0001";
@@ -660,11 +670,11 @@ end process;
 		end if;
 		
 		if (trigger_2_dp = '1' and done_PE2 = '0' and full_PE2 = '0') then
-			--****************************************************************************************************************************************************************--
+			--******************************************************************************************************************************************************************************--
 			--DATA PACKET
-			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 0
-			--****************************************************************************************************************************************************************--
-			data_inject_PE2 <= tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & c_pid & "0010" & packet_type_RT2 & "0";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : PRIORITY = 1|0 :C/D = 0
+			--******************************************************************************************************************************************************************************--
+			data_inject_PE2 <= tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & c_pid & "0010" & packet_type_RT2 & priority_RT2 & "0";
 			sm_triggerPE2 <= '1';
 			
 			
@@ -698,11 +708,11 @@ end process;
 		
 		
 		if (trigger_3_cp = '1' and done_PE3 = '0' and full_PE3 = '0') then
-			--****************************************************************************************************************************************************************--
+			--*******************************************************************************************************************************************************************************--
 			--CONTROL PACKET
-			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 1
-			--****************************************************************************************************************************************************************--
-			data_inject_PE3 <= tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & c_pid & "0011" & packet_type_RT3 & "1";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : PRIORITY = N\A : C/D = 1
+			--*******************************************************************************************************************************************************************************--
+			data_inject_PE3 <= tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & c_pid & "0011" & packet_type_RT3 & priority_RT3 & "1";
 			sm_triggerPE3 <= '1';
 			
 			c_pid := c_pid + "0001";
@@ -710,11 +720,11 @@ end process;
 		end if;
 		
 		if (trigger_3_dp = '1' and done_PE3 = '0' and full_PE3 = '0') then
-			--****************************************************************************************************************************************************************--
+			--*******************************************************************************************************************************************************************************--
 			--DATA PACKET
-			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : C/D = 0
-			--****************************************************************************************************************************************************************--
-			data_inject_PE3 <= tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & c_pid & "0011" & packet_type_RT3 & "0";
+			--PAYLOAD = 0x0000 (TID) : DIR3 = 0x00 : DIR2 = 0x00 : DIR1 = 0x00 : DIR0 = 0x00 : COUNT = 0x00 : PID = 0x00 : MID = 0x01 (ROUTER ADDRESS) : COND = 0x00 : PRIORITY = 1|0 : C/D = 0
+			--*******************************************************************************************************************************************************************************--
+			data_inject_PE3 <= tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & c_pid & "0011" & packet_type_RT3 & priority_RT3 & "0";
 			sm_triggerPE3 <= '1';
 			
 			

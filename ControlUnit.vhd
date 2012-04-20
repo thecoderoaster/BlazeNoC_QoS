@@ -232,7 +232,8 @@ architecture Behavioral of ControlUnit is
 							  depart_w_sw1, depart_w_sw2, depart_w_sw3, depart_w_sw4, depart_w_sw5,
 							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
 							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9,
-							  enqueue_occurred1, dequeue_occurred1, dequeue_occurred2, shift_occurred1, shift_occurred2, shift_occurred3);   -- State FSM
+							  schedule10, schedule11, schedule12, schedule13, schedule14,
+							  enqueue_occurred1, dequeue_occurred1, dequeue_occurred2, packet_status1, shift_request1, shift_start1, shift_start2, shift_start3);   -- State FSM
 	
 	signal state_north_handler: state_type;
 	signal state_east_handler: state_type;
@@ -323,7 +324,8 @@ architecture Behavioral of ControlUnit is
 	signal w_pktarr_signal			: std_logic;
 	signal w_departed_ack			: std_logic;
 	signal w_start_timer 			: std_logic;
-	
+	signal w_force_transfer			: std_logic;
+		
 
 	--Switch Related
 	signal sw_n_rna_ctrlPkt	: std_logic_vector(pkt_size downto 0);
@@ -367,6 +369,14 @@ architecture Behavioral of ControlUnit is
 	signal w_vcell_hp_packet	: std_logic;
 	signal w_vcell_hp_packet_rst : std_logic;
 	signal w_vcell_hp_pidgid	: natural range 0 to 2**address_size-1;
+	signal w_shift_in_progress	: std_logic;
+	signal w_request_packet_status : std_logic;
+	signal w_request_complete	: std_logic;
+	signal w_sitting_in_cell	: std_logic_vector(2 downto 0);
+	signal w_requesting_packet	: natural range 0 to 2**address_size-1;
+	signal w_has_packet_arrived : std_logic;
+	
+	
 	
 	
 
@@ -533,32 +543,32 @@ begin
 					--Reserve and schedule the incoming control packet
 					
 					--Update count
-					temp := sw_n_rna_ctrlPkt(12 downto 11) + 1;
-					sw_n_rna_ctrlPkt(12 downto 11) <= temp;
+					temp := sw_n_rna_ctrlPkt(13 downto 12) + 1;
+					sw_n_rna_ctrlPkt(13 downto 12) <= temp;
 					
 					ns_north_handler <= north4;
 					
 				when north4 =>
 					--Write bits to rsv_data_out
-					case sw_n_rna_ctrlPkt(12 downto 11) is
+					case sw_n_rna_ctrlPkt(13 downto 12) is
 						when "00" =>
-							n_rsv_data_out_a <= n_rnaCtrl(15 downto 13);
+							n_rsv_data_out_a <= n_rnaCtrl(16 downto 14);
 						when "01" =>
-							n_rsv_data_out_a <= n_rnaCtrl(18 downto 16);
+							n_rsv_data_out_a <= n_rnaCtrl(19 downto 17);
 						when "10" =>
-							n_rsv_data_out_a <= n_rnaCtrl(21 downto 19);
+							n_rsv_data_out_a <= n_rnaCtrl(22 downto 20);
 						when "11" =>
-							n_rsv_data_out_a <= n_rnaCtrl(24 downto 22);
+							n_rsv_data_out_a <= n_rnaCtrl(25 downto 23);
 						when others =>
 							null;
 					end case;
 					
 					--Write bits to sch_packet
-					n_sch_data_out_a <= (globaltime + n_rnaCtrl(pkt_size downto 25));
+					n_sch_data_out_a <= (globaltime + n_rnaCtrl(pkt_size downto 26));
 
 					--Send to reservation table
-					n_rsv_addr_a <= conv_integer(n_rnaCtrl(10 downto 3));
-					n_sch_addr_a <= conv_integer(n_rnaCtrl(10 downto 3));
+					n_rsv_addr_a <= conv_integer(n_rnaCtrl(11 downto 4));
+					n_sch_addr_a <= conv_integer(n_rnaCtrl(11 downto 4));
 					n_rsv_wen_a <= '1';
 					n_sch_wen_a <= '1';
 										
@@ -592,7 +602,7 @@ begin
 					end if;
 				when north9 =>
 					--Grab reservation table details
-					n_rsv_addr_a <= conv_integer(n_rnaCtrl(10 downto 3));
+					n_rsv_addr_a <= conv_integer(n_rnaCtrl(11 downto 4));
 					
 					ns_north_handler <= north10;
 				when north10 =>	
@@ -668,31 +678,31 @@ begin
 					--Reserve and schedule the incoming control packet
 				
 					--Update count
-					temp := sw_e_rna_ctrlPkt(12 downto 11) + 1;
-					sw_e_rna_ctrlPkt(12 downto 11) <= temp;
+					temp := sw_e_rna_ctrlPkt(13 downto 12) + 1;
+					sw_e_rna_ctrlPkt(13 downto 12) <= temp;
 					
 					ns_east_handler <= east4;
 				when east4 =>
 					--Write bits to rsv_data_out
-					case sw_e_rna_ctrlPkt(12 downto 11) is
+					case sw_e_rna_ctrlPkt(13 downto 12) is
 						when "00" =>
-							e_rsv_data_out_a <= e_rnaCtrl(15 downto 13);
+							e_rsv_data_out_a <= e_rnaCtrl(16 downto 14);
 						when "01" =>
-							e_rsv_data_out_a <= e_rnaCtrl(18 downto 16);
+							e_rsv_data_out_a <= e_rnaCtrl(19 downto 17);
 						when "10" =>
-							e_rsv_data_out_a <= e_rnaCtrl(21 downto 19);
+							e_rsv_data_out_a <= e_rnaCtrl(22 downto 20);
 						when "11" =>
-							e_rsv_data_out_a <= e_rnaCtrl(24 downto 22);
+							e_rsv_data_out_a <= e_rnaCtrl(25 downto 23);
 						when others =>
 							null;
 					end case;
 					
 					--Write bits to sch_packet
-					e_sch_data_out_a <= (globaltime + e_rnaCtrl(pkt_size downto 25));
+					e_sch_data_out_a <= (globaltime + e_rnaCtrl(pkt_size downto 26));
 
 					--Send to reservation table
-					e_rsv_addr_a <= conv_integer(e_rnaCtrl(10 downto 3));
-					e_sch_addr_a <= conv_integer(e_rnaCtrl(10 downto 3));
+					e_rsv_addr_a <= conv_integer(e_rnaCtrl(11 downto 4));
+					e_sch_addr_a <= conv_integer(e_rnaCtrl(11 downto 4));
 					e_rsv_wen_a <= '1';
 					e_sch_wen_a <= '1';
 										
@@ -726,7 +736,7 @@ begin
 					end if;
 				when east9 =>
 					--Grab reservation table details
-					e_rsv_addr_a <= conv_integer(e_rnaCtrl(10 downto 3));
+					e_rsv_addr_a <= conv_integer(e_rnaCtrl(11 downto 4));
 					
 					ns_east_handler <= east10;
 				when east10 =>	
@@ -800,32 +810,32 @@ begin
 					--Reserve and schedule the incoming control packet
 					
 					--Update count
-					temp := sw_s_rna_ctrlPkt(12 downto 11) + 1;
-					sw_s_rna_ctrlPkt(12 downto 11) <= temp;
+					temp := sw_s_rna_ctrlPkt(13 downto 12) + 1;
+					sw_s_rna_ctrlPkt(13 downto 12) <= temp;
 					
 					ns_south_handler <= south4;
 					
 				when south4 =>
 					--Write bits to rsv_data_out
-					case sw_s_rna_ctrlPkt(12 downto 11) is
+					case sw_s_rna_ctrlPkt(13 downto 12) is
 						when "00" =>
-							s_rsv_data_out_a <= s_rnaCtrl(15 downto 13);
+							s_rsv_data_out_a <= s_rnaCtrl(16 downto 14);
 						when "01" =>
-							s_rsv_data_out_a <= s_rnaCtrl(18 downto 16);
+							s_rsv_data_out_a <= s_rnaCtrl(19 downto 17);
 						when "10" =>
-							s_rsv_data_out_a <= s_rnaCtrl(21 downto 19);
+							s_rsv_data_out_a <= s_rnaCtrl(22 downto 20);
 						when "11" =>
-							s_rsv_data_out_a <= s_rnaCtrl(24 downto 22);
+							s_rsv_data_out_a <= s_rnaCtrl(25 downto 23);
 						when others =>
 							null;
 					end case;
 					
 					--Write bits to sch_packet
-					s_sch_data_out_a <= (globaltime + s_rnaCtrl(pkt_size downto 25));
+					s_sch_data_out_a <= (globaltime + s_rnaCtrl(pkt_size downto 26));
 
 					--Send to reservation table
-					s_rsv_addr_a <= conv_integer(s_rnaCtrl(10 downto 3));
-					s_sch_addr_a <= conv_integer(s_rnaCtrl(10 downto 3));
+					s_rsv_addr_a <= conv_integer(s_rnaCtrl(11 downto 4));
+					s_sch_addr_a <= conv_integer(s_rnaCtrl(11 downto 4));
 					s_rsv_wen_a <= '1';
 					s_sch_wen_a <= '1';
 										
@@ -859,7 +869,7 @@ begin
 					end if;
 				when south9 =>
 					--Grab reservation table details
-					s_rsv_addr_a <= conv_integer(s_rnaCtrl(10 downto 3));
+					s_rsv_addr_a <= conv_integer(s_rnaCtrl(11 downto 4));
 					
 					ns_south_handler <= south10;
 				when south10 =>	
@@ -933,31 +943,31 @@ begin
 					--Reserve and schedule the incoming control packet
 					
 					--Update count
-					temp := sw_w_rna_ctrlPkt(12 downto 11) + 1;		--Update count
-					sw_w_rna_ctrlPkt(12 downto 11) <= temp;
+					temp := sw_w_rna_ctrlPkt(13 downto 12) + 1;		--Update count
+					sw_w_rna_ctrlPkt(13 downto 12) <= temp;
 				
 					ns_west_handler <= west4;
 				when west4 =>
 					--Write bits to rsv_data_out
-					case sw_w_rna_ctrlPkt(12 downto 11) is
+					case sw_w_rna_ctrlPkt(13 downto 12) is
 						when "00" =>
-							w_rsv_data_out_a <= w_rnaCtrl(15 downto 13);
+							w_rsv_data_out_a <= w_rnaCtrl(16 downto 14);
 						when "01" =>
-							w_rsv_data_out_a <= w_rnaCtrl(18 downto 16);
+							w_rsv_data_out_a <= w_rnaCtrl(19 downto 17);
 						when "10" =>
-							w_rsv_data_out_a <= w_rnaCtrl(21 downto 19);
+							w_rsv_data_out_a <= w_rnaCtrl(22 downto 20);
 						when "11" =>
-							w_rsv_data_out_a <= w_rnaCtrl(24 downto 22);
+							w_rsv_data_out_a <= w_rnaCtrl(25 downto 23);
 						when others =>
 							null;
 					end case;
 					
 					--Write bits to sch_packet
-					w_sch_data_out_a <= (globaltime + w_rnaCtrl(pkt_size downto 25));
+					w_sch_data_out_a <= (globaltime + w_rnaCtrl(pkt_size downto 26));
 
 					--Send to reservation table
-					w_rsv_addr_a <= conv_integer(w_rnaCtrl(10 downto 3));
-					w_sch_addr_a <= conv_integer(w_rnaCtrl(10 downto 3));
+					w_rsv_addr_a <= conv_integer(w_rnaCtrl(11 downto 4));
+					w_sch_addr_a <= conv_integer(w_rnaCtrl(11 downto 4));
 					w_rsv_wen_a <= '1';
 					w_sch_wen_a <= '1';
 										
@@ -985,14 +995,14 @@ begin
 			
 				when west8 =>
 					--Data Packet Arrived?
-					if(w_DataFlg = '1') then
+					if(w_DataFlg = '1' and w_shift_in_progress = '0') then
 						ns_west_handler <= west9;
 					else
 						ns_west_handler <= wait_state;
 					end if;
 				when west9 =>
 					--Grab reservation table details
-					w_rsv_addr_a <= conv_integer(w_rnaCtrl(10 downto 3));
+					w_rsv_addr_a <= conv_integer(w_rnaCtrl(11 downto 4));
 					
 					ns_west_handler <= west10;
 				when west10 =>	
@@ -1004,15 +1014,12 @@ begin
 							w_vc_rnaSelI <= "01";			--East
 						when "010" =>
 							w_vc_rnaSelI <= "10";			--South
-							w_vc_circSel <= "10";
-							w_which_vcell_enq <= "10";
 						when "111" =>
 							w_vc_rnaSelI <= "11";			--Ejection
 						when others =>
 							null;
 					end case;
 					
---TO DO: Notify VCC manager that a packet has enqueued succesfully.
 					w_vcell_enq_flg <= '1', '0' after 1 ns;
 					
 					--Acknowledge
@@ -1023,12 +1030,9 @@ begin
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
 					
-					w_vcell_shift_flg <= '1', '0' after 1 ns;
 					--Notify scheduler if this packet is set to depart soon
-					if(w_midgid_scheduled = conv_integer(w_rnaCtrl(10 downto 3))) then
+					if(w_midgid_scheduled = conv_integer(w_rnaCtrl(11 downto 4))) then
 						w_dpkt_arrived <= '1', '0' after 1 ns;
---TO DO: Notify VCC Manager that a SHIFT must occur!
-
 					else
 						w_dpkt_arrived <= '0';
 					end if;
@@ -1082,12 +1086,10 @@ begin
 			end case;
 	end process;
 	
---	--************************************************************************	
---	--n_scheduler_handler - Handles all scheduling related tasks on North Port
---	--************************************************************************
---	n_scheduler_handler:process(state_scheduler_handler)
---	begin
---	end process;
+	--************************************************************************	
+	--n_scheduler_handler - Handles all scheduling related tasks on North Port
+	--************************************************************************
+
 
 	--************************************************************************	
 	--w_scheduler_handler - Handles all scheduling related tasks on West Port
@@ -1123,27 +1125,77 @@ begin
 					ns_w_scheduler_handler <= schedule2;
 				end if;
 			when schedule4 =>
+				w_request_packet_status <= '1';
+				w_requesting_packet <= w_next_sch_job_midpid;
+				ns_w_scheduler_handler <= schedule5;
+			when schedule5 =>
+				--Wait state
+				if(w_request_complete = '1' and w_has_packet_arrived = '1') then
+					--Packet is here! Move it to the next router (Don't Schedule)
+					w_force_transfer <= '1';
+					ns_w_scheduler_handler <= schedule8;
+				elsif(w_request_complete = '1' and w_has_packet_arrived = '0') then
+					--Need to schedule...
+					ns_w_scheduler_handler <= schedule6;
+				else
+					--No Ack Yet...
+					ns_w_scheduler_handler <= schedule4;
+				end if;
+			when schedule6 =>
 				w_pkt_expires_in <= w_next_sch_job_time;
 				w_midgid_scheduled <= w_next_sch_job_midpid;
 				w_start_timer <= '1';
-				ns_w_scheduler_handler <= schedule6;
-			when schedule5 =>
-				ns_w_scheduler_handler <= schedule6;
-			when schedule6 =>
-				if(w_current_job_expired = '1' or w_pktarr_signal = '1') then
+				ns_w_scheduler_handler <= schedule8;
+			when schedule7 =>
+				ns_w_scheduler_handler <= schedule8;
+			when schedule8 =>
+				if(w_current_job_expired = '1' or w_pktarr_signal = '1' or w_force_transfer = '1') then
+					--Reset signals
 					w_pktarr_rst <= '1', '0' after 1 ns;
 					w_start_timer <= '0';
-					ns_w_scheduler_handler <= schedule8;		--Job expired!
+					w_force_transfer <= '0';
+					w_requesting_packet <= w_midgid_scheduled;
+					
+					--Make a shift request
+					case w_sitting_in_cell(2 downto 0) is
+						when "000" =>
+							w_vc_circSel <= "00";			
+							w_which_vcell_enq <= "00";		--North	
+						when "001" =>
+							w_vc_circSel <= "01";
+							w_which_vcell_enq <= "01";		--East
+						when "010" =>
+							w_vc_circSel <= "10";
+							w_which_vcell_enq <= "10";		--South
+						when "111" =>
+							w_vc_circSel <= "10";
+							w_which_vcell_enq <= "10";		--Ejection
+						when others =>
+							null;
+					end case;
+					ns_w_scheduler_handler <= schedule9;		--Did shift conclude?
 				else	
-					ns_w_scheduler_handler <= schedule5;		--Not yet...
+					ns_w_scheduler_handler <= schedule7;		--Not yet...
 				end if;
-			when schedule7 =>
-				ns_w_scheduler_handler <= schedule9;			--Wait for ack...
-			when schedule8 =>
+			when schedule9 =>
+				w_vcell_shift_flg <= '1', '0' after 1 ns;
+				ns_w_scheduler_handler <= schedule11;
+			when schedule10 =>
+				ns_w_scheduler_handler <= schedule11;
+			when schedule11 =>
+				if(w_shift_in_progress = '0') then
+					--Shift completed, begin departure
+					ns_w_scheduler_handler <= schedule13;
+				else
+					ns_w_scheduler_handler <= schedule10;
+				end if;
+			when schedule12 =>
+				ns_w_scheduler_handler <= schedule14;			--Wait for ack...
+			when schedule13 =>
 				--Initiate data packet transfer
 				sw_w_depart_toggle <= '1';
-				ns_w_scheduler_handler <= schedule9;
-			when schedule9 =>
+				ns_w_scheduler_handler <= schedule14;
+			when schedule14 =>
 				if(w_departed_ack = '1') then
 					sw_w_depart_toggle <= '0';
 					
@@ -1152,7 +1204,7 @@ begin
 					w_purge_midpid <= w_midgid_scheduled;
 					ns_w_scheduler_handler <= wait_state;
 				else
-					ns_w_scheduler_handler <= schedule7;
+					ns_w_scheduler_handler <= schedule12;
 				end if;
 			when others =>
 				ns_w_scheduler_handler <= start;
@@ -1247,7 +1299,9 @@ begin
 		end case;
 	end process;
 	
+	--************************************************************************	
 	--switch_handler - Handles all switch related tasks
+	--************************************************************************
 	switch_handler:process(state_switch_handler)
 		variable count : std_logic_vector(1 downto 0);
 		variable direction : std_logic_vector(2 downto 0);
@@ -1290,16 +1344,16 @@ begin
 				ns_switch_handler <= north_sw1;
 			when north_sw1 =>
 				if(sw_n_rna_toggle = '1') then
-					count:= sw_n_rna_ctrlPkt(12 downto 11);	--Get next hop
+					count:= sw_n_rna_ctrlPkt(13 downto 12);	--Get next hop
 					case count is
 						when "00" =>	
-							direction := sw_n_rna_ctrlPkt(15 downto 13);
+							direction := sw_n_rna_ctrlPkt(16 downto 14);
 						when "01" =>
-							direction := sw_n_rna_ctrlPkt(18 downto 16);
+							direction := sw_n_rna_ctrlPkt(19 downto 17);
 						when "10" =>
-							direction := sw_n_rna_ctrlPkt(21 downto 19);
+							direction := sw_n_rna_ctrlPkt(22 downto 20);
 						when "11" =>
-							direction := sw_n_rna_ctrlPkt(24 downto 22);
+							direction := sw_n_rna_ctrlPkt(25 downto 23);
 						when others =>
 							null;
 					end case;
@@ -1373,16 +1427,16 @@ begin
 			when east_sw1 =>
 				if(sw_e_rna_toggle = '1') then
 					sw_e_rna_ack <= '0';
-					count:= sw_e_rna_ctrlPkt(12 downto 11);	--Get next hop
+					count:= sw_e_rna_ctrlPkt(13 downto 12);	--Get next hop
 					case count is
 						when "00" =>	
-							direction := sw_e_rna_ctrlPkt(15 downto 13);
+							direction := sw_e_rna_ctrlPkt(16 downto 14);
 						when "01" =>
-							direction := sw_e_rna_ctrlPkt(18 downto 16);
+							direction := sw_e_rna_ctrlPkt(19 downto 17);
 						when "10" =>
-							direction := sw_e_rna_ctrlPkt(21 downto 19);
+							direction := sw_e_rna_ctrlPkt(22 downto 20);
 						when "11" =>
-							direction := sw_e_rna_ctrlPkt(24 downto 22);
+							direction := sw_e_rna_ctrlPkt(25 downto 23);
 						when others =>
 							null;
 					end case;
@@ -1456,16 +1510,16 @@ begin
 			when south_sw1 =>
 				if(sw_s_rna_toggle = '1') then
 					sw_s_rna_ack <= '0';
-					count:= sw_s_rna_ctrlPkt(12 downto 11);	--Get next hop
+					count:= sw_s_rna_ctrlPkt(13 downto 12);	--Get next hop
 					case count is
 						when "00" =>	
-							direction := sw_s_rna_ctrlPkt(15 downto 13);
+							direction := sw_s_rna_ctrlPkt(16 downto 14);
 						when "01" =>
-							direction := sw_s_rna_ctrlPkt(18 downto 16);
+							direction := sw_s_rna_ctrlPkt(19 downto 17);
 						when "10" =>
-							direction := sw_s_rna_ctrlPkt(21 downto 19);
+							direction := sw_s_rna_ctrlPkt(22 downto 20);
 						when "11" =>
-							direction := sw_s_rna_ctrlPkt(24 downto 22);
+							direction := sw_s_rna_ctrlPkt(25 downto 23);
 						when others =>
 							null;
 					end case;
@@ -1539,16 +1593,16 @@ begin
 			when west_sw1 =>
 				if(sw_w_rna_toggle = '1') then
 					sw_w_rna_ack <= '0';
-					count:= sw_w_rna_ctrlPkt(12 downto 11);	--Get next hop
+					count:= sw_w_rna_ctrlPkt(13 downto 12);	--Get next hop
 					case count is
 						when "00" =>	
-							direction := sw_w_rna_ctrlPkt(15 downto 13);
+							direction := sw_w_rna_ctrlPkt(16 downto 14);
 						when "01" =>
-							direction := sw_w_rna_ctrlPkt(18 downto 16);
+							direction := sw_w_rna_ctrlPkt(19 downto 17);
 						when "10" =>
-							direction := sw_w_rna_ctrlPkt(21 downto 19);
+							direction := sw_w_rna_ctrlPkt(22 downto 20);
 						when "11" =>
-							direction := sw_w_rna_ctrlPkt(24 downto 22);
+							direction := sw_w_rna_ctrlPkt(25 downto 23);
 						when others =>
 							null;
 					end case;
@@ -1622,16 +1676,16 @@ begin
 			when injection_sw1 =>
 				if(sw_injt_toggle = '1') then
 				
-					count:= sw_injt_pkt(12 downto 11);	--Get next hop
+					count:= sw_injt_pkt(13 downto 12);	--Get next hop
 					case count is
 						when "00" =>	
-							direction := sw_injt_pkt(15 downto 13);
+							direction := sw_injt_pkt(16 downto 14);
 						when "01" =>
-							direction := sw_injt_pkt(18 downto 16);
+							direction := sw_injt_pkt(19 downto 17);
 						when "10" =>
-							direction := sw_injt_pkt(21 downto 19);
+							direction := sw_injt_pkt(22 downto 20);
 						when "11" =>
-							direction := sw_injt_pkt(24 downto 22);
+							direction := sw_injt_pkt(25 downto 23);
 						when others =>
 							null;
 					end case;
@@ -1964,7 +2018,7 @@ begin
 	end process;
 	
 	--************************************************************************
-	--west_scell_handler: Manages VCC enqueues and dequeues made along with shifting
+	--west_vcc_handler: Manages VCC enqueues and dequeues made along with shifting
 	--************************************************************************
 	west_vcc_handler:process(state_westvc_handler)
 	variable countCell0: natural range 0 to 63 := 0;
@@ -1972,13 +2026,18 @@ begin
 	variable countCell2: natural range 0 to 63 := 0;
 	variable countCell3: natural range 0 to 63 := 0;
 	variable shift: natural range 0 to 63 := 0;
-	type memory_type is array(0 to 2**address_size-1) of
-		natural range 0 to 255;
-	variable vcc_lut: memory_type;
+	type lut_type is array(0 to 2**address_size-1) of
+		natural range 0 to 63;
+	type arrival_type is array(0 to 2**address_size-1) of
+		std_logic;
+	variable vcc_lut: lut_type;
+	variable vcc_arrived : arrival_type;
 	
 	begin
 		case state_westvc_handler is
 			when start =>
+				w_shift_in_progress <= '0';
+				w_request_complete <= '0';
 				w_vc_circEn <= '0';
 				w_vc_directEnq <= '0';
 				w_vc_deq <= '0';
@@ -2003,24 +2062,28 @@ begin
 							if(w_vcell_hp_packet = '1') then
 								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
 								vcc_lut(w_vcell_hp_pidgid) := countCell0;
+								vcc_arrived(w_vcell_hp_pidgid) := '1';
 							end if;
 						when "01" =>
 							countCell1 := countCell1 + 1;
 							if(w_vcell_hp_packet = '1') then
 								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
 								vcc_lut(w_vcell_hp_pidgid) := countCell1;
+								vcc_arrived(w_vcell_hp_pidgid) := '1';
 							end if;
 						when "10" =>
 							countCell2 := countCell2 + 1;
 							if(w_vcell_hp_packet = '1') then
 								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
 								vcc_lut(w_vcell_hp_pidgid) := countCell2;
+								vcc_arrived(w_vcell_hp_pidgid) := '1';
 							end if;
 						when "11" =>
 							countCell3 := countCell3 + 1;
 							if(w_vcell_hp_packet = '1') then
 								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
 								vcc_lut(w_vcell_hp_pidgid) := countCell3;
+								vcc_arrived(w_vcell_hp_pidgid) := '1';
 							end if;
 						when others =>
 							null;
@@ -2052,27 +2115,43 @@ begin
 				ns_westvc_handler <= dequeue_occurred2;
 			when dequeue_occurred2 =>
 				for i in vcc_lut'range loop
-					exit when i = 256;
 					vcc_lut(i) := vcc_lut(i) - 1;
 				end loop;
-				ns_westvc_handler <= shift_occurred1;
-			when shift_occurred1 =>
+				ns_westvc_handler <= packet_status1;
+			when packet_status1 =>
+				if(w_request_packet_status = '1') then
+					w_has_packet_arrived <= vcc_arrived(w_requesting_packet);
+					w_request_complete <= '1';
+					ns_westvc_handler <= shift_request1;
+				else
+					ns_westvc_handler <= shift_request1;
+				end if;
+			when shift_request1 =>
 				if(w_vcell_shift = '1' and (countCell2 >= 2)) then
-					--Reset
 					shift := 0;
-					w_vc_circEn <= '1';
+					w_shift_in_progress <= '1';
 					w_vcell_shift_rst <= '1', '0' after 1 ns;
-					ns_westvc_handler <= shift_occurred2;
+					ns_westvc_handler <= shift_start1;
 				else
 					ns_westvc_handler <= wait_state;
 				end if;
-			when shift_occurred2 =>
+			when shift_start1 =>	
+				if(shift = vcc_lut(w_requesting_packet)) then
+					ns_westvc_handler <= wait_state;
+				else
+					--Start Shifting
+					w_vc_circEn <= '1';
+					ns_westvc_handler <= shift_start2;
+				end if;
+			when shift_start2 =>
+				w_vc_deq <= '0';
 				w_vc_directEnq <= '1';
-				ns_westvc_handler <= shift_occurred3;
-			when shift_occurred3 =>
+				ns_westvc_handler <= shift_start3;
+			when shift_start3 =>
 				w_vc_directEnq <= '0';
 				w_vc_deq <= '1';
-				ns_westvc_handler <= wait_state;
+				shift := shift + 1;
+				ns_westvc_handler <= shift_start1;
 			when others =>
 				ns_westvc_handler <= start;
 			end case;

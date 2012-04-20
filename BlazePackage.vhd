@@ -11,7 +11,7 @@ use ieee.std_logic_unsigned.all;
 
 package router_library is
 	--Universal constants Go Here (these are things that determine dimensions and can be changed on the fly)
-	constant WIDTH			: integer := 56;
+	constant WIDTH			: integer := 57;
 	
 	--Arbiter.vhd specific
 	constant	RSV_WIDTH 	: integer := 3;		--Reservation Table Width

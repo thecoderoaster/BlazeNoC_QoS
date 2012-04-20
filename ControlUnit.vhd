@@ -233,7 +233,9 @@ architecture Behavioral of ControlUnit is
 							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
 							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9,
 							  schedule10, schedule11, schedule12, schedule13, schedule14,
-							  enqueue_occurred1, dequeue_occurred1, dequeue_occurred2, packet_status1, shift_request1, shift_start1, shift_start2, shift_start3);   -- State FSM
+							  enqueue_occurred1, dequeue_occurred1, dequeue_occurred2, 
+							  packet_status1, 
+							  shift_request1, shift_start1, shift_start2, shift_start3, shift_start4);   -- State FSM
 	
 	signal state_north_handler: state_type;
 	signal state_east_handler: state_type;
@@ -368,18 +370,17 @@ architecture Behavioral of ControlUnit is
 	signal w_vcell_req_halt		: std_logic;
 	signal w_vcell_hp_packet	: std_logic;
 	signal w_vcell_hp_packet_rst : std_logic;
+	signal w_vcell_hp_packet_set : std_logic;
 	signal w_vcell_hp_pidgid	: natural range 0 to 2**address_size-1;
 	signal w_shift_in_progress	: std_logic;
 	signal w_request_packet_status : std_logic;
 	signal w_request_complete	: std_logic;
+	signal w_which_vcc_enq		: std_logic_vector(2 downto 0);
 	signal w_sitting_in_cell	: std_logic_vector(2 downto 0);
 	signal w_requesting_packet	: natural range 0 to 2**address_size-1;
 	signal w_has_packet_arrived : std_logic;
 	
 	
-	
-	
-
 begin
 
 	--************************************************************************
@@ -921,7 +922,8 @@ begin
 					w_dpkt_arrived <= '0';
 					
 					w_sync_rst <= '1', '0' after 1 ns;
-					
+					w_vcell_hp_packet_set <= '0';
+
 					ns_west_handler <= west1;
 				when wait_state =>
 					ns_west_handler <= west1;
@@ -1010,18 +1012,31 @@ begin
 					case w_rsv_data_in_a(2 downto 0) is
 						when "000" =>
 							w_vc_rnaSelI <= "00";			--North
+							w_which_vcell_enq <= "00";
+							w_which_vcc_enq <= "000";
 						when "001" =>
 							w_vc_rnaSelI <= "01";			--East
+							w_which_vcell_enq <= "01";
+							w_which_vcc_enq <= "001";
 						when "010" =>
 							w_vc_rnaSelI <= "10";			--South
+							w_which_vcell_enq <= "10";
+							w_which_vcc_enq <= "010";
 						when "111" =>
 							w_vc_rnaSelI <= "11";			--Ejection
+							w_which_vcell_enq <= "11";
+							w_which_vcc_enq <= "111";
 						when others =>
 							null;
 					end case;
 					
-					w_vcell_enq_flg <= '1', '0' after 1 ns;
-					
+					--Grab high or low priority status of packet
+					if(w_rnaCtrl(1) = '1') then
+						w_vcell_hp_packet_set <= '1', '0' after 1 ns;
+					else
+						w_vcell_hp_packet_set <= '0';
+					end if;
+				
 					--Acknowledge
 					w_CTRflg <= '1';
 					w_arbEnq <= '1';
@@ -1029,7 +1044,10 @@ begin
 				when west11 =>
 					w_CTRflg <= '0';
 					w_arbEnq <= '0';
-					
+				
+					--Notify the VCC Manager of a new packet that's been enqueued
+					w_vcell_enq_flg <= '1', '0' after 1 ns;
+				
 					--Notify scheduler if this packet is set to depart soon
 					if(w_midgid_scheduled = conv_integer(w_rnaCtrl(11 downto 4))) then
 						w_dpkt_arrived <= '1', '0' after 1 ns;
@@ -1154,22 +1172,18 @@ begin
 					w_pktarr_rst <= '1', '0' after 1 ns;
 					w_start_timer <= '0';
 					w_force_transfer <= '0';
-					w_requesting_packet <= w_midgid_scheduled;
+					w_requesting_packet <= w_next_sch_job_midpid;
 					
 					--Make a shift request
 					case w_sitting_in_cell(2 downto 0) is
 						when "000" =>
-							w_vc_circSel <= "00";			
-							w_which_vcell_enq <= "00";		--North	
+							w_vc_circSel <= "00";				
 						when "001" =>
 							w_vc_circSel <= "01";
-							w_which_vcell_enq <= "01";		--East
 						when "010" =>
 							w_vc_circSel <= "10";
-							w_which_vcell_enq <= "10";		--South
 						when "111" =>
 							w_vc_circSel <= "10";
-							w_which_vcell_enq <= "10";		--Ejection
 						when others =>
 							null;
 					end case;
@@ -2029,7 +2043,7 @@ begin
 	type lut_type is array(0 to 2**address_size-1) of
 		natural range 0 to 63;
 	type arrival_type is array(0 to 2**address_size-1) of
-		std_logic;
+		std_logic_vector(3 downto 0);
 	variable vcc_lut: lut_type;
 	variable vcc_arrived : arrival_type;
 	
@@ -2062,28 +2076,28 @@ begin
 							if(w_vcell_hp_packet = '1') then
 								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
 								vcc_lut(w_vcell_hp_pidgid) := countCell0;
-								vcc_arrived(w_vcell_hp_pidgid) := '1';
+								vcc_arrived(w_vcell_hp_pidgid) := '1' & w_which_vcc_enq;
 							end if;
 						when "01" =>
 							countCell1 := countCell1 + 1;
 							if(w_vcell_hp_packet = '1') then
 								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
 								vcc_lut(w_vcell_hp_pidgid) := countCell1;
-								vcc_arrived(w_vcell_hp_pidgid) := '1';
+								vcc_arrived(w_vcell_hp_pidgid) := '1' & w_which_vcc_enq;
 							end if;
 						when "10" =>
 							countCell2 := countCell2 + 1;
 							if(w_vcell_hp_packet = '1') then
 								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
 								vcc_lut(w_vcell_hp_pidgid) := countCell2;
-								vcc_arrived(w_vcell_hp_pidgid) := '1';
+								vcc_arrived(w_vcell_hp_pidgid) := '1' & w_which_vcc_enq;
 							end if;
 						when "11" =>
 							countCell3 := countCell3 + 1;
 							if(w_vcell_hp_packet = '1') then
 								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
 								vcc_lut(w_vcell_hp_pidgid) := countCell3;
-								vcc_arrived(w_vcell_hp_pidgid) := '1';
+								vcc_arrived(w_vcell_hp_pidgid) := '1' & w_which_vcc_enq;
 							end if;
 						when others =>
 							null;
@@ -2111,16 +2125,23 @@ begin
 						when others =>
 							null;
 					end case;
+					ns_westvc_handler <= dequeue_occurred2;
+				else
+					ns_westvc_handler <= packet_status1;
 				end if;
-				ns_westvc_handler <= dequeue_occurred2;
 			when dequeue_occurred2 =>
 				for i in vcc_lut'range loop
-					vcc_lut(i) := vcc_lut(i) - 1;
+					if(vcc_lut(i) = 0) then
+						vcc_arrived(i) := "0000";				-- Remove
+					else
+						vcc_lut(i) := vcc_lut(i) - 1;
+					end if;
 				end loop;
 				ns_westvc_handler <= packet_status1;
 			when packet_status1 =>
 				if(w_request_packet_status = '1') then
-					w_has_packet_arrived <= vcc_arrived(w_requesting_packet);
+					w_has_packet_arrived <= vcc_arrived(w_requesting_packet)(3);
+					w_sitting_in_cell <= vcc_arrived(w_requesting_packet)(2 downto 0);
 					w_request_complete <= '1';
 					ns_westvc_handler <= shift_request1;
 				else
@@ -2128,7 +2149,7 @@ begin
 				end if;
 			when shift_request1 =>
 				if(w_vcell_shift = '1' and (countCell2 >= 2)) then
-					shift := 0;
+					--shift := 0;
 					w_shift_in_progress <= '1';
 					w_vcell_shift_rst <= '1', '0' after 1 ns;
 					ns_westvc_handler <= shift_start1;
@@ -2136,7 +2157,7 @@ begin
 					ns_westvc_handler <= wait_state;
 				end if;
 			when shift_start1 =>	
-				if(shift = vcc_lut(w_requesting_packet)) then
+				if(vcc_lut(w_requesting_packet) = 0) then
 					ns_westvc_handler <= wait_state;
 				else
 					--Start Shifting
@@ -2150,7 +2171,17 @@ begin
 			when shift_start3 =>
 				w_vc_directEnq <= '0';
 				w_vc_deq <= '1';
-				shift := shift + 1;
+				--shift := shift + 1;
+				ns_westvc_handler <= shift_start4;
+			when shift_start4 =>
+				--Shift contents in table down by 1
+				for i in vcc_lut'range loop
+					if(vcc_lut(i) = 0) then
+						vcc_lut(i) := countCell2 - 1;				-- send to the back of the queue
+					else
+						vcc_lut(i) := vcc_lut(i) - 1;					-- everyone else...
+					end if;
+				end loop;
 				ns_westvc_handler <= shift_start1;
 			when others =>
 				ns_westvc_handler <= start;
@@ -2207,10 +2238,15 @@ begin
 	--************************************************************************
 	--west_vcell_sync_enq: Manages shift operations in VCC circular buffer.
 	--************************************************************************
-	west_vcell_hp_packet:process(w_vcell_hp_packet_rst)
+	west_vcell_hp_packet:process(w_vcell_hp_packet_rst, w_vcell_hp_packet_set)
 	begin
 		if(w_vcell_hp_packet_rst = '1') then
 			w_vcell_hp_packet <= '0';
+		end if;
+		
+		--High Priority packet has come in...
+		if(w_vcell_hp_packet_set = '1') then
+			w_vcell_hp_packet <= '1';
 		end if;
 	end process;
 

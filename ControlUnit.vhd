@@ -356,29 +356,32 @@ architecture Behavioral of ControlUnit is
 	signal sw_w_count			: std_logic_vector (1 downto 0);
 	
 	--VCC Related Signals
-	signal w_which_vcell_enq 	: std_logic_vector(1 downto 0);
-	signal w_which_vcell_deq 	: std_logic_vector(1 downto 0);
-	signal w_vcell_enq 			: std_logic;
-	signal w_vcell_enq_flg 		: std_logic;
-	signal w_vcell_enq_rst		: std_logic;
-	signal w_vcell_deq 			: std_logic;
-	signal w_vcell_deq_flg 		: std_logic;
-	signal w_vcell_deq_rst		: std_logic;
-	signal w_vcell_shift			: std_logic;
-	signal w_vcell_shift_flg 	: std_logic;
-	signal w_vcell_shift_rst 	: std_logic;
-	signal w_vcell_req_halt		: std_logic;
-	signal w_vcell_hp_packet	: std_logic;
-	signal w_vcell_hp_packet_rst : std_logic;
-	signal w_vcell_hp_packet_set : std_logic;
-	signal w_vcell_hp_pidgid	: natural range 0 to 2**address_size-1;
-	signal w_shift_in_progress	: std_logic;
-	signal w_request_packet_status : std_logic;
-	signal w_request_complete	: std_logic;
-	signal w_which_vcc_enq		: std_logic_vector(2 downto 0);
-	signal w_sitting_in_cell	: std_logic_vector(2 downto 0);
-	signal w_requesting_packet	: natural range 0 to 2**address_size-1;
-	signal w_has_packet_arrived : std_logic;
+	signal w_vcm_which_vcell_enq 		: std_logic_vector(1 downto 0);
+	signal w_vcm_which_vcc_enq			: std_logic_vector(2 downto 0);
+	signal w_vcm_which_vcell_deq 		: std_logic_vector(1 downto 0);
+	signal w_vcm_enq 						: std_logic;
+	signal w_vcm_enq_set 				: std_logic;
+	signal w_vcm_enq_rst					: std_logic;
+	signal w_vcm_deq 						: std_logic;
+	signal w_vcm_deq_set 				: std_logic;
+	signal w_vcm_deq_rst					: std_logic;
+	signal w_vcm_shift					: std_logic;
+	signal w_vcm_shift_set 				: std_logic;
+	signal w_vcm_shift_rst 				: std_logic;
+	signal w_vcm_shift_complete		: std_logic;
+	signal w_vcm_shift_complete_set	: std_logic;
+	signal w_vcm_shift_complete_rst	: std_logic;
+	signal w_vcm_shift_cell				: std_logic_vector(2 downto 0);
+	signal w_vcm_hp_pkt					: std_logic;
+	signal w_vcm_hp_pkt_set 			: std_logic;
+	signal w_vcm_hp_pkt_rst 			: std_logic;
+	signal w_vcm_hp_pidgid				: natural range 0 to 2**address_size-1;
+	signal w_vcm_req_pkt_status 		: std_logic;
+	signal w_vcm_req_pkt_status_set 	: std_logic;
+	signal w_vcm_req_pkt_status_rst 	: std_logic;
+	signal w_vcm_req_complete			: std_logic;
+	signal w_vcm_req_pkt					: natural range 0 to 2**address_size-1;
+	signal w_vcm_req_pkt_arrived 		: std_logic;
 	
 	
 begin
@@ -922,7 +925,7 @@ begin
 					w_dpkt_arrived <= '0';
 					
 					w_sync_rst <= '1', '0' after 1 ns;
-					w_vcell_hp_packet_set <= '0';
+					w_vcm_hp_pkt_set <= '0';
 
 					ns_west_handler <= west1;
 				when wait_state =>
@@ -997,7 +1000,7 @@ begin
 			
 				when west8 =>
 					--Data Packet Arrived?
-					if(w_DataFlg = '1' and w_shift_in_progress = '0') then
+					if(w_DataFlg = '1' and w_vcm_shift_complete = '0') then
 						ns_west_handler <= west9;
 					else
 						ns_west_handler <= wait_state;
@@ -1012,29 +1015,29 @@ begin
 					case w_rsv_data_in_a(2 downto 0) is
 						when "000" =>
 							w_vc_rnaSelI <= "00";			--North
-							w_which_vcell_enq <= "00";
-							w_which_vcc_enq <= "000";
+							w_vcm_which_vcell_enq <= "00";
+							w_vcm_which_vcc_enq <= "000";
 						when "001" =>
 							w_vc_rnaSelI <= "01";			--East
-							w_which_vcell_enq <= "01";
-							w_which_vcc_enq <= "001";
+							w_vcm_which_vcell_enq <= "01";
+							w_vcm_which_vcc_enq <= "001";
 						when "010" =>
 							w_vc_rnaSelI <= "10";			--South
-							w_which_vcell_enq <= "10";
-							w_which_vcc_enq <= "010";
+							w_vcm_which_vcell_enq <= "10";
+							w_vcm_which_vcc_enq <= "010";
 						when "111" =>
 							w_vc_rnaSelI <= "11";			--Ejection
-							w_which_vcell_enq <= "11";
-							w_which_vcc_enq <= "111";
+							w_vcm_which_vcell_enq <= "11";
+							w_vcm_which_vcc_enq <= "111";
 						when others =>
 							null;
 					end case;
 					
 					--Grab high or low priority status of packet
 					if(w_rnaCtrl(1) = '1') then
-						w_vcell_hp_packet_set <= '1', '0' after 1 ns;
+						w_vcm_hp_pkt_set <= '1', '0' after 1 ns;
 					else
-						w_vcell_hp_packet_set <= '0';
+						w_vcm_hp_pkt_set <= '0';
 					end if;
 				
 					--Acknowledge
@@ -1046,7 +1049,7 @@ begin
 					w_arbEnq <= '0';
 				
 					--Notify the VCC Manager of a new packet that's been enqueued
-					w_vcell_enq_flg <= '1', '0' after 1 ns;
+					w_vcm_enq_set <= '1', '0' after 1 ns;
 				
 					--Notify scheduler if this packet is set to depart soon
 					if(w_midgid_scheduled = conv_integer(w_rnaCtrl(11 downto 4))) then
@@ -1143,16 +1146,16 @@ begin
 					ns_w_scheduler_handler <= schedule2;
 				end if;
 			when schedule4 =>
-				w_request_packet_status <= '1';
-				w_requesting_packet <= w_next_sch_job_midpid;
+				w_vcm_req_pkt_status <= '1';
+				w_vcm_req_pkt <= w_next_sch_job_midpid;
 				ns_w_scheduler_handler <= schedule5;
 			when schedule5 =>
 				--Wait state
-				if(w_request_complete = '1' and w_has_packet_arrived = '1') then
+				if(w_vcm_req_complete = '1' and w_vcm_req_pkt_arrived = '1') then
 					--Packet is here! Move it to the next router (Don't Schedule)
 					w_force_transfer <= '1';
 					ns_w_scheduler_handler <= schedule8;
-				elsif(w_request_complete = '1' and w_has_packet_arrived = '0') then
+				elsif(w_vcm_req_complete = '1' and w_vcm_req_pkt_arrived = '0') then
 					--Need to schedule...
 					ns_w_scheduler_handler <= schedule6;
 				else
@@ -1172,10 +1175,10 @@ begin
 					w_pktarr_rst <= '1', '0' after 1 ns;
 					w_start_timer <= '0';
 					w_force_transfer <= '0';
-					w_requesting_packet <= w_next_sch_job_midpid;
+					w_vcm_req_pkt <= w_next_sch_job_midpid;
 					
 					--Make a shift request
-					case w_sitting_in_cell(2 downto 0) is
+					case w_vcm_shift_cell(2 downto 0) is
 						when "000" =>
 							w_vc_circSel <= "00";				
 						when "001" =>
@@ -1192,12 +1195,12 @@ begin
 					ns_w_scheduler_handler <= schedule7;		--Not yet...
 				end if;
 			when schedule9 =>
-				w_vcell_shift_flg <= '1', '0' after 1 ns;
+				w_vcm_shift_set <= '1', '0' after 1 ns;
 				ns_w_scheduler_handler <= schedule11;
 			when schedule10 =>
 				ns_w_scheduler_handler <= schedule11;
 			when schedule11 =>
-				if(w_shift_in_progress = '0') then
+				if(w_shift_complete = '1') then
 					--Shift completed, begin departure
 					ns_w_scheduler_handler <= schedule13;
 				else
@@ -1808,7 +1811,7 @@ begin
 						sw_eSel <= "011";							--East
 					when "010" =>
 						w_vc_rnaSelO <= "10";
-						w_which_vcell_deq <= "10";
+						w_vcm_which_vcell_deq <= "10";
 						sw_sSel <= "011";							--South
 					when "111" =>
 						w_vc_rnaSelO <= "11";
@@ -1849,7 +1852,7 @@ begin
 				end if;
 			when depart_w_sw5 =>
 				--Dequeue
-				w_vcell_deq_flg <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				w_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				
 				ns_switch_handler <= north_sw1;
 			when others =>
@@ -2050,14 +2053,13 @@ begin
 	begin
 		case state_westvc_handler is
 			when start =>
-				w_shift_in_progress <= '0';
-				w_request_complete <= '0';
+				w_vcm_req_complete <= '0';
 				w_vc_circEn <= '0';
 				w_vc_directEnq <= '0';
 				w_vc_deq <= '0';
-				w_vcell_enq_rst <= '0';
-				w_vcell_deq_rst <= '0';
-				w_vcell_shift_rst <= '0';
+				w_vcm_enq_rst <= '0';
+				w_vcm_deq_rst <= '0';
+				w_vcm_shift_rst <= '0';
 				
 				ns_westvc_handler <= wait_state;
 			when wait_state =>
@@ -2065,39 +2067,39 @@ begin
 				w_vc_circEn <= '0';
 				ns_westvc_handler <= enqueue_occurred1;
 			when enqueue_occurred1 =>
-				if(w_vcell_enq = '1') then
+				if(w_vcm_enq = '1') then
 					--Reset
-					w_vcell_enq_rst <= '1', '0' after 1 ns;
+					w_vcm_enq_rst <= '1', '0' after 1 ns;
 					
 					--Update Count
-					case w_which_vcell_enq is
+					case w_vcm_which_vcell_enq is
 						when "00" =>
 							countCell0 := countCell0 + 1;
-							if(w_vcell_hp_packet = '1') then
-								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcell_hp_pidgid) := countCell0;
-								vcc_arrived(w_vcell_hp_pidgid) := '1' & w_which_vcc_enq;
+							if(w_vcm_hp_pkt = '1') then
+								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
+								vcc_lut(w_vcm_hp_pidgid) := countCell0;
+								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
 							end if;
 						when "01" =>
 							countCell1 := countCell1 + 1;
-							if(w_vcell_hp_packet = '1') then
-								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcell_hp_pidgid) := countCell1;
-								vcc_arrived(w_vcell_hp_pidgid) := '1' & w_which_vcc_enq;
+							if(w_vcm_hp_pkt = '1') then
+								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
+								vcc_lut(w_vcm_hp_pidgid) := countCell1;
+								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
 							end if;
 						when "10" =>
 							countCell2 := countCell2 + 1;
-							if(w_vcell_hp_packet = '1') then
-								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcell_hp_pidgid) := countCell2;
-								vcc_arrived(w_vcell_hp_pidgid) := '1' & w_which_vcc_enq;
+							if(w_vcm_hp_pkt = '1') then
+								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
+								vcc_lut(w_vcm_hp_pidgid) := countCell2;
+								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
 							end if;
 						when "11" =>
 							countCell3 := countCell3 + 1;
-							if(w_vcell_hp_packet = '1') then
-								w_vcell_hp_packet_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcell_hp_pidgid) := countCell3;
-								vcc_arrived(w_vcell_hp_pidgid) := '1' & w_which_vcc_enq;
+							if(w_vcm_hp_pkt = '1') then
+								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
+								vcc_lut(w_vcm_hp_pidgid) := countCell3;
+								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
 							end if;
 						when others =>
 							null;
@@ -2105,15 +2107,15 @@ begin
 				end if;
 				ns_westvc_handler <= dequeue_occurred1;
 			when dequeue_occurred1 =>
-				if(w_vcell_deq = '1') then
+				if(w_vcm_deq = '1') then
 					--Dequeue
 					w_vc_deq <= '1', '0' after 1 ns;
 					
 					--Reset signals
-					w_vcell_deq_rst <= '1', '0' after 1 ns;
+					w_vcm_deq_rst <= '1', '0' after 1 ns;
 					
 					--Update Count
-					case w_which_vcell_deq is
+					case w_vcm_which_vcell_deq is
 						when "00" =>
 							countCell0 := countCell0 - 1;
 						when "01" =>
@@ -2139,25 +2141,24 @@ begin
 				end loop;
 				ns_westvc_handler <= packet_status1;
 			when packet_status1 =>
-				if(w_request_packet_status = '1') then
-					w_has_packet_arrived <= vcc_arrived(w_requesting_packet)(3);
-					w_sitting_in_cell <= vcc_arrived(w_requesting_packet)(2 downto 0);
-					w_request_complete <= '1';
+				if(w_vcm_req_pkt_status = '1') then
+					w_vcm_req_pkt_arrived <= vcc_arrived(w_vcm_req_pkt)(3);
+					w_vcm_shift_cell <= vcc_arrived(w_vcm_req_pkt)(2 downto 0);
+					w_vcm_req_complete <= '1';
 					ns_westvc_handler <= shift_request1;
 				else
 					ns_westvc_handler <= shift_request1;
 				end if;
 			when shift_request1 =>
-				if(w_vcell_shift = '1' and (countCell2 >= 2)) then
-					--shift := 0;
-					w_shift_in_progress <= '1';
-					w_vcell_shift_rst <= '1', '0' after 1 ns;
+				if(w_vcm_shift = '1' and (countCell2 >= 2)) then
+					w_vcm_shift_rst <= '1', '0' after 1 ns;
 					ns_westvc_handler <= shift_start1;
 				else
 					ns_westvc_handler <= wait_state;
 				end if;
 			when shift_start1 =>	
-				if(vcc_lut(w_requesting_packet) = 0) then
+				if(vcc_lut(w_vcm_req_pkt) = 0) then
+					w_vcm_shift_complete_set <= '1', '0' after 1 ns;
 					ns_westvc_handler <= wait_state;
 				else
 					--Start Shifting
@@ -2171,15 +2172,14 @@ begin
 			when shift_start3 =>
 				w_vc_directEnq <= '0';
 				w_vc_deq <= '1';
-				--shift := shift + 1;
 				ns_westvc_handler <= shift_start4;
 			when shift_start4 =>
 				--Shift contents in table down by 1
 				for i in vcc_lut'range loop
 					if(vcc_lut(i) = 0) then
-						vcc_lut(i) := countCell2 - 1;				-- send to the back of the queue
+						vcc_lut(i) := countCell2 - 2;				-- send to the back of the queue
 					else
-						vcc_lut(i) := vcc_lut(i) - 1;					-- everyone else...
+						vcc_lut(i) := vcc_lut(i) - 1;				-- everyone else...
 					end if;
 				end loop;
 				ns_westvc_handler <= shift_start1;
@@ -2188,66 +2188,95 @@ begin
 			end case;
 	end process;
 	
-	--************************************************************************
-	--west_vcell_sync_enq: Tracks VCC enqueues on the West Port
-	--************************************************************************
-	west_vcell_sync_enq:process(w_vcell_enq_rst, w_vcell_enq_flg)
+	--************************************************************************************
+	--west_vcm_enq_signals: Handles VCC enqueue signals from VCM (Virtual Channel Manager)
+	--************************************************************************************
+	west_vcm_enq_signals:process(w_vcm_enq_rst, w_vcm_enq_set)
 	begin
-		if(w_vcell_enq_rst = '1') then
-			w_vcell_enq <= '0';
+		if(w_vcm_enq_rst = '1') then
+			w_vcm_enq <= '0';
 		end if;
 		
 		--An item has been enqueued from the VCC buffer (update the global count)
-		if(w_vcell_enq_flg = '1') then
-			w_vcell_enq <= '1';
+		if(w_vcm_enq_set = '1') then
+			w_vcm_enq <= '1';
 		end if;
 	end process;
 
-	--************************************************************************
-	--west_vcell_sync_deq: Tracks VCC dequeues on the West Port
-	--************************************************************************
-	west_vcell_sync_deq:process(w_vcell_deq_rst, w_vcell_deq_flg)
+	--************************************************************************************
+	--west_vcm_deq_signals: Handles VCC dequeue signals from VCM (Virtual Channel Manager)
+	--************************************************************************************
+	west_vcm_deq_signals:process(w_vcm_deq_rst, w_vcm_deq_set)
 	begin
-		if(w_vcell_deq_rst = '1') then
-			w_vcell_deq <= '0';
+		if(w_vcm_deq_rst = '1') then
+			w_vcm_deq <= '0';
 		end if;
 				
 		--An item has been dequeued from the VCC buffer (update the global count)
-		if(w_vcell_deq_flg = '1') then
-			w_vcell_deq <= '1';
+		if(w_vcm_deq_set = '1') then
+			w_vcm_deq <= '1';
 		end if;
 	end process;
 	
-	--************************************************************************
-	--west_vcell_sync_enq: Manages shift operations in VCC circular buffer.
-	--************************************************************************
-	west_vcell_sync_shift:process(w_vcell_shift_rst, w_vcell_shift_flg)
+	--***********************************************************************************************
+	--west_vcm_signal_shift_start: Handles VCC start shift signals from VCM (Virtual Channel Manager)
+	--***********************************************************************************************
+	west_vcm_signal_shift_start:process(w_vcm_shift_rst, w_vcm_shift_set)
 	begin
-		if(w_vcell_shift_rst = '1') then
-			w_vcell_shift <= '0';
-			w_vcell_req_halt <= '0';			--Tells switch to immediately halt any lower priority xfers.
+		if(w_vcm_shift_rst = '1') then
+			w_vcm_shift <= '0';
 		end if;
 		
 		--Shifting Request
-		if(w_vcell_shift_flg = '1') then
-			w_vcell_shift <= '1';
-			w_vcell_req_halt <= '1';
+		if(w_vcm_shift_set = '1') then
+			w_vcm_shift <= '1';
 		end if;
 	end process;
 	
-	--************************************************************************
-	--west_vcell_sync_enq: Manages shift operations in VCC circular buffer.
-	--************************************************************************
-	west_vcell_hp_packet:process(w_vcell_hp_packet_rst, w_vcell_hp_packet_set)
+	--***********************************************************************************
+	--west_vcm_signal_shift_complete: Manages packet information request from VCC manager
+	--***********************************************************************************
+	west_vcm_shift_complete:process(w_vcm_shift_complete_rst, w_vcm_shift_complete_set)
 	begin
-		if(w_vcell_hp_packet_rst = '1') then
-			w_vcell_hp_packet <= '0';
+		if(w_vcm_shift_complete_rst = '1') then
+			w_vcm_shift_complete <= '0';
+		end if;
+		
+		--Determine if the data packet has arrived...
+		if(w_vcm_shift_complete_set = '1') then
+			w_vcm_shift_complete <= '1';
+		end if;
+	end process;
+	
+	--*******************************************************************************************************
+	--west_vcm_signal_hp_packet: Handles notification of incoming high priority packet from West Port to VCM
+	--*******************************************************************************************************
+	west_vcm_signal_hp_packet:process(w_vcm_hp_pkt_rst, w_vcm_hp_pkt_set)
+	begin
+		if(w_vcm_hp_pkt_rst = '1') then
+			w_vcm_hp_pkt <= '0';
 		end if;
 		
 		--High Priority packet has come in...
-		if(w_vcell_hp_packet_set = '1') then
-			w_vcell_hp_packet <= '1';
+		if(w_vcm_hp_pkt_set = '1') then
+			w_vcm_hp_pkt <= '1';
 		end if;
 	end process;
+
+	--***********************************************************************************
+	--west_vcm_signal_req_pkt_status: Manages packet information request from VCC manager
+	--***********************************************************************************
+	west_vcm_signal_req_pkt_status:process(w_vcm_req_pkt_status_rst, w_vcm_req_pkt_status_set)
+	begin
+		if(w_vcm_req_pkt_status_rst = '1') then
+			w_vcm_req_pkt_status <= '0';
+		end if;
+		
+		--Determine if the data packet has arrived...
+		if(w_vcm_req_pkt_status_set = '1') then
+			w_vcm_req_pkt_status <= '1';
+		end if;
+	end process;
+	
 
 end Behavioral;

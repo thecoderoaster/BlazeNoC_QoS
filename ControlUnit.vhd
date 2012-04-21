@@ -1125,6 +1125,7 @@ begin
 				w_sch_purge_job_set <= '0';
 				w_sch_dpkt_arrived_rst <= '0';
 				w_sch_job_ready_rst <= '0';
+				w_vcm_shift_complete_rst <= '1', '0' after 1 ns;
 				
 				ns_w_scheduler_handler <= schedule1;
 			when wait_state =>
@@ -1148,7 +1149,7 @@ begin
 					ns_w_scheduler_handler <= schedule2;
 				end if;
 			when schedule4 =>
-				w_vcm_req_pkt_status <= '1';
+				w_vcm_req_pkt_status_set <= '1', '0' after 1 ns;
 				w_vcm_req_pkt <= w_sch_next_job_midpid;
 				ns_w_scheduler_handler <= schedule5;
 			when schedule5 =>
@@ -1156,9 +1157,11 @@ begin
 				if(w_vcm_req_complete = '1' and w_vcm_req_pkt_arrived = '1') then
 					--Packet is here! Move it to the next router (Don't Schedule)
 					w_sch_force_transfer <= '1';
+					w_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
 					ns_w_scheduler_handler <= schedule8;
 				elsif(w_vcm_req_complete = '1' and w_vcm_req_pkt_arrived = '0') then
 					--Need to schedule...
+					w_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
 					ns_w_scheduler_handler <= schedule6;
 				else
 					--No Ack Yet...
@@ -1202,8 +1205,9 @@ begin
 			when schedule10 =>
 				ns_w_scheduler_handler <= schedule11;
 			when schedule11 =>
-				if(w_shift_complete = '1') then
+				if(w_vcm_shift_complete = '1') then
 					--Shift completed, begin departure
+					w_vcm_shift_complete_rst <= '1', '0' after 1 ns;
 					ns_w_scheduler_handler <= schedule13;
 				else
 					ns_w_scheduler_handler <= schedule10;
@@ -1995,9 +1999,9 @@ begin
 	end process;
 	
 	--************************************************************************
-	--west_pktarrived_sync: Handles dpkt arrived signal for west
+	--west_sch_signal_arrived: Handles dpkt arrived signal for west
 	--************************************************************************
-	west_pktarrived_sync:process(w_sch_dpkt_arrived_rst, w_sch_dpkt_arrived_set)
+	west_sch_signal_arrived:process(w_sch_dpkt_arrived_rst, w_sch_dpkt_arrived_set)
 	begin
 		if(w_sch_dpkt_arrived_rst = '1') then
 			w_sch_dpkt_arrived <= '0';
@@ -2009,9 +2013,9 @@ begin
 	end process;
 	
 	--************************************************************************
-	--west_pktpurge_sync: Handles purge signal for west
+	--west_sch_signal_purge: Handles purge signal for west
 	--************************************************************************
-	west_pktpurge_sync:process(w_sch_purge_job_rst, w_sch_purge_job_set)
+	west_sch_signal_purge:process(w_sch_purge_job_rst, w_sch_purge_job_set)
 	begin
 		if(w_sch_purge_job_rst = '1') then
 			w_sch_purge_job <= '0';
@@ -2023,9 +2027,9 @@ begin
 	end process;
 	
 	--************************************************************************
-	--west_jobready_sync: Handles job ready signal for west
+	--west_sch_signal_ready: Handles job ready signal for west
 	--************************************************************************
-	west_jobready_sync:process(w_sch_job_ready_rst, w_sch_job_ready_set)
+	west_sch_signal_ready:process(w_sch_job_ready_rst, w_sch_job_ready_set)
 	begin
 		if(w_sch_job_ready_rst = '1') then
 			w_sch_job_ready <= '0';
@@ -2037,9 +2041,9 @@ begin
 	end process;
 	
 	--************************************************************************
-	--west_vcc_handler: Manages VCC enqueues and dequeues made along with shifting
+	--west_vcm_handler: Manages VCC enqueues and dequeues made along with shifting
 	--************************************************************************
-	west_vcc_handler:process(state_westvc_handler)
+	west_vcm_handler:process(state_westvc_handler)
 	variable countCell0: natural range 0 to 63 := 0;
 	variable countCell1: natural range 0 to 63 := 0;
 	variable countCell2: natural range 0 to 63 := 0;
@@ -2176,6 +2180,7 @@ begin
 				w_vc_deq <= '1';
 				ns_westvc_handler <= shift_start4;
 			when shift_start4 =>
+				w_vc_deq <= '0';
 				--Shift contents in table down by 1
 				for i in vcc_lut'range loop
 					if(vcc_lut(i) = 0) then

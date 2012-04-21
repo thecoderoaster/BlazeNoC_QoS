@@ -376,6 +376,7 @@ architecture Behavioral of ControlUnit is
 	signal w_vcm_shift_complete_set	: std_logic;
 	signal w_vcm_shift_complete_rst	: std_logic;
 	signal w_vcm_shift_cell				: std_logic_vector(2 downto 0);
+	signal w_vcm_which_vcell_to_shift : std_logic_vector(1 downto 0);
 	signal w_vcm_hp_pkt					: std_logic;
 	signal w_vcm_hp_pkt_set 			: std_logic;
 	signal w_vcm_hp_pkt_rst 			: std_logic;
@@ -1193,12 +1194,16 @@ begin
 					case w_vcm_shift_cell(2 downto 0) is
 						when "000" =>
 							w_vc_circSel <= "00";
+							w_vcm_which_vcell_to_shift <= "00";
 						when "001" =>
 							w_vc_circSel <= "01";
+							w_vcm_which_vcell_to_shift <= "01";
 						when "010" =>
 							w_vc_circSel <= "10";
+							w_vcm_which_vcell_to_shift <= "10";
 						when "111" =>
-							w_vc_circSel <= "10";
+							w_vc_circSel <= "11";
+							w_vcm_which_vcell_to_shift <= "11";
 						when others =>
 							null;
 					end case;
@@ -2120,28 +2125,28 @@ begin
 							countCell0 := countCell0 + 1;
 							if(w_vcm_hp_pkt = '1') then
 								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcm_hp_pidgid) := countCell0;
+								vcc_lut(w_vcm_hp_pidgid) := countCell0 - 1;
 								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
 							end if;
 						when "01" =>
 							countCell1 := countCell1 + 1;
 							if(w_vcm_hp_pkt = '1') then
 								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcm_hp_pidgid) := countCell1;
+								vcc_lut(w_vcm_hp_pidgid) := countCell1 - 1;
 								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
 							end if;
 						when "10" =>
 							countCell2 := countCell2 + 1;
 							if(w_vcm_hp_pkt = '1') then
 								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcm_hp_pidgid) := countCell2;
+								vcc_lut(w_vcm_hp_pidgid) := countCell2 - 1;
 								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
 							end if;
 						when "11" =>
 							countCell3 := countCell3 + 1;
 							if(w_vcm_hp_pkt = '1') then
 								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcm_hp_pidgid) := countCell3;
+								vcc_lut(w_vcm_hp_pidgid) := countCell3 - 1;
 								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
 							end if;
 						when others =>
@@ -2193,8 +2198,8 @@ begin
 					ns_westvc_handler <= shift_request1;
 				end if;
 			when shift_request1 =>
-				if(w_vcm_shift = '1' and (countCell2 >= 2)) then
-					w_vc_rnaSelO <= "10";
+				if(w_vcm_shift = '1') then
+					w_vc_rnaSelO <=  w_vcm_which_vcell_to_shift(1 downto 0);
 					w_vcm_shift_rst <= '1', '0' after 1 ns;
 					ns_westvc_handler <= shift_start1;
 				else
@@ -2222,7 +2227,18 @@ begin
 				--Shift contents in table down by 1
 				for i in vcc_lut'range loop
 					if(vcc_lut(i) = 0) then
-						vcc_lut(i) := countCell2 - 2;				-- send to the back of the queue
+						case w_vcm_which_vcell_to_shift(1 downto 0) is
+							when "00" =>
+								vcc_lut(i) := countCell0 - 1;				-- send to the back of the queue
+							when "01" =>
+								vcc_lut(i) := countCell1 - 1;				-- send to the back of the queue
+							when "10" =>
+								vcc_lut(i) := countCell2 - 1;				-- send to the back of the queue
+							when "11" =>
+								vcc_lut(i) := countCell3 - 1;				-- send to the back of the queue
+							when others =>
+								null;
+						end case;
 					else
 						vcc_lut(i) := vcc_lut(i) - 1;				-- everyone else...
 					end if;

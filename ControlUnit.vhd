@@ -1018,6 +1018,7 @@ begin
 				when west9 =>
 					--Grab reservation table details
 					w_rsv_addr_a <= conv_integer(w_rnaCtrl(11 downto 4));
+					w_vcm_hp_pidgid <= conv_integer(w_rnaCtrl(11 downto 4));
 					
 					ns_west_handler <= west10;
 				when west10 =>	
@@ -1062,7 +1063,7 @@ begin
 					w_vcm_enq_set <= '1', '0' after 1 ns;
 				
 					--Notify scheduler if this packet is set to depart soon
-					if(w_sch_midgid = conv_integer(w_rnaCtrl(11 downto 4))) then
+					if((w_sch_midgid = conv_integer(w_rnaCtrl(11 downto 4))) and w_rnaCtrl(1) = '1') then
 						w_sch_dpkt_arrived_set <= '1', '0' after 1 ns;
 					else
 						w_sch_dpkt_arrived_set <= '0';
@@ -1167,7 +1168,7 @@ begin
 					w_sch_force_transfer <= '1';
 					w_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
 					ns_w_scheduler_handler <= schedule8;
-				elsif(w_vcm_req_complete = '1' and w_vcm_req_pkt_arrived = '0') then
+				elsif(w_vcm_req_complete = '1' and (w_vcm_req_pkt_arrived = '0' or (w_vcm_req_pkt_arrived /= '0' and w_vcm_req_pkt_arrived /= '1'))) then
 					--Need to schedule...
 					w_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
 					ns_w_scheduler_handler <= schedule6;
@@ -1209,7 +1210,7 @@ begin
 					end case;
 					ns_w_scheduler_handler <= schedule9;		--Did shift conclude?
 				else	
-					ns_w_scheduler_handler <= schedule7;		--Not yet...
+					ns_w_scheduler_handler <= schedule4;		--Not yet...
 				end if;
 			when schedule9 =>
 				w_vcm_shift_set <= '1', '0' after 1 ns;

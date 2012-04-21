@@ -229,10 +229,11 @@ architecture Behavioral of ControlUnit is
 							  south_sw1, south_sw2, south_sw3, south_sw4,
 							  west_sw1, west_sw2, west_sw3, west_sw4,
 							  injection_sw1, injection_sw2, injection_sw3, injection_sw4,
-							  depart_w_sw1, depart_w_sw2, depart_w_sw3, depart_w_sw4, depart_w_sw5,
+							  depart_w_sw1, depart_w_sw2, depart_w_sw3, depart_w_sw4, depart_w_sw5, depart_w_sw6, depart_w_sw7, depart_w_sw8,
 							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
 							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9,
 							  schedule10, schedule11, schedule12, schedule13, schedule14,
+							  vcc_output_request1,
 							  enqueue_occurred1, dequeue_occurred1, dequeue_occurred2, 
 							  packet_status1, 
 							  shift_request1, shift_start1, shift_start2, shift_start3, shift_start4);   -- State FSM
@@ -361,6 +362,7 @@ architecture Behavioral of ControlUnit is
 	signal w_vcm_which_vcell_enq 		: std_logic_vector(1 downto 0);
 	signal w_vcm_which_vcc_enq			: std_logic_vector(2 downto 0);
 	signal w_vcm_which_vcell_deq 		: std_logic_vector(1 downto 0);
+	signal w_vcm_which_vcc_deq			: std_logic_vector(2 downto 0);
 	signal w_vcm_enq 						: std_logic;
 	signal w_vcm_enq_set 				: std_logic;
 	signal w_vcm_enq_rst					: std_logic;
@@ -384,7 +386,12 @@ architecture Behavioral of ControlUnit is
 	signal w_vcm_req_complete			: std_logic;
 	signal w_vcm_req_pkt					: natural range 0 to 2**address_size-1;
 	signal w_vcm_req_pkt_arrived 		: std_logic;
-	
+	signal w_vcm_request_vcc			: std_logic;
+	signal w_vcm_request_vcc_set		: std_logic;
+	signal w_vcm_request_vcc_rst		: std_logic;
+	signal w_vcm_request_vcc_done		: std_logic;
+	signal w_vcm_request_vcc_done_set	: std_logic;
+	signal w_vcm_request_vcc_done_rst	: std_logic;
 	
 begin
 
@@ -1185,7 +1192,7 @@ begin
 					--Make a shift request
 					case w_vcm_shift_cell(2 downto 0) is
 						when "000" =>
-							w_vc_circSel <= "00";				
+							w_vc_circSel <= "00";
 						when "001" =>
 							w_vc_circSel <= "01";
 						when "010" =>
@@ -1363,6 +1370,7 @@ begin
 				sw_rnaCtDeq <= '0';
 				
 				w_sch_departed_ack <= '0';
+				w_vcm_request_vcc_set <= '0';
 				
 				ns_switch_handler <= north_sw1;
 			when north_sw1 =>
@@ -1806,57 +1814,68 @@ begin
 					w_sch_departed_ack <= '0';
 					ns_switch_handler <= north_sw1;
 				end if;
-			when depart_w_sw2 =>	
-				--Control VCC Output and Switch to move Data Packet out
-				case w_rsv_data_in_b(2 downto 0) is
-					when "000" =>
-						w_vc_rnaSelO <= "00";
-						sw_nSel <= "011"; 						--North
-					when "001" =>
-						w_vc_rnaSelO <= "01";
-						sw_eSel <= "011";							--East
-					when "010" =>
-						w_vc_rnaSelO <= "10";
-						w_vcm_which_vcell_deq <= "10";
-						sw_sSel <= "011";							--South
-					when "111" =>
-						w_vc_rnaSelO <= "11";
-						sw_ejectSel <= "011";					--Ejection
-					when others =>
-						null;
-				end case;
-				
-				--injt_dataGood <= '1';
+			when depart_w_sw2 =>
+				--Control VCC Output
+				w_vcm_which_vcc_deq <= w_rsv_data_in_b(2 downto 0);
+				w_vcm_request_vcc_set <= '1', '0' after 1 ns;
 				ns_switch_handler <= depart_w_sw4;
 			when depart_w_sw3 =>
-				--Wait state
 				ns_switch_handler <= depart_w_sw4;
 			when depart_w_sw4 =>
-				--Check for ack
-				if(n_pkt_in_flg_set = '1') then
-					w_sch_departed_ack <= '1';
-					n_rst <= '1', '0' after 1 ns;
-					--injt_dataGood <= '0';
-					ns_switch_handler <= depart_w_sw5;
-				elsif(e_pkt_in_flg_set = '1') then
-					w_sch_departed_ack <= '1';
-					e_rst <= '1', '0' after 1 ns;
-					--injt_dataGood <= '0';
-					ns_switch_handler <= depart_w_sw5;
-				elsif(s_pkt_in_flg_set = '1') then
-					w_sch_departed_ack <= '1';
-					s_rst <= '1', '0' after 1 ns;
-					sw_sSel <= "000";
-					ns_switch_handler <= depart_w_sw5;
-				elsif(w_pkt_in_flg_set = '1') then
-					w_sch_departed_ack <= '1';
-					w_rst <= '1', '0' after 1 ns;
-					--injt_dataGood <= '0';
+				if(w_vcm_request_vcc_done = '1') then
+					w_vcm_request_vcc_done_rst <= '1', '0' after 1 ns;
 					ns_switch_handler <= depart_w_sw5;
 				else
 					ns_switch_handler <= depart_w_sw3;
 				end if;
 			when depart_w_sw5 =>
+				--Control Switch to move Data Packet out
+				case w_rsv_data_in_b(2 downto 0) is
+					when "000" =>
+						w_vcm_which_vcell_deq <= "00";
+						sw_nSel <= "011"; 						--North
+					when "001" =>
+						w_vcm_which_vcell_deq <= "01";
+						sw_eSel <= "011";							--East
+					when "010" =>
+						w_vcm_which_vcell_deq <= "10";
+						sw_sSel <= "011";							--South
+					when "111" =>
+						w_vcm_which_vcell_deq <= "11";
+						sw_ejectSel <= "011";					--Ejection
+					when others =>
+						null;
+				end case;
+				ns_switch_handler <= depart_w_sw6;
+			when depart_w_sw6 =>
+				--Wait state
+				ns_switch_handler <= depart_w_sw7;
+			when depart_w_sw7 =>
+				--Check for ack
+				if(n_pkt_in_flg_set = '1') then
+					w_sch_departed_ack <= '1';
+					n_rst <= '1', '0' after 1 ns;
+					sw_nSel <= "000";
+					ns_switch_handler <= depart_w_sw8;
+				elsif(e_pkt_in_flg_set = '1') then
+					w_sch_departed_ack <= '1';
+					e_rst <= '1', '0' after 1 ns;
+					sw_eSel <= "000";
+					ns_switch_handler <= depart_w_sw8;
+				elsif(s_pkt_in_flg_set = '1') then
+					w_sch_departed_ack <= '1';
+					s_rst <= '1', '0' after 1 ns;
+					sw_sSel <= "000";
+					ns_switch_handler <= depart_w_sw8;
+				elsif(w_pkt_in_flg_set = '1') then
+					w_sch_departed_ack <= '1';
+					w_rst <= '1', '0' after 1 ns;
+					sw_wSel <= "000";
+					ns_switch_handler <= depart_w_sw8;
+				else
+					ns_switch_handler <= depart_w_sw6;
+				end if;
+			when depart_w_sw8 =>
 				--Dequeue
 				w_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				
@@ -2071,6 +2090,24 @@ begin
 			when wait_state =>
 				w_vc_deq <= '0';
 				w_vc_circEn <= '0';
+				ns_westvc_handler <= vcc_output_request1;
+			when vcc_output_request1 =>
+				if(w_vcm_request_vcc = '1') then
+					w_vcm_request_vcc_rst <= '1', '0' after 1 ns;
+					case w_vcm_which_vcc_deq(2 downto 0) is
+						when "000" =>
+							w_vc_rnaSelO <= "00";					--North
+						when "001" =>
+							w_vc_rnaSelO <= "01";					--East
+						when "010" =>
+							w_vc_rnaSelO <= "10";					--South
+						when "111" =>
+							w_vc_rnaSelO <= "11";					--Ejection
+						when others =>
+							null;
+					end case;
+					w_vcm_request_vcc_done_set <= '1', '0' after 1 ns;
+				end if;
 				ns_westvc_handler <= enqueue_occurred1;
 			when enqueue_occurred1 =>
 				if(w_vcm_enq = '1') then
@@ -2121,7 +2158,7 @@ begin
 					w_vcm_deq_rst <= '1', '0' after 1 ns;
 					
 					--Update Count
-					case w_vcm_which_vcell_deq is
+					case w_vcm_which_vcell_deq(1 downto 0) is
 						when "00" =>
 							countCell0 := countCell0 - 1;
 						when "01" =>
@@ -2157,6 +2194,7 @@ begin
 				end if;
 			when shift_request1 =>
 				if(w_vcm_shift = '1' and (countCell2 >= 2)) then
+					w_vc_rnaSelO <= "10";
 					w_vcm_shift_rst <= '1', '0' after 1 ns;
 					ns_westvc_handler <= shift_start1;
 				else
@@ -2222,6 +2260,34 @@ begin
 		--An item has been dequeued from the VCC buffer (update the global count)
 		if(w_vcm_deq_set = '1') then
 			w_vcm_deq <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--west_vcm_request_vcc: Handles setting the VCC output signals
+	--************************************************************************************
+	west_vcm_request_vcc:process(w_vcm_request_vcc_rst, w_vcm_request_vcc_set)
+	begin
+		if(w_vcm_request_vcc_rst = '1') then
+			w_vcm_request_vcc <= '0';
+		end if;
+		
+		if(w_vcm_request_vcc_set = '1') then
+			w_vcm_request_vcc <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--west_vcm_request_vcc_done: Handles setting the VCC output completion signals
+	--************************************************************************************
+	west_vcm_request_vcc_done:process(w_vcm_request_vcc_done_set, w_vcm_request_vcc_done_set)
+	begin
+		if(w_vcm_request_vcc_done_rst = '1') then
+			w_vcm_request_vcc_done <= '0';
+		end if;
+		
+		if(w_vcm_request_vcc_done_set = '1') then
+			w_vcm_request_vcc_done <= '1';
 		end if;
 	end process;
 	

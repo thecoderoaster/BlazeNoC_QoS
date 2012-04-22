@@ -261,7 +261,7 @@ BEGIN
 		if(router_start = '1') then
 			
 			--Send a control packet	
-			tid_RT0 <= "10000000000000000000000100000011";
+			tid_RT0 <= "11111110000000000000000100000011";
 			dir_3_RT0 <= "000";		--Not used
 			dir_2_RT0 <= "111";		--Eject
 			dir_1_RT0 <= "010";		--South
@@ -276,7 +276,7 @@ BEGIN
 			-- Resets Internal Counters			
 			--reset_RT0 <= '1', '0' after 1 ns;
 			
-			wait for clk_period_pe*10;
+			wait for clk_period_pe*5;
 			
 			--Send a control packet
 			tid_RT0 <= "11110000000000001100000110000011";

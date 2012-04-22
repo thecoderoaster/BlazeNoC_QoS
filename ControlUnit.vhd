@@ -232,7 +232,7 @@ architecture Behavioral of ControlUnit is
 							  depart_w_sw1, depart_w_sw2, depart_w_sw3, depart_w_sw4, depart_w_sw5, depart_w_sw6, depart_w_sw7, depart_w_sw8,
 							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
 							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9,
-							  schedule10, schedule11, schedule12, schedule13, schedule14,
+							  schedule10, schedule11, schedule12, schedule13,
 							  vcc_output_request1,
 							  enqueue_occurred1, dequeue_occurred1, dequeue_occurred2, 
 							  packet_status1, 
@@ -316,7 +316,6 @@ architecture Behavioral of ControlUnit is
 	signal w_sch_purge_job_set		: std_logic;
 	signal w_sch_purge_job_rst		: std_logic;
 	signal w_sch_purge_midpid		: natural range 0 to 2**address_size-1;
-	signal w_sch_midgid				: natural range 0 to 2**address_size-1;
 	signal w_sch_job_ready_set		: std_logic;
 	signal w_sch_job_ready_rst		: std_logic;
 	signal w_sch_job_ready			: std_logic;
@@ -324,9 +323,6 @@ architecture Behavioral of ControlUnit is
 	signal w_sch_job_valid 			: std_logic;
 	signal w_sch_job_expired 		: std_logic;
 	signal w_sch_expiration			: std_logic_vector(sch_size-1 downto 0);
-	signal w_sch_dpkt_arrived_set	: std_logic;
-	signal w_sch_dpkt_arrived_rst	: std_logic;
-	signal w_sch_dpkt_arrived		: std_logic;
 	signal w_sch_departed_ack		: std_logic;
 	signal w_sch_start_timer 		: std_logic;
 	signal w_sch_force_transfer	: std_logic;
@@ -439,7 +435,7 @@ begin
 				timeunit := timeunit + "00000000000000000000000000000001";
 				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
 					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
-					if(counter = w_sch_expiration) then
+					if(counter = w_sch_next_job_time) then
 						counter := "00000000000000000000000000000000";
 						w_sch_job_expired <= '1';
 					else
@@ -934,7 +930,6 @@ begin
 					w_sch_wen_a	<= '0';
 					w_sch_table_purge <= '0';
 					sw_w_rna_toggle <= '0';
-					w_sch_dpkt_arrived_set <= '0';
 					
 					w_sync_rst <= '1', '0' after 1 ns;
 					w_vcm_hp_pkt_set <= '0';
@@ -1063,13 +1058,6 @@ begin
 				
 					--Notify the VCC Manager of a new packet that's been enqueued
 					w_vcm_enq_set <= '1', '0' after 1 ns;
-				
-					--Notify scheduler if this packet is set to depart soon
-					--if((w_sch_midgid = conv_integer(w_rnaCtrl(11 downto 4))) and w_rnaCtrl(1) = '1') then
-					--	w_sch_dpkt_arrived_set <= '1', '0' after 1 ns;
-					--else
-					--	w_sch_dpkt_arrived_set <= '0';
-					--end if;
 					
 					ns_west_handler <= wait_state;
 				when others =>
@@ -1134,7 +1122,6 @@ begin
 			when start =>
 				w_sch_req_next_job <= '0';
 				w_sch_purge_job_set <= '0';
-				w_sch_dpkt_arrived_rst <= '0';
 				w_sch_job_ready_rst <= '0';
 				w_vcm_shift_complete_rst <= '1', '0' after 1 ns;
 				w_vcm_req_complete_rst <= '1', '0' after 1 ns;
@@ -1171,27 +1158,22 @@ begin
 					w_vcm_req_complete_rst <= '1', '0' after 1 ns;
 					w_sch_force_transfer <= '1';
 					w_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
-					ns_w_scheduler_handler <= schedule8;
+					ns_w_scheduler_handler <= schedule7;
 				elsif(w_vcm_req_complete = '1' and (w_vcm_req_pkt_arrived = '0' or (w_vcm_req_pkt_arrived /= '0' and w_vcm_req_pkt_arrived /= '1'))) then
 					--Need to schedule...
 					w_vcm_req_complete_rst <= '1', '0' after 1 ns;
 					w_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
-					ns_w_scheduler_handler <= schedule6;
+					w_sch_start_timer <= '1';
+					ns_w_scheduler_handler <= schedule7;
 				else
 					--No Ack Yet...
 					ns_w_scheduler_handler <= schedule4;
 				end if;
 			when schedule6 =>
-				w_sch_expiration <= w_sch_next_job_time;
-				w_sch_midgid <= w_sch_next_job_midpid;
-				w_sch_start_timer <= '1';
-				ns_w_scheduler_handler <= schedule8;
+				ns_w_scheduler_handler <= schedule7;
 			when schedule7 =>
-				ns_w_scheduler_handler <= schedule8;
-			when schedule8 =>
-				if(w_sch_job_expired = '1' or w_sch_dpkt_arrived = '1' or w_sch_force_transfer = '1') then
+				if(w_sch_job_expired = '1' or w_sch_force_transfer = '1') then
 					--Reset signals
-					w_sch_dpkt_arrived_rst <= '1', '0' after 1 ns;
 					w_sch_start_timer <= '0';
 					w_sch_force_transfer <= '0';
 					w_vcm_req_pkt <= w_sch_next_job_midpid;
@@ -1213,39 +1195,39 @@ begin
 						when others =>
 							null;
 					end case;
-					ns_w_scheduler_handler <= schedule9;		--Did shift conclude?
+					ns_w_scheduler_handler <= schedule8;		--Did shift conclude?
 				else	
 					ns_w_scheduler_handler <= schedule4;		--Not yet...
 				end if;
-			when schedule9 =>
+			when schedule8 =>
 				w_vcm_shift_set <= '1', '0' after 1 ns;
-				ns_w_scheduler_handler <= schedule11;
+				ns_w_scheduler_handler <= schedule10;
+			when schedule9 =>
+				ns_w_scheduler_handler <= schedule10;
 			when schedule10 =>
-				ns_w_scheduler_handler <= schedule11;
-			when schedule11 =>
 				if(w_vcm_shift_complete = '1') then
 					--Shift completed, begin departure
 					w_vcm_shift_complete_rst <= '1', '0' after 1 ns;
-					ns_w_scheduler_handler <= schedule13;
+					ns_w_scheduler_handler <= schedule12;
 				else
-					ns_w_scheduler_handler <= schedule10;
+					ns_w_scheduler_handler <= schedule9;
 				end if;
+			when schedule11 =>
+				ns_w_scheduler_handler <= schedule13;			--Wait for ack...
 			when schedule12 =>
-				ns_w_scheduler_handler <= schedule14;			--Wait for ack...
-			when schedule13 =>
 				--Initiate data packet transfer
 				sw_w_depart_toggle <= '1';
-				ns_w_scheduler_handler <= schedule14;
-			when schedule14 =>
+				ns_w_scheduler_handler <= schedule13;
+			when schedule13 =>
 				if(w_sch_departed_ack = '1') then
 					sw_w_depart_toggle <= '0';
 					
 					--Purge data from scheduler
 					w_sch_purge_job_set <= '1', '0' after 1 ns;
-					w_sch_purge_midpid <= w_sch_midgid;
+					w_sch_purge_midpid <= w_sch_next_job_midpid;
 					ns_w_scheduler_handler <= wait_state;
 				else
-					ns_w_scheduler_handler <= schedule12;
+					ns_w_scheduler_handler <= schedule11;
 				end if;
 			when others =>
 				ns_w_scheduler_handler <= start;
@@ -1257,6 +1239,8 @@ begin
 	--************************************************************************
 	w_sorting_handler:process(state_west_sorting_handler)
 		variable w_last_scheduled : natural range 0 to 2**address_size := 256;
+		variable w_sort_next_job_time : std_logic_vector(sch_size-1 downto 0);
+		variable w_sort_next_job_midpid : natural range 0 to 2**address_size-1;
 	begin
 		case state_west_sorting_handler is
 			when start =>
@@ -1297,8 +1281,8 @@ begin
 				end if;
 			when sort4 =>
 				--Take first item
-				w_sch_next_job_time <= w_sch_data_in_b;
-				w_sch_next_job_midpid <= w_sort_index;
+				w_sort_next_job_time := w_sch_data_in_b; -- Temporary bin
+				w_sort_next_job_midpid := w_sort_index;  -- Temporary bin	  
 				w_sort_index <= w_sort_index + 1;
 				if(w_sch_data_in_b(31 downto 0) > 0 and (w_last_scheduled /= w_sort_index)) then
 					w_sch_job_valid <= '1';
@@ -1315,21 +1299,19 @@ begin
 					ns_west_sorting_handler <= sort7;
 				end if;
 			when sort6 =>
-				if(w_sch_data_in_b < w_sch_next_job_time and (w_sch_data_in_b(31 downto 0) > 0)) then
-					w_sch_next_job_time <= w_sch_data_in_b;
-					w_sch_next_job_midpid <= w_sort_index;
-					if(w_sort_index /= w_sch_next_job_midpid) then
-						w_sch_job_valid <= '1';			--Ensure that you're not reading the same location
-					else
-						w_sch_job_valid <= '0';			--If so, don't issue the request.
-					end if;
+				if(w_sch_data_in_b < w_sort_next_job_time and (w_sch_data_in_b(31 downto 0) > 0)) then
+					w_sort_next_job_time := w_sch_data_in_b;
+					w_sort_next_job_midpid := w_sort_index;
+					w_sch_job_valid <= '1';
 				end if;
-		
+				
 				w_sort_index <= w_sort_index + 1;
 				ns_west_sorting_handler <= sort5;
 			when sort7 =>
 				--Is there a new job request? Issue it, if so.
 				if(w_sch_req_next_job = '1' and w_sch_job_valid = '1') then
+					w_sch_next_job_time <= w_sort_next_job_time;
+					w_sch_next_job_midpid <= w_sort_next_job_midpid;
 					w_last_scheduled := w_sort_index;
 					w_sch_job_ready_set <= '1', '0' after 1 ns;
 				else
@@ -1821,7 +1803,7 @@ begin
 			when depart_w_sw1 =>
 				if(sw_w_depart_toggle = '1') then
 					--Grab reservation table details
-					w_rsv_addr_b <= conv_integer(w_sch_midgid);
+					w_rsv_addr_b <= conv_integer(w_sch_next_job_midpid);
 					ns_switch_handler <= depart_w_sw2;
 				else
 					w_sch_departed_ack <= '0';
@@ -2027,20 +2009,6 @@ begin
 		
 		if(sw_w_rna_ack = '1') then
 			w_sync_signal <= '1';
-		end if;
-	end process;
-	
-	--************************************************************************
-	--west_sch_signal_arrived: Handles dpkt arrived signal for west
-	--************************************************************************
-	west_sch_signal_arrived:process(w_sch_dpkt_arrived_rst, w_sch_dpkt_arrived_set)
-	begin
-		if(w_sch_dpkt_arrived_rst = '1') then
-			w_sch_dpkt_arrived <= '0';
-		end if;
-		
-		if(w_sch_dpkt_arrived_set = '1') then
-			w_sch_dpkt_arrived <= '1';
 		end if;
 	end process;
 	

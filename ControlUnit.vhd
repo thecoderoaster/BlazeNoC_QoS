@@ -222,7 +222,7 @@ architecture Behavioral of ControlUnit is
 							  north1, north2, north3, north4, north5, north6, north7, north8, north9, north10, north11,
 							  east1, east2, east3, east4, east5, east6, east7, east8, east9, east10, east11,
 							  south1, south2, south3, south4, south5, south6, south7, south8, south9, south10, south11,
-							  west1, west2, west3, west4, west5, west6, west7, west8, west9, west10, west11,
+							  west1, west2, west3, west4, west5, west6, west7, west8, west9, west10, west11, west12, west13,
 							  injection1, injection2, injection3, injection4, injection5,
 							  north_sw1, north_sw2, north_sw3, north_sw4,
 							  east_sw1, east_sw2, east_sw3, east_sw4,
@@ -362,6 +362,9 @@ architecture Behavioral of ControlUnit is
 	signal w_vcm_enq 						: std_logic;
 	signal w_vcm_enq_set 				: std_logic;
 	signal w_vcm_enq_rst					: std_logic;
+	signal w_vcm_enq_complete			: std_logic;
+	signal w_vcm_enq_complete_set		: std_logic;
+	signal w_vcm_enq_complete_rst		: std_logic;
 	signal w_vcm_deq 						: std_logic;
 	signal w_vcm_deq_set 				: std_logic;
 	signal w_vcm_deq_rst					: std_logic;
@@ -373,10 +376,8 @@ architecture Behavioral of ControlUnit is
 	signal w_vcm_shift_complete_rst	: std_logic;
 	signal w_vcm_shift_cell				: std_logic_vector(2 downto 0);
 	signal w_vcm_which_vcell_to_shift : std_logic_vector(1 downto 0);
-	signal w_vcm_hp_pkt					: std_logic;
-	signal w_vcm_hp_pkt_set 			: std_logic;
-	signal w_vcm_hp_pkt_rst 			: std_logic;
-	signal w_vcm_hp_pidgid				: natural range 0 to 2**address_size-1;
+	signal w_vcm_pkt_priority			: std_logic;
+	signal w_vcm_pkt_pidgid				: natural range 0 to 2**address_size-1;
 	signal w_vcm_req_pkt_status 		: std_logic;
 	signal w_vcm_req_pkt_status_set 	: std_logic;
 	signal w_vcm_req_pkt_status_rst 	: std_logic;
@@ -932,7 +933,7 @@ begin
 					sw_w_rna_toggle <= '0';
 					
 					w_sync_rst <= '1', '0' after 1 ns;
-					w_vcm_hp_pkt_set <= '0';
+					w_vcm_enq_complete_rst <= '1', '0' after 1 ns;
 
 					ns_west_handler <= west1;
 				when wait_state =>
@@ -1015,7 +1016,7 @@ begin
 				when west9 =>
 					--Grab reservation table details
 					w_rsv_addr_a <= conv_integer(w_rnaCtrl(11 downto 4));
-					w_vcm_hp_pidgid <= conv_integer(w_rnaCtrl(11 downto 4));
+					w_vcm_pkt_pidgid <= conv_integer(w_rnaCtrl(11 downto 4));
 					
 					ns_west_handler <= west10;
 				when west10 =>	
@@ -1042,12 +1043,8 @@ begin
 					end case;
 					
 					--Grab high or low priority status of packet
-					if(w_rnaCtrl(1) = '1') then
-						w_vcm_hp_pkt_set <= '1', '0' after 1 ns;
-					else
-						w_vcm_hp_pkt_set <= '0';
-					end if;
-				
+					w_vcm_pkt_priority <= w_rnaCtrl(1);
+					
 					--Acknowledge
 					w_CTRflg <= '1';
 					w_arbEnq <= '1';
@@ -1059,7 +1056,16 @@ begin
 					--Notify the VCC Manager of a new packet that's been enqueued
 					w_vcm_enq_set <= '1', '0' after 1 ns;
 					
-					ns_west_handler <= wait_state;
+					ns_west_handler <= west13;
+				when west12 =>
+					ns_west_handler <= west13;
+				when west13 =>
+					if(w_vcm_enq_complete = '1') then
+						w_vcm_enq_complete_rst <= '1', '0' after 1 ns;
+						ns_west_handler <= wait_state;
+					else
+						ns_west_handler <= west12;
+					end if;
 				when others =>
 					ns_west_handler <= wait_state;
 			end case;
@@ -2052,7 +2058,7 @@ begin
 	type lut_type is array(0 to 2**address_size-1) of
 		natural range 0 to 63;
 	type arrival_type is array(0 to 2**address_size-1) of
-		std_logic_vector(3 downto 0);
+		std_logic_vector(4 downto 0);
 	variable vcc_lut: lut_type;
 	variable vcc_arrived : arrival_type;
 	
@@ -2060,6 +2066,7 @@ begin
 		case state_westvc_handler is
 			when start =>
 				w_vcm_req_complete_set <= '0';
+				w_vcm_enq_complete_set <= '0';
 				w_vc_circEn <= '0';
 				w_vc_directEnq <= '0';
 				w_vc_deq <= '0';
@@ -2099,35 +2106,25 @@ begin
 					case w_vcm_which_vcell_enq is
 						when "00" =>
 							countCell0 := countCell0 + 1;
-							if(w_vcm_hp_pkt = '1') then
-								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcm_hp_pidgid) := countCell0 - 1;
-								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
-							end if;
+							vcc_lut(w_vcm_pkt_pidgid) := countCell0 - 1;
+							vcc_arrived(w_vcm_pkt_pidgid) := '1' & w_vcm_pkt_priority & w_vcm_which_vcc_enq;
 						when "01" =>
 							countCell1 := countCell1 + 1;
-							if(w_vcm_hp_pkt = '1') then
-								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcm_hp_pidgid) := countCell1 - 1;
-								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
-							end if;
+							vcc_lut(w_vcm_pkt_pidgid) := countCell1 - 1;
+							vcc_arrived(w_vcm_pkt_pidgid) := '1' & w_vcm_pkt_priority & w_vcm_which_vcc_enq;
 						when "10" =>
 							countCell2 := countCell2 + 1;
-							if(w_vcm_hp_pkt = '1') then
-								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcm_hp_pidgid) := countCell2 - 1;
-								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
-							end if;
+							vcc_lut(w_vcm_pkt_pidgid) := countCell2 - 1;
+							vcc_arrived(w_vcm_pkt_pidgid) := '1' & w_vcm_pkt_priority & w_vcm_which_vcc_enq;
 						when "11" =>
 							countCell3 := countCell3 + 1;
-							if(w_vcm_hp_pkt = '1') then
-								w_vcm_hp_pkt_rst <= '1', '0' after 1 ns;
-								vcc_lut(w_vcm_hp_pidgid) := countCell3 - 1;
-								vcc_arrived(w_vcm_hp_pidgid) := '1' & w_vcm_which_vcc_enq;
-							end if;
+							vcc_lut(w_vcm_pkt_pidgid) := countCell3 - 1;
+							vcc_arrived(w_vcm_pkt_pidgid) := '1' & w_vcm_pkt_priority & w_vcm_which_vcc_enq;
 						when others =>
 							null;
 					end case;
+					
+					w_vcm_enq_complete_set <= '1', '0' after 1 ns;
 				end if;
 				ns_westvc_handler <= dequeue_occurred1;
 			when dequeue_occurred1 =>
@@ -2158,7 +2155,7 @@ begin
 			when dequeue_occurred2 =>
 				for i in vcc_lut'range loop
 					if(vcc_lut(i) = 0) then
-						vcc_arrived(i) := "0000";				-- Remove
+						vcc_arrived(i) := "00000";				-- Remove
 					else
 						vcc_lut(i) := vcc_lut(i) - 1;
 					end if;
@@ -2239,6 +2236,21 @@ begin
 			w_vcm_enq <= '1';
 		end if;
 	end process;
+	
+	--************************************************************************************
+	--west_vcm_enq_complete: Notifies listeners that enqueue is complete from (Virtual Channel Manager)
+	--************************************************************************************
+	west_vcm_enq_complete:process(w_vcm_enq_complete_rst, w_vcm_enq_complete_set)
+	begin
+		if(w_vcm_enq_complete_rst = '1') then
+			w_vcm_enq_complete <= '0';
+		end if;
+		
+		--Enqueue has completed.
+		if(w_vcm_enq_complete_set = '1') then
+			w_vcm_enq_complete <= '1';
+		end if;
+	end process;
 
 	--************************************************************************************
 	--west_vcm_deq_signals: Handles VCC dequeue signals from VCM (Virtual Channel Manager)
@@ -2313,21 +2325,6 @@ begin
 		end if;
 	end process;
 	
-	--*******************************************************************************************************
-	--west_vcm_signal_hp_packet: Handles notification of incoming high priority packet from West Port to VCM
-	--*******************************************************************************************************
-	west_vcm_signal_hp_packet:process(w_vcm_hp_pkt_rst, w_vcm_hp_pkt_set)
-	begin
-		if(w_vcm_hp_pkt_rst = '1') then
-			w_vcm_hp_pkt <= '0';
-		end if;
-		
-		--High Priority packet has come in...
-		if(w_vcm_hp_pkt_set = '1') then
-			w_vcm_hp_pkt <= '1';
-		end if;
-	end process;
-
 	--***********************************************************************************
 	--west_vcm_signal_req_pkt_status: Manages packet information request from VCC manager
 	--***********************************************************************************

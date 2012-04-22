@@ -385,6 +385,8 @@ architecture Behavioral of ControlUnit is
 	signal w_vcm_req_pkt_status_set 	: std_logic;
 	signal w_vcm_req_pkt_status_rst 	: std_logic;
 	signal w_vcm_req_complete			: std_logic;
+	signal w_vcm_req_complete_set		: std_logic;
+	signal w_vcm_req_complete_rst		: std_logic;
 	signal w_vcm_req_pkt					: natural range 0 to 2**address_size-1;
 	signal w_vcm_req_pkt_arrived 		: std_logic;
 	signal w_vcm_request_vcc			: std_logic;
@@ -1063,11 +1065,11 @@ begin
 					w_vcm_enq_set <= '1', '0' after 1 ns;
 				
 					--Notify scheduler if this packet is set to depart soon
-					if((w_sch_midgid = conv_integer(w_rnaCtrl(11 downto 4))) and w_rnaCtrl(1) = '1') then
-						w_sch_dpkt_arrived_set <= '1', '0' after 1 ns;
-					else
-						w_sch_dpkt_arrived_set <= '0';
-					end if;
+					--if((w_sch_midgid = conv_integer(w_rnaCtrl(11 downto 4))) and w_rnaCtrl(1) = '1') then
+					--	w_sch_dpkt_arrived_set <= '1', '0' after 1 ns;
+					--else
+					--	w_sch_dpkt_arrived_set <= '0';
+					--end if;
 					
 					ns_west_handler <= wait_state;
 				when others =>
@@ -1135,6 +1137,7 @@ begin
 				w_sch_dpkt_arrived_rst <= '0';
 				w_sch_job_ready_rst <= '0';
 				w_vcm_shift_complete_rst <= '1', '0' after 1 ns;
+				w_vcm_req_complete_rst <= '1', '0' after 1 ns;
 				
 				ns_w_scheduler_handler <= schedule1;
 			when wait_state =>
@@ -1165,11 +1168,13 @@ begin
 				--Wait state
 				if(w_vcm_req_complete = '1' and w_vcm_req_pkt_arrived = '1') then
 					--Packet is here! Move it to the next router (Don't Schedule)
+					w_vcm_req_complete_rst <= '1', '0' after 1 ns;
 					w_sch_force_transfer <= '1';
 					w_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
 					ns_w_scheduler_handler <= schedule8;
 				elsif(w_vcm_req_complete = '1' and (w_vcm_req_pkt_arrived = '0' or (w_vcm_req_pkt_arrived /= '0' and w_vcm_req_pkt_arrived /= '1'))) then
 					--Need to schedule...
+					w_vcm_req_complete_rst <= '1', '0' after 1 ns;
 					w_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
 					ns_w_scheduler_handler <= schedule6;
 				else
@@ -1270,6 +1275,7 @@ begin
 					w_sch_purge_job_rst <= '1', '0' after 1 ns;
 					w_sch_addr_b <= w_sch_purge_midpid;
 					w_sch_data_out_b <= "11111111111111111111111111111111";	
+					w_sch_table_purge <= '1';					
 					w_sch_wen_b <= '1';
 								
 					ns_west_sorting_handler <= sort2;
@@ -1278,6 +1284,7 @@ begin
 				end if;
 			when sort2 =>
 				w_sch_wen_b <= '0';
+				w_sch_table_purge <= '0';
 				--Reset Signals
 				ns_west_sorting_handler <= sort3;
 			when sort3 =>
@@ -2084,7 +2091,7 @@ begin
 	begin
 		case state_westvc_handler is
 			when start =>
-				w_vcm_req_complete <= '0';
+				w_vcm_req_complete_set <= '0';
 				w_vc_circEn <= '0';
 				w_vc_directEnq <= '0';
 				w_vc_deq <= '0';
@@ -2193,7 +2200,7 @@ begin
 				if(w_vcm_req_pkt_status = '1') then
 					w_vcm_req_pkt_arrived <= vcc_arrived(w_vcm_req_pkt)(3);
 					w_vcm_shift_cell <= vcc_arrived(w_vcm_req_pkt)(2 downto 0);
-					w_vcm_req_complete <= '1';
+					w_vcm_req_complete_set <= '1', '0' after 1 ns;
 					ns_westvc_handler <= shift_request1;
 				else
 					ns_westvc_handler <= shift_request1;
@@ -2368,5 +2375,19 @@ begin
 		end if;
 	end process;
 	
+	
+	--***********************************************************************************
+	--west_vcm_signal_req_pkt_complete: Informs if a packet status request has completed
+	--***********************************************************************************
+	west_vcm_signal_req_pkt_complete:process(w_vcm_req_complete_rst, w_vcm_req_complete_set)
+	begin
+		if(w_vcm_req_complete_rst = '1') then
+			w_vcm_req_complete <= '0';
+		end if;
+		
+		if(w_vcm_req_complete_set = '1') then
+			w_vcm_req_complete <= '1';
+		end if;
+	end process;
 
 end Behavioral;

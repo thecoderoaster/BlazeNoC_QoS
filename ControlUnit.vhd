@@ -1017,7 +1017,6 @@ begin
 					--Grab reservation table details
 					w_rsv_addr_a <= conv_integer(w_rnaCtrl(11 downto 4));
 					w_vcm_pkt_pidgid <= conv_integer(w_rnaCtrl(11 downto 4));
-					
 					ns_west_handler <= west10;
 				when west10 =>	
 					--Control VCC

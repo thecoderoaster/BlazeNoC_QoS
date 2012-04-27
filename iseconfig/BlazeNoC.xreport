@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2012-04-26T19:43:24</DateModified>
+  <DateModified>2012-04-26T20:30:28</DateModified>
   <ModuleName>BlazeNoC</ModuleName>
-  <SummaryTimeStamp>2012-04-26T19:42:08</SummaryTimeStamp>
+  <SummaryTimeStamp>2012-04-26T20:27:55</SummaryTimeStamp>
   <SavedFilePath>//vmware-host/shared folders/BlazeNoC_QoS/iseconfig/BlazeNoC.xreport</SavedFilePath>
   <ImplementationReportsDirectory>Z:/BlazeNoC_QoS\</ImplementationReportsDirectory>
   <DateInitialized>2012-01-08T12:44:15</DateInitialized>

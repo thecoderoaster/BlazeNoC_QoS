@@ -45,12 +45,7 @@ architecture Behavioral of ReservationTable is
 	type memory_type is array (0 to 2**address_size-1) of
 		std_logic_vector(word_size-1 downto 0);
 	shared variable rsv_table : memory_type;
-	shared variable slots_taken : natural range 0 to 2**address_size-1;
 	signal table_full : std_logic;
-	signal portAWrite : std_logic;
-	signal portBWrite : std_logic; 
-	signal purgeA		: std_logic; 
-	signal purgeB		: std_logic;
 	
 begin
 
@@ -58,19 +53,9 @@ begin
 	process(clk, rst)
 	begin
 		
-		if(rising_edge(rst)) then
-			portAWrite <= '0';
-			purgeA <= '0';
-		end if;
-		
 		if(rising_edge(clk)) then
 			if(we_a = '1' and table_full = '0') then
 				rsv_table(addr_a) := data_a;
-				portAWrite <= '1', '0' after 1 ns;
-			end if;
-			
-			if(purge = '1') then
-				purgeA <= '1', '0' after 1 ns;
 			end if;
 			
 			q_a <= rsv_table(addr_a);
@@ -80,20 +65,10 @@ begin
 	--Port B
 	process(clk, rst)
 	begin
-		
-		if(rising_edge(rst)) then
-			portBWrite <= '0';
-			purgeB <= '0';
-		end if;
-	
+			
 		if(rising_edge(clk)) then
 			if(we_b = '1' and table_full = '0') then
 				rsv_table(addr_b) := data_b;
-				portBWrite <= '1', '0' after 1 ns;
-			end if;
-			
-			if(purge = '1') then
-				purgeB <= '1', '0' after 1 ns;
 			end if;
 			
 			q_b <= rsv_table(addr_b);
@@ -101,32 +76,40 @@ begin
 	end process;
 	
 	--Capacity Monitor
-	process(rst, portAWrite, portBWrite, purgeA, purgeB)
+	process(clk, rst, we_a, we_b, purge)
+	variable slots_taken : natural range 0 to 2**address_size-1;
 	begin
 		if(rst'event and rst = '1') then
 			slots_taken := 0;
 		end if;
-	
-		if((portAWrite'event and portAWrite = '1') and (purgeA'event and purgeA = '0')) then
-			slots_taken := slots_taken + 1;
+		
+		if(rising_edge(clk)) then
+			if(we_a = '1' and purge = '0') then
+				slots_taken := slots_taken + 1;
+			end if;
+			
+			if(we_b = '1' and purge = '0') then
+				slots_taken := slots_taken + 1;
+			end if;
+			
+			if(we_a = '0' and purge = '1') then
+				slots_taken := slots_taken - 1;
+			end if;
+			
+			if(we_b = '0' and purge = '1') then
+				slots_taken := slots_taken - 1;
+			end if;
 		end if;
 		
-		if((portBWrite'event and portBWrite = '1') and (purgeB'event and purgeB = '0')) then
-			slots_taken := slots_taken + 1;
-		end if;
-		
-		if((portAWrite'event and portAWrite = '0') and (purgeA'event and purgeA = '1')) then
-			slots_taken := slots_taken - 1;
-		end if;
-		
-		if((portBWrite'event and portBWrite = '0') and (purgeB'event and purgeB = '1')) then
-			slots_taken <= slots_taken - 1;
+		--Always notify table capacity status	
+		if(slots_taken = 256) then
+			full <= '1';
+			table_full <= '1';
+		else 
+			full <= '0';
+			table_full <= '0';
 		end if;
 	end process;
-	
-	--Always notify table capacity status
-	table_full <= '1' when (slots_taken = 256) else '0';
-	full <= '1' when (slots_taken = 256) else '0';
 	
 end Behavioral;
 

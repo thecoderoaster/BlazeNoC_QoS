@@ -929,7 +929,6 @@ begin
 					w_rsv_wen_a <= '0';
 					w_rsv_table_purge <= '0';
 					w_sch_wen_a	<= '0';
-					w_sch_table_purge <= '0';
 					sw_w_rna_toggle <= '0';
 					
 					w_sync_rst <= '1', '0' after 1 ns;
@@ -1252,6 +1251,7 @@ begin
 				w_sch_wen_b <= '0';
 				w_sch_job_ready_set <= '0';
 				w_sch_purge_job_rst <= '0';
+				w_sch_table_purge <= '0';
 				w_sch_job_valid <= '0';
 			
 				ns_west_sorting_handler <= sort1;
@@ -1275,7 +1275,7 @@ begin
 				w_sch_wen_b <= '0';
 				w_sch_table_purge <= '0';
 				--Reset Signals
-				ns_west_sorting_handler <= sort3;
+				ns_west_sorting_handler <= wait_state;
 			when sort3 =>
 				if(w_sch_table_count > 0) then
 					w_sch_addr_b <= w_sort_index;

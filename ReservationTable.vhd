@@ -76,30 +76,30 @@ begin
 	end process;
 	
 	--Capacity Monitor
-	process(clk, rst, we_a, we_b, purge)
+	process(rst, we_a, we_b, purge)
 	variable slots_taken : natural range 0 to 2**address_size-1;
 	begin
 		if(rst'event and rst = '1') then
 			slots_taken := 0;
 		end if;
 		
-		if(rising_edge(clk)) then
-			if(we_a = '1' and purge = '0') then
-				slots_taken := slots_taken + 1;
-			end if;
-			
-			if(we_b = '1' and purge = '0') then
-				slots_taken := slots_taken + 1;
-			end if;
-			
-			if(we_a = '0' and purge = '1') then
-				slots_taken := slots_taken - 1;
-			end if;
-			
-			if(we_b = '0' and purge = '1') then
-				slots_taken := slots_taken - 1;
-			end if;
+		--if(rising_edge(clk)) then
+		if(we_a = '1' and purge = '0') then
+			slots_taken := slots_taken + 1;
 		end if;
+		
+		if(we_b = '1' and purge = '0') then
+			slots_taken := slots_taken + 1;
+		end if;
+		
+		if(we_a = '0' and purge = '1') then
+			slots_taken := slots_taken - 1;
+		end if;
+		
+		if(we_b = '0' and purge = '1') then
+			slots_taken := slots_taken - 1;
+		end if;
+		--end if;
 		
 		--Always notify table capacity status	
 		if(slots_taken = 256) then

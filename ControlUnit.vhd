@@ -1304,7 +1304,7 @@ begin
 					ns_west_sorting_handler <= sort7;
 				end if;
 			when sort6 =>
-				if(w_sch_data_in_b < w_sort_next_job_time and (w_sch_data_in_b(31 downto 0) > 0)) then
+				if(w_sch_data_in_b < w_sort_next_job_time and (w_sch_data_in_b(31 downto 0) > 0) and  (w_last_scheduled /= w_sort_index)) then
 					w_sort_next_job_time := w_sch_data_in_b;
 					w_sort_next_job_midpid := w_sort_index;
 					w_sch_job_valid <= '1';
@@ -1317,7 +1317,7 @@ begin
 				if(w_sch_req_next_job = '1' and w_sch_job_valid = '1') then
 					w_sch_next_job_time <= w_sort_next_job_time;
 					w_sch_next_job_midpid <= w_sort_next_job_midpid;
-					w_last_scheduled := w_sort_index;
+					w_last_scheduled := w_sort_next_job_midpid;
 					w_sch_job_ready_set <= '1', '0' after 1 ns;
 				else
 					w_sch_job_ready_set <= '0';
@@ -2162,7 +2162,7 @@ begin
 				ns_westvc_handler <= packet_status1;
 			when packet_status1 =>
 				if(w_vcm_req_pkt_status = '1') then
-					w_vcm_req_pkt_arrived <= vcc_arrived(w_vcm_req_pkt)(3);
+					w_vcm_req_pkt_arrived <= vcc_arrived(w_vcm_req_pkt)(4);
 					w_vcm_shift_cell <= vcc_arrived(w_vcm_req_pkt)(2 downto 0);
 					w_vcm_req_complete_set <= '1', '0' after 1 ns;
 					ns_westvc_handler <= shift_request1;

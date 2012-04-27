@@ -103,24 +103,24 @@ begin
 	--Capacity Monitor
 	process(rst, portAWrite, portBWrite, purgeA, purgeB)
 	begin
-		if(rst = '1') then
+		if(rst'event and rst = '1') then
 			slots_taken := 0;
 		end if;
 	
-		if(portAWrite = '1' and purgeA = '0') then
+		if((portAWrite'event and portAWrite = '1') and (purgeA'event and purgeA = '0')) then
 			slots_taken := slots_taken + 1;
 		end if;
 		
-		if(portBWrite = '1' and purgeA = '0') then
+		if((portBWrite'event and portBWrite = '1') and (purgeB'event and purgeB = '0')) then
 			slots_taken := slots_taken + 1;
 		end if;
 		
-		if(portAWrite = '0' and purgeA = '1') then
+		if((portAWrite'event and portAWrite = '0') and (purgeA'event and purgeA = '1')) then
 			slots_taken := slots_taken - 1;
 		end if;
 		
-		if(portBWrite = '0' and purgeB = '1') then
-			slots_taken := slots_taken - 1;
+		if((portBWrite'event and portBWrite = '0') and (purgeB'event and purgeB = '1')) then
+			slots_taken <= slots_taken - 1;
 		end if;
 	end process;
 	

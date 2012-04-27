@@ -261,7 +261,7 @@ BEGIN
 		if(router_start = '1') then
 			
 			--Send a control packet	
-			tid_RT0 <= "11111110000000000000000100000011";
+			tid_RT0 <= "00000000000000000000001100000011";
 			dir_3_RT0 <= "000";		--Not used
 			dir_2_RT0 <= "111";		--Eject
 			dir_1_RT0 <= "010";		--South
@@ -276,7 +276,7 @@ BEGIN
 			wait for clk_period_pe*5;
 			
 			--Send a control packet
-			tid_RT0 <= "11110000000000001100000110000011";
+			tid_RT0 <= "00000000000000001100000110000011";
 			dir_3_RT0 <= "000";		--Not used
 			dir_2_RT0 <= "111";		--Eject
 			dir_1_RT0 <= "010";		--South
@@ -323,7 +323,7 @@ BEGIN
 			wait for clk_period_pe*20;
 			
 			--Send control packet
-			tid_RT0 <= "01110000000000000000000000001000";
+			tid_RT0 <= "00000000000000000000011110001000";
 			dir_3_RT0 <= "000";		--Not used
 			dir_2_RT0 <= "111";		--Eject
 			dir_1_RT0 <= "010";		--South
@@ -337,7 +337,7 @@ BEGIN
 			wait for clk_period_pe*20;
 				
 			--Send control packet
-			tid_RT0 <= "00011111000000000000000000000000";
+			tid_RT0 <= "00000000000000000000000111110000";
 			dir_3_RT0 <= "000";		--Not used
 			dir_2_RT0 <= "111";		--Eject
 			dir_1_RT0 <= "010";		--South
@@ -379,7 +379,7 @@ BEGIN
 			wait for clk_period_pe*20;
 
 			--Send control packet
-			tid_RT0 <= "00011100000000000110000000000000";
+			tid_RT0 <= "00000000000000000110000000011000";
 			dir_3_RT0 <= "000";		--Not used
 			dir_2_RT0 <= "111";		--Eject
 			dir_1_RT0 <= "010";		--South
@@ -393,13 +393,13 @@ BEGIN
 			wait for clk_period_pe*20;
 			
 			--Send control packet
-			tid_RT0 <= "00010000001000000100000010000010";
+			tid_RT0 <= "00000000000000000100000010001111";
 			dir_3_RT0 <= "000";		--Not used
 			dir_2_RT0 <= "111";		--Eject
 			dir_1_RT0 <= "010";		--South
 			dir_0_RT0 <= "001";		--East
 			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000000";		--Packet ID
+			pid_RT0 <= "001000";		--Packet ID
 			packet_type_RT0 <= "00";
 			priority_RT0 <= '0';
 			trigger_0_cp <= '1', '0' after 1 ns;
@@ -413,7 +413,21 @@ BEGIN
 			dir_1_RT0 <= "010";		--South
 			dir_0_RT0 <= "001";		--East
 			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000000";		--Packet ID
+			pid_RT0 <= "001000";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '1';
+			trigger_0_dp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*10;
+			
+			--Send its data packet (Low Priority)
+			tid_RT0 <= "00100100000000000000000000000000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000100";		--Packet ID
 			packet_type_RT0 <= "00";
 			priority_RT0 <= '1';
 			trigger_0_dp <= '1', '0' after 1 ns;
@@ -421,7 +435,7 @@ BEGIN
 			wait for clk_period_pe*20;
 			
 			--Send control packet
-			tid_RT0 <= "00101000011110000000000001100000";
+			tid_RT0 <= "00000000000000000000001101100001";
 			dir_3_RT0 <= "000";		--Not used
 			dir_2_RT0 <= "111";		--Eject
 			dir_1_RT0 <= "010";		--South

@@ -48,7 +48,6 @@ architecture Behavioral of SchedulerTable is
 		std_logic_vector(word_size-1 downto 0);
 	shared variable sch_table: memory_type;
 	signal table_full : std_logic;
-
 	
 begin
 
@@ -115,7 +114,5 @@ begin
 			--Count Signal
 			count <= slots_taken;
 	end process;
-
-
 end Behavioral;
 

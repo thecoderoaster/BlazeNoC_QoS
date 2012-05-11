@@ -229,6 +229,9 @@ architecture Behavioral of ControlUnit is
 							  south_sw1, south_sw2, south_sw3, south_sw4,
 							  west_sw1, west_sw2, west_sw3, west_sw4,
 							  injection_sw1, injection_sw2, injection_sw3, injection_sw4,
+							  depart_n_sw1, depart_n_sw2, depart_n_sw3, depart_n_sw4, depart_n_sw5, depart_n_sw6, depart_n_sw7, depart_n_sw8,
+							  depart_e_sw1, depart_e_sw2, depart_e_sw3, depart_e_sw4, depart_e_sw5, depart_e_sw6, depart_e_sw7, depart_e_sw8,
+							  depart_s_sw1, depart_s_sw2, depart_s_sw3, depart_s_sw4, depart_s_sw5, depart_s_sw6, depart_s_sw7, depart_s_sw8,
 							  depart_w_sw1, depart_w_sw2, depart_w_sw3, depart_w_sw4, depart_w_sw5, depart_w_sw6, depart_w_sw7, depart_w_sw8,
 							  sort1, sort2, sort3, sort4, sort5, sort6, sort7,
 							  schedule1, schedule2, schedule3, schedule4, schedule5, schedule6, schedule7, schedule8, schedule9,
@@ -245,6 +248,15 @@ architecture Behavioral of ControlUnit is
 	signal state_injection_handler: state_type;
 	signal state_scheduler_handler: state_type;
 	signal state_switch_handler: state_type;
+	signal state_north_sorting_handler: state_type;
+	signal state_n_scheduler_handler: state_type;
+	signal state_northvc_handler: state_type;
+	signal state_east_sorting_handler: state_type;
+	signal state_e_scheduler_handler: state_type;
+	signal state_eastvc_handler: state_type;
+	signal state_south_sorting_handler: state_type;
+	signal state_s_scheduler_handler: state_type;
+	signal state_southvc_handler: state_type;
 	signal state_west_sorting_handler: state_type;
 	signal state_w_scheduler_handler: state_type;
 	signal state_westvc_handler: state_type;
@@ -256,6 +268,15 @@ architecture Behavioral of ControlUnit is
 	signal ns_injection_handler: state_type;
 	signal ns_scheduler_handler: state_type;
 	signal ns_switch_handler: state_type;
+	signal ns_north_sorting_handler: state_type;
+	signal ns_n_scheduler_handler: state_type;
+	signal ns_northvc_handler: state_type;
+	signal ns_east_sorting_handler: state_type;
+	signal ns_e_scheduler_handler: state_type;
+	signal ns_eastvc_handler: state_type;
+	signal ns_south_sorting_handler: state_type;
+	signal ns_s_scheduler_handler: state_type;
+	signal ns_southvc_handler: state_type;
 	signal ns_west_sorting_handler: state_type;
 	signal ns_w_scheduler_handler: state_type;
 	signal ns_westvc_handler: state_type;
@@ -307,9 +328,63 @@ architecture Behavioral of ControlUnit is
 	signal w_sync_signal		: std_logic;
 	
 	--Sorting Related
+	signal n_sort_index 					: natural range 0 to 2**address_size;
+	signal e_sort_index 					: natural range 0 to 2**address_size;
+	signal s_sort_index 					: natural range 0 to 2**address_size;
 	signal w_sort_index 					: natural range 0 to 2**address_size;
 	
 	--Scheduling Related
+	signal n_sch_next_job_midpid 	: natural range 0 to 2**address_size-1;
+	signal n_sch_next_job_time		: std_logic_vector(sch_size-1 downto 0);	
+	signal n_sch_purge_job			: std_logic;
+	signal n_sch_purge_job_set		: std_logic;
+	signal n_sch_purge_job_rst		: std_logic;
+	signal n_sch_purge_midpid		: natural range 0 to 2**address_size-1;
+	signal n_sch_job_ready_set		: std_logic;
+	signal n_sch_job_ready_rst		: std_logic;
+	signal n_sch_job_ready			: std_logic;
+	signal n_sch_req_next_job		: std_logic;
+	signal n_sch_job_valid 			: std_logic;
+	signal n_sch_job_expired 		: std_logic;
+	signal n_sch_expiration			: std_logic_vector(sch_size-1 downto 0);
+	signal n_sch_departed_ack		: std_logic;
+	signal n_sch_start_timer 		: std_logic;
+	signal n_sch_force_transfer	: std_logic;
+	
+	signal e_sch_next_job_midpid 	: natural range 0 to 2**address_size-1;
+	signal e_sch_next_job_time		: std_logic_vector(sch_size-1 downto 0);	
+	signal e_sch_purge_job			: std_logic;
+	signal e_sch_purge_job_set		: std_logic;
+	signal e_sch_purge_job_rst		: std_logic;
+	signal e_sch_purge_midpid		: natural range 0 to 2**address_size-1;
+	signal e_sch_job_ready_set		: std_logic;
+	signal e_sch_job_ready_rst		: std_logic;
+	signal e_sch_job_ready			: std_logic;
+	signal e_sch_req_next_job		: std_logic;
+	signal e_sch_job_valid 			: std_logic;
+	signal e_sch_job_expired 		: std_logic;
+	signal e_sch_expiration			: std_logic_vector(sch_size-1 downto 0);
+	signal e_sch_departed_ack		: std_logic;
+	signal e_sch_start_timer 		: std_logic;
+	signal e_sch_force_transfer	: std_logic;
+	
+	signal s_sch_next_job_midpid 	: natural range 0 to 2**address_size-1;
+	signal s_sch_next_job_time		: std_logic_vector(sch_size-1 downto 0);	
+	signal s_sch_purge_job			: std_logic;
+	signal s_sch_purge_job_set		: std_logic;
+	signal s_sch_purge_job_rst		: std_logic;
+	signal s_sch_purge_midpid		: natural range 0 to 2**address_size-1;
+	signal s_sch_job_ready_set		: std_logic;
+	signal s_sch_job_ready_rst		: std_logic;
+	signal s_sch_job_ready			: std_logic;
+	signal s_sch_req_next_job		: std_logic;
+	signal s_sch_job_valid 			: std_logic;
+	signal s_sch_job_expired 		: std_logic;
+	signal s_sch_expiration			: std_logic_vector(sch_size-1 downto 0);
+	signal s_sch_departed_ack		: std_logic;
+	signal s_sch_start_timer 		: std_logic;
+	signal s_sch_force_transfer	: std_logic;
+	
 	signal w_sch_next_job_midpid 	: natural range 0 to 2**address_size-1;
 	signal w_sch_next_job_time		: std_logic_vector(sch_size-1 downto 0);	
 	signal w_sch_purge_job			: std_logic;
@@ -355,6 +430,120 @@ architecture Behavioral of ControlUnit is
 	signal sw_w_count			: std_logic_vector (1 downto 0);
 	
 	--VCC Related Signals
+	signal n_vcm_which_vcell_enq 		: std_logic_vector(1 downto 0);
+	signal n_vcm_which_vcc_enq			: std_logic_vector(2 downto 0);
+	signal n_vcm_which_vcell_deq 		: std_logic_vector(1 downto 0);
+	signal n_vcm_which_vcc_deq			: std_logic_vector(2 downto 0);
+	signal n_vcm_enq 						: std_logic;
+	signal n_vcm_enq_set 				: std_logic;
+	signal n_vcm_enq_rst					: std_logic;
+	signal n_vcm_enq_complete			: std_logic;
+	signal n_vcm_enq_complete_set		: std_logic;
+	signal n_vcm_enq_complete_rst		: std_logic;
+	signal n_vcm_deq 						: std_logic;
+	signal n_vcm_deq_set 				: std_logic;
+	signal n_vcm_deq_rst					: std_logic;
+	signal n_vcm_shift					: std_logic;
+	signal n_vcm_shift_set 				: std_logic;
+	signal n_vcm_shift_rst 				: std_logic;
+	signal n_vcm_shift_complete		: std_logic;
+	signal n_vcm_shift_complete_set	: std_logic;
+	signal n_vcm_shift_complete_rst	: std_logic;
+	signal n_vcm_shift_cell				: std_logic_vector(2 downto 0);
+	signal n_vcm_which_vcell_to_shift : std_logic_vector(1 downto 0);
+	signal n_vcm_pkt_priority			: std_logic;
+	signal n_vcm_pkt_pidgid				: natural range 0 to 2**address_size-1;
+	signal n_vcm_req_pkt_status 		: std_logic;
+	signal n_vcm_req_pkt_status_set 	: std_logic;
+	signal n_vcm_req_pkt_status_rst 	: std_logic;
+	signal n_vcm_req_complete			: std_logic;
+	signal n_vcm_req_complete_set		: std_logic;
+	signal n_vcm_req_complete_rst		: std_logic;
+	signal n_vcm_req_pkt					: natural range 0 to 2**address_size-1;
+	signal n_vcm_req_pkt_arrived 		: std_logic;
+	signal n_vcm_request_vcc			: std_logic;
+	signal n_vcm_request_vcc_set		: std_logic;
+	signal n_vcm_request_vcc_rst		: std_logic;
+	signal n_vcm_request_vcc_done		: std_logic;
+	signal n_vcm_request_vcc_done_set	: std_logic;
+	signal n_vcm_request_vcc_done_rst	: std_logic;
+	
+	signal e_vcm_which_vcell_enq 		: std_logic_vector(1 downto 0);
+	signal e_vcm_which_vcc_enq			: std_logic_vector(2 downto 0);
+	signal e_vcm_which_vcell_deq 		: std_logic_vector(1 downto 0);
+	signal e_vcm_which_vcc_deq			: std_logic_vector(2 downto 0);
+	signal e_vcm_enq 						: std_logic;
+	signal e_vcm_enq_set 				: std_logic;
+	signal e_vcm_enq_rst					: std_logic;
+	signal e_vcm_enq_complete			: std_logic;
+	signal e_vcm_enq_complete_set		: std_logic;
+	signal e_vcm_enq_complete_rst		: std_logic;
+	signal e_vcm_deq 						: std_logic;
+	signal e_vcm_deq_set 				: std_logic;
+	signal e_vcm_deq_rst					: std_logic;
+	signal e_vcm_shift					: std_logic;
+	signal e_vcm_shift_set 				: std_logic;
+	signal e_vcm_shift_rst 				: std_logic;
+	signal e_vcm_shift_complete		: std_logic;
+	signal e_vcm_shift_complete_set	: std_logic;
+	signal e_vcm_shift_complete_rst	: std_logic;
+	signal e_vcm_shift_cell				: std_logic_vector(2 downto 0);
+	signal e_vcm_which_vcell_to_shift : std_logic_vector(1 downto 0);
+	signal e_vcm_pkt_priority			: std_logic;
+	signal e_vcm_pkt_pidgid				: natural range 0 to 2**address_size-1;
+	signal e_vcm_req_pkt_status 		: std_logic;
+	signal e_vcm_req_pkt_status_set 	: std_logic;
+	signal e_vcm_req_pkt_status_rst 	: std_logic;
+	signal e_vcm_req_complete			: std_logic;
+	signal e_vcm_req_complete_set		: std_logic;
+	signal e_vcm_req_complete_rst		: std_logic;
+	signal e_vcm_req_pkt					: natural range 0 to 2**address_size-1;
+	signal e_vcm_req_pkt_arrived 		: std_logic;
+	signal e_vcm_request_vcc			: std_logic;
+	signal e_vcm_request_vcc_set		: std_logic;
+	signal e_vcm_request_vcc_rst		: std_logic;
+	signal e_vcm_request_vcc_done		: std_logic;
+	signal e_vcm_request_vcc_done_set	: std_logic;
+	signal e_vcm_request_vcc_done_rst	: std_logic;
+	
+	signal s_vcm_which_vcell_enq 		: std_logic_vector(1 downto 0);
+	signal s_vcm_which_vcc_enq			: std_logic_vector(2 downto 0);
+	signal s_vcm_which_vcell_deq 		: std_logic_vector(1 downto 0);
+	signal s_vcm_which_vcc_deq			: std_logic_vector(2 downto 0);
+	signal s_vcm_enq 						: std_logic;
+	signal s_vcm_enq_set 				: std_logic;
+	signal s_vcm_enq_rst					: std_logic;
+	signal s_vcm_enq_complete			: std_logic;
+	signal s_vcm_enq_complete_set		: std_logic;
+	signal s_vcm_enq_complete_rst		: std_logic;
+	signal s_vcm_deq 						: std_logic;
+	signal s_vcm_deq_set 				: std_logic;
+	signal s_vcm_deq_rst					: std_logic;
+	signal s_vcm_shift					: std_logic;
+	signal s_vcm_shift_set 				: std_logic;
+	signal s_vcm_shift_rst 				: std_logic;
+	signal s_vcm_shift_complete		: std_logic;
+	signal s_vcm_shift_complete_set	: std_logic;
+	signal s_vcm_shift_complete_rst	: std_logic;
+	signal s_vcm_shift_cell				: std_logic_vector(2 downto 0);
+	signal s_vcm_which_vcell_to_shift : std_logic_vector(1 downto 0);
+	signal s_vcm_pkt_priority			: std_logic;
+	signal s_vcm_pkt_pidgid				: natural range 0 to 2**address_size-1;
+	signal s_vcm_req_pkt_status 		: std_logic;
+	signal s_vcm_req_pkt_status_set 	: std_logic;
+	signal s_vcm_req_pkt_status_rst 	: std_logic;
+	signal s_vcm_req_complete			: std_logic;
+	signal s_vcm_req_complete_set		: std_logic;
+	signal s_vcm_req_complete_rst		: std_logic;
+	signal s_vcm_req_pkt					: natural range 0 to 2**address_size-1;
+	signal s_vcm_req_pkt_arrived 		: std_logic;
+	signal s_vcm_request_vcc			: std_logic;
+	signal s_vcm_request_vcc_set		: std_logic;
+	signal s_vcm_request_vcc_rst		: std_logic;
+	signal s_vcm_request_vcc_done		: std_logic;
+	signal s_vcm_request_vcc_done_set	: std_logic;
+	signal s_vcm_request_vcc_done_rst	: std_logic;
+	
 	signal w_vcm_which_vcell_enq 		: std_logic_vector(1 downto 0);
 	signal w_vcm_which_vcc_enq			: std_logic_vector(2 downto 0);
 	signal w_vcm_which_vcell_deq 		: std_logic_vector(1 downto 0);
@@ -414,6 +603,118 @@ begin
 			end if;
 		end if;
 	end process;
+
+	--************************************************************************
+	--n_timebase_process: 	Creates a "stopwatch" for establishing a timebase that
+	--							the packet transfers process requires to ensure QoS.
+	--************************************************************************
+	n_timebase_process: process(clk, rst)
+		variable counter 			: std_logic_vector(31 downto 0);
+		variable timeunit			: std_logic_vector(31 downto 0);
+		variable expires_in		: std_logic_vector(31 downto 0);
+	begin
+	
+		if rst = '1' then
+			counter := std_logic_vector(to_unsigned(0, counter'length));
+			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
+			n_sch_job_expired <= '0';
+			
+		elsif rising_edge(clk) then
+			if(n_sch_start_timer = '1' and n_sch_job_expired = '0') then
+				timeunit := timeunit + "00000000000000000000000000000001";
+				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
+					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
+					if(counter = n_sch_next_job_time) then
+						counter := "00000000000000000000000000000000";
+						n_sch_job_expired <= '1';
+					else
+						timeunit := "00000000000000000000000000000000";
+					end if;
+				end if;
+			elsif(n_sch_start_timer = '0' and n_sch_job_expired = '1') then
+				n_sch_job_expired <= '0';
+			elsif(n_sch_start_timer = '0' and n_sch_job_expired = '0') then
+				n_sch_job_expired <= '0';
+				counter := std_logic_vector(to_unsigned(0, counter'length));
+				timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
+			end if;
+		end if;
+	end process;
+	
+	--************************************************************************
+	--e_timebase_process: 	Creates a "stopwatch" for establishing a timebase that
+	--							the packet transfers process requires to ensure QoS.
+	--************************************************************************
+	e_timebase_process: process(clk, rst)
+		variable counter 			: std_logic_vector(31 downto 0);
+		variable timeunit			: std_logic_vector(31 downto 0);
+		variable expires_in		: std_logic_vector(31 downto 0);
+	begin
+	
+		if rst = '1' then
+			counter := std_logic_vector(to_unsigned(0, counter'length));
+			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
+			e_sch_job_expired <= '0';
+			
+		elsif rising_edge(clk) then
+			if(e_sch_start_timer = '1' and e_sch_job_expired = '0') then
+				timeunit := timeunit + "00000000000000000000000000000001";
+				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
+					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
+					if(counter = e_sch_next_job_time) then
+						counter := "00000000000000000000000000000000";
+						e_sch_job_expired <= '1';
+					else
+						timeunit := "00000000000000000000000000000000";
+					end if;
+				end if;
+			elsif(e_sch_start_timer = '0' and e_sch_job_expired = '1') then
+				e_sch_job_expired <= '0';
+			elsif(e_sch_start_timer = '0' and e_sch_job_expired = '0') then
+				e_sch_job_expired <= '0';
+				counter := std_logic_vector(to_unsigned(0, counter'length));
+				timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
+			end if;
+		end if;
+	end process;
+	
+	--************************************************************************
+	--s_timebase_process: 	Creates a "stopwatch" for establishing a timebase that
+	--							the packet transfers process requires to ensure QoS.
+	--************************************************************************
+	s_timebase_process: process(clk, rst)
+		variable counter 			: std_logic_vector(31 downto 0);
+		variable timeunit			: std_logic_vector(31 downto 0);
+		variable expires_in		: std_logic_vector(31 downto 0);
+	begin
+	
+		if rst = '1' then
+			counter := std_logic_vector(to_unsigned(0, counter'length));
+			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
+			s_sch_job_expired <= '0';
+			
+		elsif rising_edge(clk) then
+			if(s_sch_start_timer = '1' and s_sch_job_expired = '0') then
+				timeunit := timeunit + "00000000000000000000000000000001";
+				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
+					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
+					if(counter = s_sch_next_job_time) then
+						counter := "00000000000000000000000000000000";
+						s_sch_job_expired <= '1';
+					else
+						timeunit := "00000000000000000000000000000000";
+					end if;
+				end if;
+			elsif(s_sch_start_timer = '0' and s_sch_job_expired = '1') then
+				s_sch_job_expired <= '0';
+			elsif(s_sch_start_timer = '0' and s_sch_job_expired = '0') then
+				s_sch_job_expired <= '0';
+				counter := std_logic_vector(to_unsigned(0, counter'length));
+				timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
+			end if;
+		end if;
+	end process;
+
 
 
 	--************************************************************************
@@ -493,8 +794,17 @@ begin
 			state_west_handler <= start;
 			state_injection_handler <= start;
 			state_scheduler_handler <= start;
+			state_n_scheduler_handler <= start;
+			state_e_scheduler_handler <= start;
+			state_s_scheduler_handler <= start;
 			state_w_scheduler_handler <= start;
 			state_switch_handler <= start;
+			state_north_sorting_handler <= start;
+			state_northvc_handler <= start;
+			state_east_sorting_handler <= start;
+			state_eastvc_handler <= start;
+			state_south_sorting_handler <= start;
+			state_southvc_handler <= start;
 			state_west_sorting_handler <= start;
 			state_westvc_handler <= start;
 		else
@@ -504,8 +814,17 @@ begin
 			state_west_handler <= ns_west_handler;
 			state_injection_handler <= ns_injection_handler;
 			state_scheduler_handler <= ns_scheduler_handler;
+			state_n_scheduler_handler <= ns_n_scheduler_handler;
+			state_e_scheduler_handler <= ns_e_scheduler_handler;
+			state_s_scheduler_handler <= ns_s_scheduler_handler;
 			state_w_scheduler_handler <= ns_w_scheduler_handler;
 			state_switch_handler <= ns_switch_handler;
+			state_north_sorting_handler <= ns_north_sorting_handler;
+			state_northvc_handler <= ns_northvc_handler;
+			state_east_sorting_handler <= ns_east_sorting_handler;
+			state_eastvc_handler <= ns_eastvc_handler;
+			state_south_sorting_handler <= ns_south_sorting_handler;
+			state_southvc_handler <= ns_southvc_handler;
 			state_west_sorting_handler <= ns_west_sorting_handler;
 			state_westvc_handler <= ns_westvc_handler;
 		end if;
@@ -523,21 +842,18 @@ begin
 					--Drive signals to default state
 					n_CTRflg <= '0';
 					n_arbEnq <= '0';
-					n_vc_circEn <= '0';
 					
 					n_rsv_wen_a <= '0';
 					n_rsv_table_purge <= '0';
 					n_sch_wen_a	<= '0';
-					n_sch_table_purge <= '0';
 					sw_n_rna_toggle <= '0';
 					
 					n_sync_rst <= '1', '0' after 1 ns;
-					
+					n_vcm_enq_complete_rst <= '1', '0' after 1 ns;
+
 					ns_north_handler <= north1;
-				
 				when wait_state =>
 					ns_north_handler <= north1;
-				
 				when north1 =>
 					--Control Packet Arrived?
 					if(n_CtrlFlg = '1') then
@@ -547,7 +863,7 @@ begin
 					end if;
 				when north2 =>
 					if(n_rsv_table_full = '0') then
-						sw_n_rna_ctrlPkt <= n_rnaCtrl;		--Make copy of packet
+						sw_n_rna_ctrlPkt <= n_rnaCtrl;
 						ns_north_handler <= north3;
 					else
 						ns_north_handler <= north8;			--Table is full. Try again later
@@ -556,11 +872,10 @@ begin
 					--Reserve and schedule the incoming control packet
 					
 					--Update count
-					temp := sw_n_rna_ctrlPkt(13 downto 12) + 1;
+					temp := sw_n_rna_ctrlPkt(13 downto 12) + 1;		--Update count
 					sw_n_rna_ctrlPkt(13 downto 12) <= temp;
-					
+				
 					ns_north_handler <= north4;
-					
 				when north4 =>
 					--Write bits to rsv_data_out
 					case sw_n_rna_ctrlPkt(13 downto 12) is
@@ -586,14 +901,14 @@ begin
 					n_sch_wen_a <= '1';
 										
 					ns_north_handler <= north5;
-					
-				when north5 =>
+				when west5 =>
 					--Reset signals
 					n_rsv_wen_a <= '0';
 					n_sch_wen_a <= '0';
 				
-					--Forward the Packet by checking routing table first			
+					--Forward the Packet
 					sw_n_rna_toggle <= '1';
+					
 					ns_north_handler <= north6;
 				when north6 =>
 					ns_north_handler <= north7;
@@ -601,14 +916,15 @@ begin
 					if(n_sync_signal = '1') then
 						sw_n_rna_toggle <= '0';
 						n_sync_rst <= '1', '0' after 1 ns;
-						n_CTRflg <= '1', '0' after 1 ns;				--Ack back to src.
+						n_CTRflg <= '1', '0' after 1 ns;					--Ack back to src.
 						ns_north_handler <= north8;
 					else
 						ns_north_handler <= north6;	--Keep trying (might need WDT eventually)
 					end if;
+			
 				when north8 =>
 					--Data Packet Arrived?
-					if(n_DataFlg = '1') then
+					if(n_DataFlg = '1' and n_vcm_shift_complete = '0') then
 						ns_north_handler <= north9;
 					else
 						ns_north_handler <= wait_state;
@@ -616,22 +932,33 @@ begin
 				when north9 =>
 					--Grab reservation table details
 					n_rsv_addr_a <= conv_integer(n_rnaCtrl(11 downto 4));
-					
+					n_vcm_pkt_pidgid <= conv_integer(n_rnaCtrl(11 downto 4));
 					ns_north_handler <= north10;
 				when north10 =>	
 					--Control VCC
 					case n_rsv_data_in_a(2 downto 0) is
 						when "001" =>
 							n_vc_rnaSelI <= "00";			--East
+							n_vcm_which_vcell_enq <= "00";
+							n_vcm_which_vcc_enq <= "000";
 						when "010" =>
 							n_vc_rnaSelI <= "01";			--South
+							n_vcm_which_vcell_enq <= "01";
+							n_vcm_which_vcc_enq <= "001";
 						when "011" =>
 							n_vc_rnaSelI <= "10";			--West
+							n_vcm_which_vcell_enq <= "10";
+							n_vcm_which_vcc_enq <= "010";
 						when "111" =>
 							n_vc_rnaSelI <= "11";			--Ejection
+							n_vcm_which_vcell_enq <= "11";
+							n_vcm_which_vcc_enq <= "111";
 						when others =>
 							null;
 					end case;
+					
+					--Grab high or low priority status of packet
+					n_vcm_pkt_priority <= n_rnaCtrl(1);
 					
 					--Acknowledge
 					n_CTRflg <= '1';
@@ -640,7 +967,20 @@ begin
 				when north11 =>
 					n_CTRflg <= '0';
 					n_arbEnq <= '0';
-					ns_north_handler <= wait_state;
+				
+					--Notify the VCC Manager of a new packet that's been enqueued
+					n_vcm_enq_set <= '1', '0' after 1 ns;
+					
+					ns_north_handler <= north13;
+				when north12 =>
+					ns_north_handler <= north13;
+				when north13 =>
+					if(n_vcm_enq_complete = '1') then
+						n_vcm_enq_complete_rst <= '1', '0' after 1 ns;
+						ns_north_handler <= wait_state;
+					else
+						ns_north_handler <= north12;
+					end if;
 				when others =>
 					ns_north_handler <= wait_state;
 			end case;
@@ -658,21 +998,18 @@ begin
 					--Drive signals to default state
 					e_CTRflg <= '0';
 					e_arbEnq <= '0';
-					e_vc_circEn <= '0';
 					
 					e_rsv_wen_a <= '0';
 					e_rsv_table_purge <= '0';
 					e_sch_wen_a	<= '0';
-					e_sch_table_purge <= '0';
 					sw_e_rna_toggle <= '0';
 					
 					e_sync_rst <= '1', '0' after 1 ns;
-					
+					e_vcm_enq_complete_rst <= '1', '0' after 1 ns;
+
 					ns_east_handler <= east1;
-				
 				when wait_state =>
-					ns_east_handler <= east1;	
-				
+					ns_east_handler <= east1;
 				when east1 =>
 					--Control Packet Arrived?
 					if(e_CtrlFlg = '1') then
@@ -689,11 +1026,11 @@ begin
 					end if;
 				when east3 =>	
 					--Reserve and schedule the incoming control packet
-				
-					--Update count
-					temp := sw_e_rna_ctrlPkt(13 downto 12) + 1;
-					sw_e_rna_ctrlPkt(13 downto 12) <= temp;
 					
+					--Update count
+					temp := sw_e_rna_ctrlPkt(13 downto 12) + 1;		--Update count
+					sw_e_rna_ctrlPkt(13 downto 12) <= temp;
+				
 					ns_east_handler <= east4;
 				when east4 =>
 					--Write bits to rsv_data_out
@@ -724,8 +1061,8 @@ begin
 					--Reset signals
 					e_rsv_wen_a <= '0';
 					e_sch_wen_a <= '0';
-					
-					--Forward the Packet	
+				
+					--Forward the Packet
 					sw_e_rna_toggle <= '1';
 					
 					ns_east_handler <= east6;
@@ -740,9 +1077,10 @@ begin
 					else
 						ns_east_handler <= east6;	--Keep trying (might need WDT eventually)
 					end if;
+			
 				when east8 =>
 					--Data Packet Arrived?
-					if(e_DataFlg = '1') then
+					if(e_DataFlg = '1' and e_vcm_shift_complete = '0') then
 						ns_east_handler <= east9;
 					else
 						ns_east_handler <= wait_state;
@@ -750,22 +1088,33 @@ begin
 				when east9 =>
 					--Grab reservation table details
 					e_rsv_addr_a <= conv_integer(e_rnaCtrl(11 downto 4));
-					
+					e_vcm_pkt_pidgid <= conv_integer(e_rnaCtrl(11 downto 4));
 					ns_east_handler <= east10;
 				when east10 =>	
 					--Control VCC
 					case e_rsv_data_in_a(2 downto 0) is
 						when "000" =>
 							e_vc_rnaSelI <= "00";			--North
+							e_vcm_which_vcell_enq <= "00";
+							e_vcm_which_vcc_enq <= "000";
 						when "010" =>
 							e_vc_rnaSelI <= "01";			--South
+							e_vcm_which_vcell_enq <= "01";
+							e_vcm_which_vcc_enq <= "001";
 						when "011" =>
-							e_vc_rnaSelI <= "10";			--West
+							e_vc_rnaSelI <= "10";			--South
+							e_vcm_which_vcell_enq <= "10";
+							e_vcm_which_vcc_enq <= "010";
 						when "111" =>
 							e_vc_rnaSelI <= "11";			--Ejection
+							e_vcm_which_vcell_enq <= "11";
+							e_vcm_which_vcc_enq <= "111";
 						when others =>
 							null;
 					end case;
+					
+					--Grab high or low priority status of packet
+					e_vcm_pkt_priority <= e_rnaCtrl(1);
 					
 					--Acknowledge
 					e_CTRflg <= '1';
@@ -774,7 +1123,20 @@ begin
 				when east11 =>
 					e_CTRflg <= '0';
 					e_arbEnq <= '0';
-					ns_east_handler <= wait_state;
+				
+					--Notify the VCC Manager of a new packet that's been enqueued
+					e_vcm_enq_set <= '1', '0' after 1 ns;
+					
+					ns_east_handler <= east13;
+				when east12 =>
+					ns_east_handler <= east13;
+				when east13 =>
+					if(e_vcm_enq_complete = '1') then
+						e_vcm_enq_complete_rst <= '1', '0' after 1 ns;
+						ns_east_handler <= wait_state;
+					else
+						ns_east_handler <= east12;
+					end if;
 				when others =>
 					ns_east_handler <= wait_state;
 			end case;
@@ -783,7 +1145,7 @@ begin
 	--************************************************************************
 	--south_handler: Handles all incoming packets (data/control) on south port
 	--************************************************************************
-	south_cp_handler:process(state_south_handler)
+	south_handler:process(state_south_handler)
 	variable temp : std_logic_vector(1 downto 0);
 	begin
 		case state_south_handler is
@@ -792,16 +1154,15 @@ begin
 					--Drive signals to default state
 					s_CTRflg <= '0';
 					s_arbEnq <= '0';
-					s_vc_circEn <= '0';
 					
 					s_rsv_wen_a <= '0';
 					s_rsv_table_purge <= '0';
 					s_sch_wen_a	<= '0';
-					s_sch_table_purge <= '0';
 					sw_s_rna_toggle <= '0';
 					
 					s_sync_rst <= '1', '0' after 1 ns;
-					
+					s_vcm_enq_complete_rst <= '1', '0' after 1 ns;
+
 					ns_south_handler <= south1;
 				when wait_state =>
 					ns_south_handler <= south1;
@@ -823,11 +1184,10 @@ begin
 					--Reserve and schedule the incoming control packet
 					
 					--Update count
-					temp := sw_s_rna_ctrlPkt(13 downto 12) + 1;
+					temp := sw_s_rna_ctrlPkt(13 downto 12) + 1;		--Update count
 					sw_s_rna_ctrlPkt(13 downto 12) <= temp;
-					
+				
 					ns_south_handler <= south4;
-					
 				when south4 =>
 					--Write bits to rsv_data_out
 					case sw_s_rna_ctrlPkt(13 downto 12) is
@@ -873,9 +1233,10 @@ begin
 					else
 						ns_south_handler <= south6;	--Keep trying (might need WDT eventually)
 					end if;
+			
 				when south8 =>
 					--Data Packet Arrived?
-					if(s_DataFlg = '1') then
+					if(s_DataFlg = '1' and s_vcm_shift_complete = '0') then
 						ns_south_handler <= south9;
 					else
 						ns_south_handler <= wait_state;
@@ -883,22 +1244,33 @@ begin
 				when south9 =>
 					--Grab reservation table details
 					s_rsv_addr_a <= conv_integer(s_rnaCtrl(11 downto 4));
-					
+					s_vcm_pkt_pidgid <= conv_integer(s_rnaCtrl(11 downto 4));
 					ns_south_handler <= south10;
 				when south10 =>	
 					--Control VCC
 					case s_rsv_data_in_a(2 downto 0) is
 						when "000" =>
 							s_vc_rnaSelI <= "00";			--North
+							s_vcm_which_vcell_enq <= "00";
+							s_vcm_which_vcc_enq <= "000";
 						when "001" =>
 							s_vc_rnaSelI <= "01";			--East
+							s_vcm_which_vcell_enq <= "01";
+							s_vcm_which_vcc_enq <= "001";
 						when "011" =>
 							s_vc_rnaSelI <= "10";			--West
+							s_vcm_which_vcell_enq <= "10";
+							s_vcm_which_vcc_enq <= "010";
 						when "111" =>
 							s_vc_rnaSelI <= "11";			--Ejection
+							s_vcm_which_vcell_enq <= "11";
+							s_vcm_which_vcc_enq <= "111";
 						when others =>
 							null;
 					end case;
+					
+					--Grab high or low priority status of packet
+					s_vcm_pkt_priority <= s_rnaCtrl(1);
 					
 					--Acknowledge
 					s_CTRflg <= '1';
@@ -907,7 +1279,20 @@ begin
 				when south11 =>
 					s_CTRflg <= '0';
 					s_arbEnq <= '0';
-					ns_south_handler <= wait_state;
+				
+					--Notify the VCC Manager of a new packet that's been enqueued
+					s_vcm_enq_set <= '1', '0' after 1 ns;
+					
+					ns_south_handler <= south13;
+				when south12 =>
+					ns_south_handler <= south13;
+				when south13 =>
+					if(s_vcm_enq_complete = '1') then
+						s_vcm_enq_complete_rst <= '1', '0' after 1 ns;
+						ns_south_handler <= wait_state;
+					else
+						ns_south_handler <= south12;
+					end if;
 				when others =>
 					ns_south_handler <= wait_state;
 			end case;
@@ -916,7 +1301,7 @@ begin
 	--************************************************************************
 	--west_handler: Handles all incoming packets (data/control) on west port
 	--************************************************************************
-	west_cp_handler:process(state_west_handler)
+	west_handler:process(state_west_handler)
 	variable temp : std_logic_vector(1 downto 0);
 	begin
 		case state_west_handler is
@@ -1115,7 +1500,365 @@ begin
 	--************************************************************************	
 	--n_scheduler_handler - Handles all scheduling related tasks on North Port
 	--************************************************************************
+	n_scheduler_handler:process(state_n_scheduler_handler)
+	begin
+		case state_n_scheduler_handler is
+			when start =>
+				n_sch_req_next_job <= '0';
+				n_sch_purge_job_set <= '0';
+				n_sch_job_ready_rst <= '0';
+				n_vcm_shift_complete_rst <= '1', '0' after 1 ns;
+				n_vcm_req_complete_rst <= '1', '0' after 1 ns;
+				
+				ns_n_scheduler_handler <= schedule1;
+			when wait_state =>
+				ns_n_scheduler_handler <= schedule1;
+			when schedule1 =>
+				if(n_sch_job_expired = '0') then
+					n_sch_req_next_job <= '1';
+					ns_n_scheduler_handler <= schedule3;
+				else
+					n_sch_req_next_job <= '0';
+					ns_n_scheduler_handler <= wait_state;
+				end if;
+			when schedule2 =>
+				ns_n_scheduler_handler <= schedule3;
+			when schedule3 =>
+				if(n_sch_job_ready = '1') then
+					n_sch_job_ready_rst <= '1', '0' after 1 ns;
+					n_sch_req_next_job <= '0';
+					ns_n_scheduler_handler <= schedule4;
+				else
+					ns_n_scheduler_handler <= schedule2;
+				end if;
+			when schedule4 =>
+				n_vcm_req_pkt_status_set <= '1', '0' after 1 ns;
+				n_vcm_req_pkt <= n_sch_next_job_midpid;
+				ns_n_scheduler_handler <= schedule5;
+			when schedule5 =>
+				--Wait state
+				if(n_vcm_req_complete = '1' and n_vcm_req_pkt_arrived = '1') then
+					--Packet is here! Move it to the next router (Don't Schedule)
+					n_vcm_req_complete_rst <= '1', '0' after 1 ns;
+					n_sch_force_transfer <= '1';
+					n_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
+					ns_n_scheduler_handler <= schedule7;
+				elsif(n_vcm_req_complete = '1' and (n_vcm_req_pkt_arrived = '0' or (n_vcm_req_pkt_arrived /= '0' and n_vcm_req_pkt_arrived /= '1'))) then
+					--Need to schedule...
+					n_vcm_req_complete_rst <= '1', '0' after 1 ns;
+					n_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
+					n_sch_start_timer <= '1';
+					ns_n_scheduler_handler <= schedule7;
+				else
+					--No Ack Yet...
+					ns_n_scheduler_handler <= schedule4;
+				end if;
+			when schedule6 =>
+				ns_n_scheduler_handler <= schedule7;
+			when schedule7 =>
+				if(n_sch_job_expired = '1' or n_sch_force_transfer = '1') then
+					--Reset signals
+					n_sch_start_timer <= '0';
+					n_sch_force_transfer <= '0';
+					n_vcm_req_pkt <= n_sch_next_job_midpid;
+					
+					--Make a shift request
+					case n_vcm_shift_cell(2 downto 0) is
+						when "000" =>
+							n_vc_circSel <= "00";
+							n_vcm_which_vcell_to_shift <= "00";
+						when "001" =>
+							n_vc_circSel <= "01";
+							n_vcm_which_vcell_to_shift <= "01";
+						when "010" =>
+							n_vc_circSel <= "10";
+							n_vcm_which_vcell_to_shift <= "10";
+						when "111" =>
+							n_vc_circSel <= "11";
+							n_vcm_which_vcell_to_shift <= "11";
+						when others =>
+							null;
+					end case;
+					ns_n_scheduler_handler <= schedule8;		--Did shift conclude?
+				else	
+					ns_n_scheduler_handler <= schedule4;		--Not yet...
+				end if;
+			when schedule8 =>
+				n_vcm_shift_set <= '1', '0' after 1 ns;
+				ns_n_scheduler_handler <= schedule10;
+			when schedule9 =>
+				ns_n_scheduler_handler <= schedule10;
+			when schedule10 =>
+				if(n_vcm_shift_complete = '1') then
+					--Shift completed, begin departure
+					n_vcm_shift_complete_rst <= '1', '0' after 1 ns;
+					ns_n_scheduler_handler <= schedule12;
+				else
+					ns_n_scheduler_handler <= schedule9;
+				end if;
+			when schedule11 =>
+				ns_n_scheduler_handler <= schedule13;			--Wait for ack...
+			when schedule12 =>
+				--Initiate data packet transfer
+				sw_n_depart_toggle <= '1';
+				ns_n_scheduler_handler <= schedule13;
+			when schedule13 =>
+				if(n_sch_departed_ack = '1') then
+					sw_n_depart_toggle <= '0';
+					
+					--Purge data from scheduler
+					n_sch_purge_job_set <= '1', '0' after 1 ns;
+					n_sch_purge_midpid <= n_sch_next_job_midpid;
+					ns_n_scheduler_handler <= wait_state;
+				else
+					ns_n_scheduler_handler <= schedule11;
+				end if;
+			when others =>
+				ns_n_scheduler_handler <= start;
+		end case;
+	end process;
+	
+	--************************************************************************	
+	--e_scheduler_handler - Handles all scheduling related tasks on East Port
+	--************************************************************************
+	e_scheduler_handler:process(state_e_scheduler_handler)
+	begin
+		case state_e_scheduler_handler is
+			when start =>
+				e_sch_req_next_job <= '0';
+				e_sch_purge_job_set <= '0';
+				e_sch_job_ready_rst <= '0';
+				e_vcm_shift_complete_rst <= '1', '0' after 1 ns;
+				e_vcm_req_complete_rst <= '1', '0' after 1 ns;
+				
+				ns_e_scheduler_handler <= schedule1;
+			when wait_state =>
+				ns_e_scheduler_handler <= schedule1;
+			when schedule1 =>
+				if(e_sch_job_expired = '0') then
+					e_sch_req_next_job <= '1';
+					ns_e_scheduler_handler <= schedule3;
+				else
+					e_sch_req_next_job <= '0';
+					ns_e_scheduler_handler <= wait_state;
+				end if;
+			when schedule2 =>
+				ns_e_scheduler_handler <= schedule3;
+			when schedule3 =>
+				if(e_sch_job_ready = '1') then
+					e_sch_job_ready_rst <= '1', '0' after 1 ns;
+					e_sch_req_next_job <= '0';
+					ns_e_scheduler_handler <= schedule4;
+				else
+					ns_e_scheduler_handler <= schedule2;
+				end if;
+			when schedule4 =>
+				e_vcm_req_pkt_status_set <= '1', '0' after 1 ns;
+				e_vcm_req_pkt <= e_sch_next_job_midpid;
+				ns_e_scheduler_handler <= schedule5;
+			when schedule5 =>
+				--Wait state
+				if(e_vcm_req_complete = '1' and e_vcm_req_pkt_arrived = '1') then
+					--Packet is here! Move it to the next router (Don't Schedule)
+					e_vcm_req_complete_rst <= '1', '0' after 1 ns;
+					e_sch_force_transfer <= '1';
+					e_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
+					ns_e_scheduler_handler <= schedule7;
+				elsif(e_vcm_req_complete = '1' and (e_vcm_req_pkt_arrived = '0' or (e_vcm_req_pkt_arrived /= '0' and e_vcm_req_pkt_arrived /= '1'))) then
+					--Need to schedule...
+					e_vcm_req_complete_rst <= '1', '0' after 1 ns;
+					e_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
+					e_sch_start_timer <= '1';
+					ns_e_scheduler_handler <= schedule7;
+				else
+					--No Ack Yet...
+					ns_e_scheduler_handler <= schedule4;
+				end if;
+			when schedule6 =>
+				ns_e_scheduler_handler <= schedule7;
+			when schedule7 =>
+				if(e_sch_job_expired = '1' or e_sch_force_transfer = '1') then
+					--Reset signals
+					e_sch_start_timer <= '0';
+					e_sch_force_transfer <= '0';
+					e_vcm_req_pkt <= e_sch_next_job_midpid;
+					
+					--Make a shift request
+					case e_vcm_shift_cell(2 downto 0) is
+						when "000" =>
+							e_vc_circSel <= "00";
+							e_vcm_which_vcell_to_shift <= "00";
+						when "001" =>
+							e_vc_circSel <= "01";
+							e_vcm_which_vcell_to_shift <= "01";
+						when "010" =>
+							e_vc_circSel <= "10";
+							e_vcm_which_vcell_to_shift <= "10";
+						when "111" =>
+							e_vc_circSel <= "11";
+							e_vcm_which_vcell_to_shift <= "11";
+						when others =>
+							null;
+					end case;
+					ns_e_scheduler_handler <= schedule8;		--Did shift conclude?
+				else	
+					ns_e_scheduler_handler <= schedule4;		--Not yet...
+				end if;
+			when schedule8 =>
+				e_vcm_shift_set <= '1', '0' after 1 ns;
+				ns_e_scheduler_handler <= schedule10;
+			when schedule9 =>
+				ns_e_scheduler_handler <= schedule10;
+			when schedule10 =>
+				if(e_vcm_shift_complete = '1') then
+					--Shift completed, begin departure
+					e_vcm_shift_complete_rst <= '1', '0' after 1 ns;
+					ns_e_scheduler_handler <= schedule12;
+				else
+					ns_e_scheduler_handler <= schedule9;
+				end if;
+			when schedule11 =>
+				ns_e_scheduler_handler <= schedule13;			--Wait for ack...
+			when schedule12 =>
+				--Initiate data packet transfer
+				sw_e_depart_toggle <= '1';
+				ns_e_scheduler_handler <= schedule13;
+			when schedule13 =>
+				if(e_sch_departed_ack = '1') then
+					sw_e_depart_toggle <= '0';
+					
+					--Purge data from scheduler
+					e_sch_purge_job_set <= '1', '0' after 1 ns;
+					e_sch_purge_midpid <= e_sch_next_job_midpid;
+					ns_e_scheduler_handler <= wait_state;
+				else
+					ns_e_scheduler_handler <= schedule11;
+				end if;
+			when others =>
+				ns_e_scheduler_handler <= start;
+		end case;
+	end process;
 
+	--************************************************************************	
+	--s_scheduler_handler - Handles all scheduling related tasks on South Port
+	--************************************************************************
+	s_scheduler_handler:process(state_s_scheduler_handler)
+	begin
+		case state_s_scheduler_handler is
+			when start =>
+				s_sch_req_next_job <= '0';
+				s_sch_purge_job_set <= '0';
+				s_sch_job_ready_rst <= '0';
+				s_vcm_shift_complete_rst <= '1', '0' after 1 ns;
+				s_vcm_req_complete_rst <= '1', '0' after 1 ns;
+				
+				ns_s_scheduler_handler <= schedule1;
+			when wait_state =>
+				ns_s_scheduler_handler <= schedule1;
+			when schedule1 =>
+				if(s_sch_job_expired = '0') then
+					s_sch_req_next_job <= '1';
+					ns_s_scheduler_handler <= schedule3;
+				else
+					s_sch_req_next_job <= '0';
+					ns_s_scheduler_handler <= wait_state;
+				end if;
+			when schedule2 =>
+				ns_s_scheduler_handler <= schedule3;
+			when schedule3 =>
+				if(s_sch_job_ready = '1') then
+					s_sch_job_ready_rst <= '1', '0' after 1 ns;
+					s_sch_req_next_job <= '0';
+					ns_s_scheduler_handler <= schedule4;
+				else
+					ns_s_scheduler_handler <= schedule2;
+				end if;
+			when schedule4 =>
+				s_vcm_req_pkt_status_set <= '1', '0' after 1 ns;
+				s_vcm_req_pkt <= s_sch_next_job_midpid;
+				ns_s_scheduler_handler <= schedule5;
+			when schedule5 =>
+				--Wait state
+				if(s_vcm_req_complete = '1' and s_vcm_req_pkt_arrived = '1') then
+					--Packet is here! Move it to the next router (Don't Schedule)
+					s_vcm_req_complete_rst <= '1', '0' after 1 ns;
+					s_sch_force_transfer <= '1';
+					s_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
+					ns_s_scheduler_handler <= schedule7;
+				elsif(s_vcm_req_complete = '1' and (s_vcm_req_pkt_arrived = '0' or (s_vcm_req_pkt_arrived /= '0' and s_vcm_req_pkt_arrived /= '1'))) then
+					--Need to schedule...
+					s_vcm_req_complete_rst <= '1', '0' after 1 ns;
+					s_vcm_req_pkt_status_rst <= '1', '0' after 1 ns;
+					s_sch_start_timer <= '1';
+					ns_s_scheduler_handler <= schedule7;
+				else
+					--No Ack Yet...
+					ns_s_scheduler_handler <= schedule4;
+				end if;
+			when schedule6 =>
+				ns_s_scheduler_handler <= schedule7;
+			when schedule7 =>
+				if(s_sch_job_expired = '1' or s_sch_force_transfer = '1') then
+					--Reset signals
+					s_sch_start_timer <= '0';
+					s_sch_force_transfer <= '0';
+					s_vcm_req_pkt <= s_sch_next_job_midpid;
+					
+					--Make a shift request
+					case s_vcm_shift_cell(2 downto 0) is
+						when "000" =>
+							s_vc_circSel <= "00";
+							s_vcm_which_vcell_to_shift <= "00";
+						when "001" =>
+							s_vc_circSel <= "01";
+							s_vcm_which_vcell_to_shift <= "01";
+						when "010" =>
+							s_vc_circSel <= "10";
+							s_vcm_which_vcell_to_shift <= "10";
+						when "111" =>
+							s_vc_circSel <= "11";
+							s_vcm_which_vcell_to_shift <= "11";
+						when others =>
+							null;
+					end case;
+					ns_s_scheduler_handler <= schedule8;		--Did shift conclude?
+				else	
+					ns_s_scheduler_handler <= schedule4;		--Not yet...
+				end if;
+			when schedule8 =>
+				s_vcm_shift_set <= '1', '0' after 1 ns;
+				ns_s_scheduler_handler <= schedule10;
+			when schedule9 =>
+				ns_s_scheduler_handler <= schedule10;
+			when schedule10 =>
+				if(s_vcm_shift_complete = '1') then
+					--Shift completed, begin departure
+					s_vcm_shift_complete_rst <= '1', '0' after 1 ns;
+					ns_s_scheduler_handler <= schedule12;
+				else
+					ns_s_scheduler_handler <= schedule9;
+				end if;
+			when schedule11 =>
+				ns_s_scheduler_handler <= schedule13;			--Wait for ack...
+			when schedule12 =>
+				--Initiate data packet transfer
+				sw_s_depart_toggle <= '1';
+				ns_s_scheduler_handler <= schedule13;
+			when schedule13 =>
+				if(s_sch_departed_ack = '1') then
+					sw_s_depart_toggle <= '0';
+					
+					--Purge data from scheduler
+					s_sch_purge_job_set <= '1', '0' after 1 ns;
+					s_sch_purge_midpid <= s_sch_next_job_midpid;
+					ns_s_scheduler_handler <= wait_state;
+				else
+					ns_s_scheduler_handler <= schedule11;
+				end if;
+			when others =>
+				ns_s_scheduler_handler <= start;
+		end case;
+	end process;
 
 	--************************************************************************	
 	--w_scheduler_handler - Handles all scheduling related tasks on West Port
@@ -1238,6 +1981,280 @@ begin
 		end case;
 	end process;
 	
+	--************************************************************************	
+	--n_sorting_handler - Handles all schedule sorting for North Port
+	--************************************************************************
+	n_sorting_handler:process(state_north_sorting_handler)
+		variable n_last_scheduled : natural range 0 to 2**address_size := 256;
+		variable n_sort_next_job_time : std_logic_vector(sch_size-1 downto 0);
+		variable n_sort_next_job_midpid : natural range 0 to 2**address_size-1;
+	begin
+		case state_north_sorting_handler is
+			when start =>
+				n_sch_wen_b <= '0';
+				n_sch_job_ready_set <= '0';
+				n_sch_purge_job_rst <= '0';
+				n_sch_table_purge <= '0';
+				n_sch_job_valid <= '0';
+			
+				ns_north_sorting_handler <= sort1;
+				
+			when wait_state =>
+				ns_north_sorting_handler <= sort1;
+			when sort1 =>
+				--Did job finish? Purge location in scheduler?
+				if(n_sch_purge_job = '1') then
+					n_sch_purge_job_rst <= '1', '0' after 1 ns;
+					n_sch_addr_b <= n_sch_purge_midpid;
+					n_sch_data_out_b <= "11111111111111111111111111111111";	
+					n_sch_table_purge <= '1';					
+					n_sch_wen_b <= '1';
+								
+					ns_north_sorting_handler <= sort2;
+				else
+					ns_north_sorting_handler <= sort3;
+				end if;
+			when sort2 =>
+				n_sch_wen_b <= '0';
+				n_sch_table_purge <= '0';
+				--Reset Signals
+				ns_north_sorting_handler <= wait_state;
+			when sort3 =>
+				if(n_sch_table_count > 0) then
+					n_sch_addr_b <= n_sort_index;
+					ns_north_sorting_handler <= sort4;
+				else
+					n_sort_index <= 0;
+					ns_north_sorting_handler <= wait_state;
+				end if;
+			when sort4 =>
+				--Take first item
+				n_sort_next_job_time := n_sch_data_in_b; -- Temporary bin
+				n_sort_next_job_midpid := n_sort_index;  -- Temporary bin	  
+				n_sort_index <= n_sort_index + 1;
+				if(n_sch_data_in_b(31 downto 0) > 0 and (n_last_scheduled /= n_sort_index)) then
+					n_sch_job_valid <= '1';
+				else
+					n_sch_job_valid <= '0';
+				end if;
+				ns_north_sorting_handler <= sort5;
+			when sort5 =>
+				if(n_sort_index /= 256) then
+					n_sch_addr_b <= n_sort_index;
+					ns_north_sorting_handler <= sort6;
+				else
+					n_sort_index <= 0;
+					ns_north_sorting_handler <= sort7;
+				end if;
+			when sort6 =>
+				if(n_sch_data_in_b < n_sort_next_job_time and (n_sch_data_in_b(31 downto 0) > 0) and  (n_last_scheduled /= n_sort_index)) then
+					n_sort_next_job_time := n_sch_data_in_b;
+					n_sort_next_job_midpid := n_sort_index;
+					n_sch_job_valid <= '1';
+				end if;
+				
+				n_sort_index <= n_sort_index + 1;
+				ns_north_sorting_handler <= sort5;
+			when sort7 =>
+				--Is there a new job request? Issue it, if so.
+				if(n_sch_req_next_job = '1' and n_sch_job_valid = '1') then
+					n_sch_next_job_time <= n_sort_next_job_time;
+					n_sch_next_job_midpid <= n_sort_next_job_midpid;
+					n_last_scheduled := n_sort_next_job_midpid;
+					n_sch_job_ready_set <= '1', '0' after 1 ns;
+				else
+					n_sch_job_ready_set <= '0';
+				end if;
+						
+				ns_north_sorting_handler <= wait_state;
+			when others =>
+				ns_north_sorting_handler <= start;
+		end case;
+	end process;
+	
+	--************************************************************************	
+	--e_sorting_handler - Handles all schedule sorting for North Port
+	--************************************************************************
+	e_sorting_handler:process(state_east_sorting_handler)
+		variable e_last_scheduled : natural range 0 to 2**address_size := 256;
+		variable e_sort_next_job_time : std_logic_vector(sch_size-1 downto 0);
+		variable e_sort_next_job_midpid : natural range 0 to 2**address_size-1;
+	begin
+		case state_east_sorting_handler is
+			when start =>
+				e_sch_wen_b <= '0';
+				e_sch_job_ready_set <= '0';
+				e_sch_purge_job_rst <= '0';
+				e_sch_table_purge <= '0';
+				e_sch_job_valid <= '0';
+			
+				ns_east_sorting_handler <= sort1;
+				
+			when wait_state =>
+				ns_east_sorting_handler <= sort1;
+			when sort1 =>
+				--Did job finish? Purge location in scheduler?
+				if(e_sch_purge_job = '1') then
+					e_sch_purge_job_rst <= '1', '0' after 1 ns;
+					e_sch_addr_b <= e_sch_purge_midpid;
+					e_sch_data_out_b <= "11111111111111111111111111111111";	
+					e_sch_table_purge <= '1';					
+					e_sch_wen_b <= '1';
+								
+					ns_east_sorting_handler <= sort2;
+				else
+					ns_east_sorting_handler <= sort3;
+				end if;
+			when sort2 =>
+				e_sch_wen_b <= '0';
+				e_sch_table_purge <= '0';
+				--Reset Signals
+				ns_east_sorting_handler <= wait_state;
+			when sort3 =>
+				if(e_sch_table_count > 0) then
+					e_sch_addr_b <= e_sort_index;
+					ns_east_sorting_handler <= sort4;
+				else
+					e_sort_index <= 0;
+					ns_east_sorting_handler <= wait_state;
+				end if;
+			when sort4 =>
+				--Take first item
+				e_sort_next_job_time := e_sch_data_in_b; -- Temporary bin
+				e_sort_next_job_midpid := e_sort_index;  -- Temporary bin	  
+				e_sort_index <= e_sort_index + 1;
+				if(e_sch_data_in_b(31 downto 0) > 0 and (e_last_scheduled /= e_sort_index)) then
+					e_sch_job_valid <= '1';
+				else
+					e_sch_job_valid <= '0';
+				end if;
+				ns_east_sorting_handler <= sort5;
+			when sort5 =>
+				if(e_sort_index /= 256) then
+					e_sch_addr_b <= e_sort_index;
+					ns_east_sorting_handler <= sort6;
+				else
+					e_sort_index <= 0;
+					ns_east_sorting_handler <= sort7;
+				end if;
+			when sort6 =>
+				if(e_sch_data_in_b < e_sort_next_job_time and (e_sch_data_in_b(31 downto 0) > 0) and  (e_last_scheduled /= e_sort_index)) then
+					e_sort_next_job_time := e_sch_data_in_b;
+					e_sort_next_job_midpid := e_sort_index;
+					e_sch_job_valid <= '1';
+				end if;
+				
+				e_sort_index <= e_sort_index + 1;
+				ns_east_sorting_handler <= sort5;
+			when sort7 =>
+				--Is there a new job request? Issue it, if so.
+				if(e_sch_req_next_job = '1' and e_sch_job_valid = '1') then
+					e_sch_next_job_time <= e_sort_next_job_time;
+					e_sch_next_job_midpid <= e_sort_next_job_midpid;
+					e_last_scheduled := e_sort_next_job_midpid;
+					e_sch_job_ready_set <= '1', '0' after 1 ns;
+				else
+					e_sch_job_ready_set <= '0';
+				end if;
+						
+				ns_east_sorting_handler <= wait_state;
+			when others =>
+				ns_east_sorting_handler <= start;
+		end case;
+	end process;
+	
+	--************************************************************************	
+	--s_sorting_handler - Handles all schedule sorting for South Port
+	--************************************************************************
+	s_sorting_handler:process(state_south_sorting_handler)
+		variable s_last_scheduled : natural range 0 to 2**address_size := 256;
+		variable s_sort_next_job_time : std_logic_vector(sch_size-1 downto 0);
+		variable s_sort_next_job_midpid : natural range 0 to 2**address_size-1;
+	begin
+		case state_south_sorting_handler is
+			when start =>
+				s_sch_wen_b <= '0';
+				s_sch_job_ready_set <= '0';
+				s_sch_purge_job_rst <= '0';
+				s_sch_table_purge <= '0';
+				s_sch_job_valid <= '0';
+			
+				ns_south_sorting_handler <= sort1;
+				
+			when wait_state =>
+				ns_south_sorting_handler <= sort1;
+			when sort1 =>
+				--Did job finish? Purge location in scheduler?
+				if(s_sch_purge_job = '1') then
+					s_sch_purge_job_rst <= '1', '0' after 1 ns;
+					s_sch_addr_b <= s_sch_purge_midpid;
+					s_sch_data_out_b <= "11111111111111111111111111111111";	
+					s_sch_table_purge <= '1';					
+					s_sch_wen_b <= '1';
+								
+					ns_south_sorting_handler <= sort2;
+				else
+					ns_south_sorting_handler <= sort3;
+				end if;
+			when sort2 =>
+				s_sch_wen_b <= '0';
+				s_sch_table_purge <= '0';
+				--Reset Signals
+				ns_south_sorting_handler <= wait_state;
+			when sort3 =>
+				if(s_sch_table_count > 0) then
+					s_sch_addr_b <= s_sort_index;
+					ns_south_sorting_handler <= sort4;
+				else
+					s_sort_index <= 0;
+					ns_south_sorting_handler <= wait_state;
+				end if;
+			when sort4 =>
+				--Take first item
+				s_sort_next_job_time := s_sch_data_in_b; -- Temporary bin
+				s_sort_next_job_midpid := s_sort_index;  -- Temporary bin	  
+				s_sort_index <= s_sort_index + 1;
+				if(s_sch_data_in_b(31 downto 0) > 0 and (s_last_scheduled /= s_sort_index)) then
+					s_sch_job_valid <= '1';
+				else
+					s_sch_job_valid <= '0';
+				end if;
+				ns_south_sorting_handler <= sort5;
+			when sort5 =>
+				if(s_sort_index /= 256) then
+					s_sch_addr_b <= s_sort_index;
+					ns_south_sorting_handler <= sort6;
+				else
+					s_sort_index <= 0;
+					ns_south_sorting_handler <= sort7;
+				end if;
+			when sort6 =>
+				if(s_sch_data_in_b < s_sort_next_job_time and (s_sch_data_in_b(31 downto 0) > 0) and  (s_last_scheduled /= s_sort_index)) then
+					s_sort_next_job_time := s_sch_data_in_b;
+					s_sort_next_job_midpid := s_sort_index;
+					s_sch_job_valid <= '1';
+				end if;
+				
+				s_sort_index <= s_sort_index + 1;
+				ns_south_sorting_handler <= sort5;
+			when sort7 =>
+				--Is there a new job request? Issue it, if so.
+				if(s_sch_req_next_job = '1' and s_sch_job_valid = '1') then
+					s_sch_next_job_time <= s_sort_next_job_time;
+					s_sch_next_job_midpid <= s_sort_next_job_midpid;
+					s_last_scheduled := s_sort_next_job_midpid;
+					s_sch_job_ready_set <= '1', '0' after 1 ns;
+				else
+					s_sch_job_ready_set <= '0';
+				end if;
+						
+				ns_south_sorting_handler <= wait_state;
+			when others =>
+				ns_south_sorting_handler <= start;
+		end case;
+	end process;
+	
+		
 	--************************************************************************	
 	--w_sorting_handler - Handles all schedule sorting for West Port
 	--************************************************************************

@@ -901,7 +901,7 @@ begin
 					n_sch_wen_a <= '1';
 										
 					ns_north_handler <= north5;
-				when west5 =>
+				when north5 =>
 					--Reset signals
 					n_rsv_wen_a <= '0';
 					n_sch_wen_a <= '0';
@@ -2386,6 +2386,12 @@ begin
 				injt_dataGood <= '0';
 				sw_rnaCtDeq <= '0';
 				
+				n_sch_departed_ack <= '0';
+				n_vcm_request_vcc_set <= '0';
+				e_sch_departed_ack <= '0';
+				e_vcm_request_vcc_set <= '0';
+				s_sch_departed_ack <= '0';
+				s_vcm_request_vcc_set <= '0';
 				w_sch_departed_ack <= '0';
 				w_vcm_request_vcc_set <= '0';
 				
@@ -2740,7 +2746,7 @@ begin
 					
 					ns_switch_handler <= injection_sw2;
 				else
-					ns_switch_handler <= depart_w_sw1;
+					ns_switch_handler <= depart_n_sw1;
 				end if;
 			when injection_sw2 =>
 			
@@ -2794,7 +2800,7 @@ begin
 					injt_dataGood <= '0';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					n_rst <= '1', '0' after 1 ns;
-					ns_switch_handler <= depart_w_sw1;
+					ns_switch_handler <= depart_n_sw1;
 				elsif(e_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
 					sw_injt_ack <= '1', '0' after 1 ns;
@@ -2802,7 +2808,7 @@ begin
 					injt_dataGood <= '0';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					e_rst <= '1', '0' after 1 ns;
-					ns_switch_handler <= depart_w_sw1;
+					ns_switch_handler <= depart_n_sw1;
 				elsif(s_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
 					sw_injt_ack <= '1', '0' after 1 ns;
@@ -2810,7 +2816,7 @@ begin
 					injt_dataGood <= '0';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					s_rst <= '1', '0' after 1 ns;
-					ns_switch_handler <= depart_w_sw1;
+					ns_switch_handler <= depart_n_sw1;
 				elsif(w_pkt_in_flg_set = '1') then
 					--Ack & Reset Signals
 					sw_injt_ack <= '1', '0' after 1 ns;
@@ -2818,10 +2824,225 @@ begin
 					injt_dataGood <= '0';
 					sw_rnaCtDeq <= '1', '0' after 1 ns;
 					w_rst <= '1', '0' after 1 ns;
-					ns_switch_handler <= depart_w_sw1;
+					ns_switch_handler <= depart_n_sw1;
 				else
 					ns_switch_handler <= injection_sw3;
 				end if;
+				
+			when depart_n_sw1 =>
+				if(sw_n_depart_toggle = '1') then
+					--Grab reservation table details
+					n_rsv_addr_b <= conv_integer(n_sch_next_job_midpid);
+					ns_switch_handler <= depart_n_sw2;
+				else
+					n_sch_departed_ack <= '0';
+					ns_switch_handler <= depart_e_sw1;
+				end if;
+			when depart_n_sw2 =>
+				--Control VCC Output
+				n_vcm_which_vcc_deq <= n_rsv_data_in_b(2 downto 0);
+				n_vcm_request_vcc_set <= '1', '0' after 1 ns;
+				ns_switch_handler <= depart_n_sw4;
+			when depart_n_sw3 =>
+				ns_switch_handler <= depart_n_sw4;
+			when depart_n_sw4 =>
+				if(n_vcm_request_vcc_done = '1') then
+					n_vcm_request_vcc_done_rst <= '1', '0' after 1 ns;
+					ns_switch_handler <= depart_n_sw5;
+				else
+					ns_switch_handler <= depart_n_sw3;
+				end if;
+			when depart_n_sw5 =>
+				--Control Switch to move Data Packet out
+				case n_rsv_data_in_b(2 downto 0) is
+					when "001" =>
+						n_vcm_which_vcell_deq <= "00";
+						sw_eSel <= "000"; 						--East
+					when "010" =>
+						n_vcm_which_vcell_deq <= "01";
+						sw_sSel <= "000";							--South
+					when "011" =>
+						n_vcm_which_vcell_deq <= "10";
+						sw_wSel <= "000";							--West
+					when "111" =>
+						w_vcm_which_vcell_deq <= "11";
+						sw_ejectSel <= "000";					--Ejection
+					when others =>
+						null;
+				end case;
+				ns_switch_handler <= depart_n_sw6;
+			when depart_n_sw6 =>
+				--Wait state
+				ns_switch_handler <= depart_n_sw7;
+			when depart_n_sw7 =>
+				--Check for ack
+				if(e_pkt_in_flg_set = '1') then
+					n_sch_departed_ack <= '1';
+					e_rst <= '1', '0' after 1 ns;
+					sw_eSel <= "000";
+					ns_switch_handler <= depart_n_sw8;
+				elsif(s_pkt_in_flg_set = '1') then
+					n_sch_departed_ack <= '1';
+					s_rst <= '1', '0' after 1 ns;
+					sw_sSel <= "000";
+					ns_switch_handler <= depart_n_sw8;
+				elsif(w_pkt_in_flg_set = '1') then
+					n_sch_departed_ack <= '1';
+					w_rst <= '1', '0' after 1 ns;
+					sw_wSel <= "000";
+					ns_switch_handler <= depart_n_sw8;
+				else
+					ns_switch_handler <= depart_n_sw6;
+				end if;
+			when depart_n_sw8 =>
+				--Dequeue
+				n_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				
+				ns_switch_handler <= depart_e_sw1;	
+
+			when depart_e_sw1 =>
+				if(sw_e_depart_toggle = '1') then
+					--Grab reservation table details
+					e_rsv_addr_b <= conv_integer(e_sch_next_job_midpid);
+					ns_switch_handler <= depart_e_sw2;
+				else
+					e_sch_departed_ack <= '0';
+					ns_switch_handler <= depart_s_sw1;
+				end if;
+			when depart_e_sw2 =>
+				--Control VCC Output
+				e_vcm_which_vcc_deq <= e_rsv_data_in_b(2 downto 0);
+				e_vcm_request_vcc_set <= '1', '0' after 1 ns;
+				ns_switch_handler <= depart_e_sw4;
+			when depart_e_sw3 =>
+				ns_switch_handler <= depart_e_sw4;
+			when depart_e_sw4 =>
+				if(e_vcm_request_vcc_done = '1') then
+					e_vcm_request_vcc_done_rst <= '1', '0' after 1 ns;
+					ns_switch_handler <= depart_e_sw5;
+				else
+					ns_switch_handler <= depart_e_sw3;
+				end if;
+			when depart_e_sw5 =>
+				--Control Switch to move Data Packet out
+				case e_rsv_data_in_b(2 downto 0) is
+					when "000" =>
+						e_vcm_which_vcell_deq <= "00";
+						sw_nSel <= "001"; 						--North
+					when "010" =>
+						e_vcm_which_vcell_deq <= "01";
+						sw_sSel <= "001";							--South
+					when "011" =>
+						e_vcm_which_vcell_deq <= "10";
+						sw_wSel <= "001";							--West
+					when "111" =>
+						e_vcm_which_vcell_deq <= "11";
+						sw_ejectSel <= "001";					--Ejection
+					when others =>
+						null;
+				end case;
+				ns_switch_handler <= depart_e_sw6;
+			when depart_e_sw6 =>
+				--Wait state
+				ns_switch_handler <= depart_e_sw7;
+			when depart_e_sw7 =>
+				--Check for ack
+				if(n_pkt_in_flg_set = '1') then
+					e_sch_departed_ack <= '1';
+					n_rst <= '1', '0' after 1 ns;
+					sw_nSel <= "000";
+					ns_switch_handler <= depart_e_sw8;
+				elsif(s_pkt_in_flg_set = '1') then
+					e_sch_departed_ack <= '1';
+					s_rst <= '1', '0' after 1 ns;
+					sw_sSel <= "000";
+					ns_switch_handler <= depart_e_sw8;
+				elsif(w_pkt_in_flg_set = '1') then
+					e_sch_departed_ack <= '1';
+					w_rst <= '1', '0' after 1 ns;
+					sw_wSel <= "000";
+					ns_switch_handler <= depart_e_sw8;
+				else
+					ns_switch_handler <= depart_e_sw6;
+				end if;
+			when depart_e_sw8 =>
+				--Dequeue
+				e_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				
+				ns_switch_handler <= depart_s_sw1;	
+
+
+			when depart_s_sw1 =>
+				if(sw_s_depart_toggle = '1') then
+					--Grab reservation table details
+					s_rsv_addr_b <= conv_integer(s_sch_next_job_midpid);
+					ns_switch_handler <= depart_s_sw2;
+				else
+					s_sch_departed_ack <= '0';
+					ns_switch_handler <= depart_w_sw1;
+				end if;
+			when depart_s_sw2 =>
+				--Control VCC Output
+				s_vcm_which_vcc_deq <= s_rsv_data_in_b(2 downto 0);
+				s_vcm_request_vcc_set <= '1', '0' after 1 ns;
+				ns_switch_handler <= depart_s_sw4;
+			when depart_s_sw3 =>
+				ns_switch_handler <= depart_s_sw4;
+			when depart_s_sw4 =>
+				if(s_vcm_request_vcc_done = '1') then
+					s_vcm_request_vcc_done_rst <= '1', '0' after 1 ns;
+					ns_switch_handler <= depart_s_sw5;
+				else
+					ns_switch_handler <= depart_s_sw3;
+				end if;
+			when depart_s_sw5 =>
+				--Control Switch to move Data Packet out
+				case s_rsv_data_in_b(2 downto 0) is
+					when "000" =>
+						s_vcm_which_vcell_deq <= "00";
+						sw_nSel <= "010"; 						--North
+					when "001" =>
+						s_vcm_which_vcell_deq <= "01";
+						sw_eSel <= "010";							--East
+					when "011" =>
+						s_vcm_which_vcell_deq <= "10";
+						sw_wSel <= "010";							--West
+					when "111" =>
+						s_vcm_which_vcell_deq <= "11";
+						sw_ejectSel <= "010";					--Ejection
+					when others =>
+						null;
+				end case;
+				ns_switch_handler <= depart_s_sw6;
+			when depart_s_sw6 =>
+				--Wait state
+				ns_switch_handler <= depart_s_sw7;
+			when depart_s_sw7 =>
+				--Check for ack
+				if(n_pkt_in_flg_set = '1') then
+					s_sch_departed_ack <= '1';
+					n_rst <= '1', '0' after 1 ns;
+					sw_nSel <= "000";
+					ns_switch_handler <= depart_s_sw8;
+				elsif(e_pkt_in_flg_set = '1') then
+					s_sch_departed_ack <= '1';
+					e_rst <= '1', '0' after 1 ns;
+					sw_eSel <= "000";
+					ns_switch_handler <= depart_s_sw8;
+				elsif(w_pkt_in_flg_set = '1') then
+					s_sch_departed_ack <= '1';
+					w_rst <= '1', '0' after 1 ns;
+					sw_wSel <= "000";
+					ns_switch_handler <= depart_s_sw8;
+				else
+					ns_switch_handler <= depart_s_sw6;
+				end if;
+			when depart_s_sw8 =>
+				--Dequeue
+				s_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				
+				ns_switch_handler <= depart_w_sw1;
+				
 			when depart_w_sw1 =>
 				if(sw_w_depart_toggle = '1') then
 					--Grab reservation table details

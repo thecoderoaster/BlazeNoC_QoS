@@ -2828,7 +2828,7 @@ begin
 				else
 					ns_switch_handler <= injection_sw3;
 				end if;
-				
+--NORTH
 			when depart_n_sw1 =>
 				if(sw_n_depart_toggle = '1') then
 					--Grab reservation table details
@@ -2879,7 +2879,7 @@ begin
 				if(e_pkt_in_flg_set = '1') then
 					n_sch_departed_ack <= '1';
 					e_rst <= '1', '0' after 1 ns;
-					sw_eSel <= "000";
+					sw_eSel <= "000";								--CHANGE TO AN UNDEFINED VALUE
 					ns_switch_handler <= depart_n_sw8;
 				elsif(s_pkt_in_flg_set = '1') then
 					n_sch_departed_ack <= '1';
@@ -2899,7 +2899,7 @@ begin
 				n_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				
 				ns_switch_handler <= depart_e_sw1;	
-
+--EAST
 			when depart_e_sw1 =>
 				if(sw_e_depart_toggle = '1') then
 					--Grab reservation table details
@@ -2970,8 +2970,7 @@ begin
 				e_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				
 				ns_switch_handler <= depart_s_sw1;	
-
-
+--SOUTH
 			when depart_s_sw1 =>
 				if(sw_s_depart_toggle = '1') then
 					--Grab reservation table details
@@ -3042,7 +3041,7 @@ begin
 				s_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				
 				ns_switch_handler <= depart_w_sw1;
-				
+--WEST
 			when depart_w_sw1 =>
 				if(sw_w_depart_toggle = '1') then
 					--Grab reservation table details

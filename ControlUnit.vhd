@@ -3255,6 +3255,90 @@ begin
 	end process;
 	
 	--************************************************************************
+	--north_sch_signal_purge: Handles purge signal for north
+	--************************************************************************
+	north_sch_signal_purge:process(n_sch_purge_job_rst, n_sch_purge_job_set)
+	begin
+		if(n_sch_purge_job_rst = '1') then
+			n_sch_purge_job <= '0';
+		end if;
+		
+		if(n_sch_purge_job_set = '1') then
+			n_sch_purge_job <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--north_sch_signal_ready: Handles job ready signal for north
+	--************************************************************************
+	north_sch_signal_ready:process(n_sch_job_ready_rst, n_sch_job_ready_set)
+	begin
+		if(n_sch_job_ready_rst = '1') then
+			n_sch_job_ready <= '0';
+		end if;
+		
+		if(n_sch_job_ready_set = '1') then
+			n_sch_job_ready <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--east_sch_signal_purge: Handles purge signal for east
+	--************************************************************************
+	east_sch_signal_purge:process(e_sch_purge_job_rst, e_sch_purge_job_set)
+	begin
+		if(e_sch_purge_job_rst = '1') then
+			e_sch_purge_job <= '0';
+		end if;
+		
+		if(e_sch_purge_job_set = '1') then
+			e_sch_purge_job <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--east_sch_signal_ready: Handles job ready signal for east
+	--************************************************************************
+	east_sch_signal_ready:process(e_sch_job_ready_rst, e_sch_job_ready_set)
+	begin
+		if(e_sch_job_ready_rst = '1') then
+			e_sch_job_ready <= '0';
+		end if;
+		
+		if(e_sch_job_ready_set = '1') then
+			e_sch_job_ready <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--south_sch_signal_purge: Handles purge signal for south
+	--************************************************************************
+	south_sch_signal_purge:process(s_sch_purge_job_rst, s_sch_purge_job_set)
+	begin
+		if(s_sch_purge_job_rst = '1') then
+			s_sch_purge_job <= '0';
+		end if;
+		
+		if(s_sch_purge_job_set = '1') then
+			s_sch_purge_job <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
+	--south_sch_signal_ready: Handles job ready signal for south
+	--************************************************************************
+	south_sch_signal_ready:process(s_sch_job_ready_rst, s_sch_job_ready_set)
+	begin
+		if(s_sch_job_ready_rst = '1') then
+			s_sch_job_ready <= '0';
+		end if;
+		
+		if(s_sch_job_ready_set = '1') then
+			s_sch_job_ready <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************
 	--west_sch_signal_purge: Handles purge signal for west
 	--************************************************************************
 	west_sch_signal_purge:process(w_sch_purge_job_rst, w_sch_purge_job_set)

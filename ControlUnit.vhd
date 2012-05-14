@@ -219,9 +219,9 @@ end ControlUnit;
 
 architecture Behavioral of ControlUnit is
 	type state_type is (start, wait_state,
-							  north1, north2, north3, north4, north5, north6, north7, north8, north9, north10, north11,
-							  east1, east2, east3, east4, east5, east6, east7, east8, east9, east10, east11,
-							  south1, south2, south3, south4, south5, south6, south7, south8, south9, south10, south11,
+							  north1, north2, north3, north4, north5, north6, north7, north8, north9, north10, north11, north12, north13,
+							  east1, east2, east3, east4, east5, east6, east7, east8, east9, east10, east11, east12, east13,
+							  south1, south2, south3, south4, south5, south6, south7, south8, south9, south10, south11, south12, south13,
 							  west1, west2, west3, west4, west5, west6, west7, west8, west9, west10, west11, west12, west13,
 							  injection1, injection2, injection3, injection4, injection5,
 							  north_sw1, north_sw2, north_sw3, north_sw4,
@@ -414,6 +414,9 @@ architecture Behavioral of ControlUnit is
 	signal sw_s_rna_toggle : std_logic;
 	signal sw_w_rna_toggle : std_logic;
 	
+	signal sw_n_depart_toggle : std_logic;
+	signal sw_e_depart_toggle : std_logic;
+	signal sw_s_depart_toggle : std_logic;
 	signal sw_w_depart_toggle : std_logic;
 	
 	signal sw_injt_pkt 		: std_logic_vector (pkt_size downto 0);
@@ -2360,11 +2363,8 @@ begin
 				sw_s_rna_ack <= '0';
 				sw_w_rna_ack <= '0';
 				
-				n_vc_deq <= '0';
 				n_vc_strq <= '0';
-				e_vc_deq <= '0';
 				e_vc_strq <= '0';
-				s_vc_deq <= '0';
 				s_vc_strq <= '0';
 				w_vc_strq <= '0';
 				
@@ -3367,6 +3367,535 @@ begin
 	end process;
 	
 	--************************************************************************
+	--north_vcm_handler: Manages VCC enqueues and dequeues made along with shifting
+	--************************************************************************
+	north_vcm_handler:process(state_northvc_handler)
+	variable countCell0: natural range 0 to 63 := 0;
+	variable countCell1: natural range 0 to 63 := 0;
+	variable countCell2: natural range 0 to 63 := 0;
+	variable countCell3: natural range 0 to 63 := 0;
+	variable shift: natural range 0 to 63 := 0;
+	type lut_type is array(0 to 2**address_size-1) of
+		natural range 0 to 63;
+	type arrival_type is array(0 to 2**address_size-1) of
+		std_logic_vector(4 downto 0);
+	variable vcc_lut: lut_type;
+	variable vcc_arrived : arrival_type;
+	
+	begin
+		case state_northvc_handler is
+			when start =>
+				n_vcm_req_complete_set <= '0';
+				n_vcm_enq_complete_set <= '0';
+				n_vc_circEn <= '0';
+				n_vc_directEnq <= '0';
+				n_vc_deq <= '0';
+				n_vcm_enq_rst <= '0';
+				n_vcm_deq_rst <= '0';
+				n_vcm_shift_rst <= '0';
+				
+				ns_northvc_handler <= wait_state;
+			when wait_state =>
+				n_vc_deq <= '0';
+				n_vc_circEn <= '0';
+				ns_northvc_handler <= vcc_output_request1;
+			when vcc_output_request1 =>
+				if(n_vcm_request_vcc = '1') then
+					n_vcm_request_vcc_rst <= '1', '0' after 1 ns;
+					case n_vcm_which_vcc_deq(2 downto 0) is
+						when "001" =>
+							n_vc_rnaSelO <= "00";					--East
+						when "010" =>
+							n_vc_rnaSelO <= "01";					--South
+						when "011" =>
+							n_vc_rnaSelO <= "10";					--West
+						when "111" =>
+							n_vc_rnaSelO <= "11";					--Ejection
+						when others =>
+							null;
+					end case;
+					n_vcm_request_vcc_done_set <= '1', '0' after 1 ns;
+				end if;
+				ns_northvc_handler <= enqueue_occurred1;
+			when enqueue_occurred1 =>
+				if(n_vcm_enq = '1') then
+					--Reset
+					n_vcm_enq_rst <= '1', '0' after 1 ns;
+					
+					--Update Count
+					case n_vcm_which_vcell_enq is
+						when "00" =>
+							countCell0 := countCell0 + 1;
+							vcc_lut(n_vcm_pkt_pidgid) := countCell0 - 1;
+							vcc_arrived(n_vcm_pkt_pidgid) := '1' & n_vcm_pkt_priority & n_vcm_which_vcc_enq;
+						when "01" =>
+							countCell1 := countCell1 + 1;
+							vcc_lut(n_vcm_pkt_pidgid) := countCell1 - 1;
+							vcc_arrived(n_vcm_pkt_pidgid) := '1' & n_vcm_pkt_priority & n_vcm_which_vcc_enq;
+						when "10" =>
+							countCell2 := countCell2 + 1;
+							vcc_lut(n_vcm_pkt_pidgid) := countCell2 - 1;
+							vcc_arrived(n_vcm_pkt_pidgid) := '1' & n_vcm_pkt_priority & n_vcm_which_vcc_enq;
+						when "11" =>
+							countCell3 := countCell3 + 1;
+							vcc_lut(n_vcm_pkt_pidgid) := countCell3 - 1;
+							vcc_arrived(n_vcm_pkt_pidgid) := '1' & n_vcm_pkt_priority & n_vcm_which_vcc_enq;
+						when others =>
+							null;
+					end case;
+					
+					n_vcm_enq_complete_set <= '1', '0' after 1 ns;
+				end if;
+				ns_northvc_handler <= dequeue_occurred1;
+			when dequeue_occurred1 =>
+				if(n_vcm_deq = '1') then
+					--Dequeue
+					n_vc_deq <= '1', '0' after 1 ns;
+					
+					--Reset signals
+					n_vcm_deq_rst <= '1', '0' after 1 ns;
+					
+					--Update Count
+					case n_vcm_which_vcell_deq(1 downto 0) is
+						when "00" =>
+							countCell0 := countCell0 - 1;
+						when "01" =>
+							countCell1 := countCell1 - 1;
+						when "10" =>
+							countCell2 := countCell2 - 1;
+						when "11" =>
+							countCell3 := countCell3 - 1;
+						when others =>
+							null;
+					end case;
+					ns_northvc_handler <= dequeue_occurred2;
+				else
+					ns_northvc_handler <= packet_status1;
+				end if;
+			when dequeue_occurred2 =>
+				for i in vcc_lut'range loop
+					if(vcc_lut(i) = 0) then
+						vcc_arrived(i) := "00000";				-- Remove
+					else
+						vcc_lut(i) := vcc_lut(i) - 1;
+					end if;
+				end loop;
+				ns_northvc_handler <= packet_status1;
+			when packet_status1 =>
+				if(n_vcm_req_pkt_status = '1') then
+					n_vcm_req_pkt_arrived <= vcc_arrived(n_vcm_req_pkt)(4);
+					n_vcm_shift_cell <= vcc_arrived(n_vcm_req_pkt)(2 downto 0);
+					n_vcm_req_complete_set <= '1', '0' after 1 ns;
+					ns_northvc_handler <= shift_request1;
+				else
+					ns_northvc_handler <= shift_request1;
+				end if;
+			when shift_request1 =>
+				if(n_vcm_shift = '1') then
+					n_vc_rnaSelO <=  n_vcm_which_vcell_to_shift(1 downto 0);
+					n_vcm_shift_rst <= '1', '0' after 1 ns;
+					ns_northvc_handler <= shift_start1;
+				else
+					ns_northvc_handler <= wait_state;
+				end if;
+			when shift_start1 =>	
+				if(vcc_lut(n_vcm_req_pkt) = 0) then
+					n_vcm_shift_complete_set <= '1', '0' after 1 ns;
+					ns_northvc_handler <= wait_state;
+				else
+					--Start Shifting
+					n_vc_circEn <= '1';
+					ns_northvc_handler <= shift_start2;
+				end if;
+			when shift_start2 =>
+				n_vc_deq <= '0';
+				n_vc_directEnq <= '1';
+				ns_northvc_handler <= shift_start3;
+			when shift_start3 =>
+				n_vc_directEnq <= '0';
+				n_vc_deq <= '1';
+				ns_northvc_handler <= shift_start4;
+			when shift_start4 =>
+				n_vc_deq <= '0';
+				--Shift contents in table down by 1
+				for i in vcc_lut'range loop
+					if(vcc_lut(i) = 0) then
+						case n_vcm_which_vcell_to_shift(1 downto 0) is
+							when "00" =>
+								vcc_lut(i) := countCell0 - 1;				-- send to the back of the queue
+							when "01" =>
+								vcc_lut(i) := countCell1 - 1;				-- send to the back of the queue
+							when "10" =>
+								vcc_lut(i) := countCell2 - 1;				-- send to the back of the queue
+							when "11" =>
+								vcc_lut(i) := countCell3 - 1;				-- send to the back of the queue
+							when others =>
+								null;
+						end case;
+					else
+						vcc_lut(i) := vcc_lut(i) - 1;				-- everyone else...
+					end if;
+				end loop;
+				ns_northvc_handler <= shift_start1;
+			when others =>
+				ns_northvc_handler <= start;
+			end case;
+	end process;
+	
+	--************************************************************************
+	--east_vcm_handler: Manages VCC enqueues and dequeues made along with shifting
+	--************************************************************************
+	east_vcm_handler:process(state_eastvc_handler)
+	variable countCell0: natural range 0 to 63 := 0;
+	variable countCell1: natural range 0 to 63 := 0;
+	variable countCell2: natural range 0 to 63 := 0;
+	variable countCell3: natural range 0 to 63 := 0;
+	variable shift: natural range 0 to 63 := 0;
+	type lut_type is array(0 to 2**address_size-1) of
+		natural range 0 to 63;
+	type arrival_type is array(0 to 2**address_size-1) of
+		std_logic_vector(4 downto 0);
+	variable vcc_lut: lut_type;
+	variable vcc_arrived : arrival_type;
+	
+	begin
+		case state_eastvc_handler is
+			when start =>
+				e_vcm_req_complete_set <= '0';
+				e_vcm_enq_complete_set <= '0';
+				e_vc_circEn <= '0';
+				e_vc_directEnq <= '0';
+				e_vc_deq <= '0';
+				e_vcm_enq_rst <= '0';
+				e_vcm_deq_rst <= '0';
+				e_vcm_shift_rst <= '0';
+				
+				ns_eastvc_handler <= wait_state;
+			when wait_state =>
+				e_vc_deq <= '0';
+				e_vc_circEn <= '0';
+				ns_eastvc_handler <= vcc_output_request1;
+			when vcc_output_request1 =>
+				if(e_vcm_request_vcc = '1') then
+					e_vcm_request_vcc_rst <= '1', '0' after 1 ns;
+					case e_vcm_which_vcc_deq(2 downto 0) is
+						when "000" =>
+							e_vc_rnaSelO <= "00";					--North
+						when "010" =>
+							e_vc_rnaSelO <= "01";					--South
+						when "011" =>
+							e_vc_rnaSelO <= "10";					--West
+						when "111" =>
+							e_vc_rnaSelO <= "11";					--Ejection
+						when others =>
+							null;
+					end case;
+					e_vcm_request_vcc_done_set <= '1', '0' after 1 ns;
+				end if;
+				ns_eastvc_handler <= enqueue_occurred1;
+			when enqueue_occurred1 =>
+				if(e_vcm_enq = '1') then
+					--Reset
+					e_vcm_enq_rst <= '1', '0' after 1 ns;
+					
+					--Update Count
+					case e_vcm_which_vcell_enq is
+						when "00" =>
+							countCell0 := countCell0 + 1;
+							vcc_lut(e_vcm_pkt_pidgid) := countCell0 - 1;
+							vcc_arrived(e_vcm_pkt_pidgid) := '1' & e_vcm_pkt_priority & e_vcm_which_vcc_enq;
+						when "01" =>
+							countCell1 := countCell1 + 1;
+							vcc_lut(e_vcm_pkt_pidgid) := countCell1 - 1;
+							vcc_arrived(e_vcm_pkt_pidgid) := '1' & e_vcm_pkt_priority & e_vcm_which_vcc_enq;
+						when "10" =>
+							countCell2 := countCell2 + 1;
+							vcc_lut(e_vcm_pkt_pidgid) := countCell2 - 1;
+							vcc_arrived(e_vcm_pkt_pidgid) := '1' & e_vcm_pkt_priority & e_vcm_which_vcc_enq;
+						when "11" =>
+							countCell3 := countCell3 + 1;
+							vcc_lut(e_vcm_pkt_pidgid) := countCell3 - 1;
+							vcc_arrived(e_vcm_pkt_pidgid) := '1' & e_vcm_pkt_priority & e_vcm_which_vcc_enq;
+						when others =>
+							null;
+					end case;
+					
+					e_vcm_enq_complete_set <= '1', '0' after 1 ns;
+				end if;
+				ns_eastvc_handler <= dequeue_occurred1;
+			when dequeue_occurred1 =>
+				if(e_vcm_deq = '1') then
+					--Dequeue
+					e_vc_deq <= '1', '0' after 1 ns;
+					
+					--Reset signals
+					e_vcm_deq_rst <= '1', '0' after 1 ns;
+					
+					--Update Count
+					case e_vcm_which_vcell_deq(1 downto 0) is
+						when "00" =>
+							countCell0 := countCell0 - 1;
+						when "01" =>
+							countCell1 := countCell1 - 1;
+						when "10" =>
+							countCell2 := countCell2 - 1;
+						when "11" =>
+							countCell3 := countCell3 - 1;
+						when others =>
+							null;
+					end case;
+					ns_eastvc_handler <= dequeue_occurred2;
+				else
+					ns_eastvc_handler <= packet_status1;
+				end if;
+			when dequeue_occurred2 =>
+				for i in vcc_lut'range loop
+					if(vcc_lut(i) = 0) then
+						vcc_arrived(i) := "00000";				-- Remove
+					else
+						vcc_lut(i) := vcc_lut(i) - 1;
+					end if;
+				end loop;
+				ns_eastvc_handler <= packet_status1;
+			when packet_status1 =>
+				if(e_vcm_req_pkt_status = '1') then
+					e_vcm_req_pkt_arrived <= vcc_arrived(e_vcm_req_pkt)(4);
+					e_vcm_shift_cell <= vcc_arrived(e_vcm_req_pkt)(2 downto 0);
+					e_vcm_req_complete_set <= '1', '0' after 1 ns;
+					ns_eastvc_handler <= shift_request1;
+				else
+					ns_eastvc_handler <= shift_request1;
+				end if;
+			when shift_request1 =>
+				if(e_vcm_shift = '1') then
+					e_vc_rnaSelO <=  e_vcm_which_vcell_to_shift(1 downto 0);
+					e_vcm_shift_rst <= '1', '0' after 1 ns;
+					ns_eastvc_handler <= shift_start1;
+				else
+					ns_eastvc_handler <= wait_state;
+				end if;
+			when shift_start1 =>	
+				if(vcc_lut(e_vcm_req_pkt) = 0) then
+					e_vcm_shift_complete_set <= '1', '0' after 1 ns;
+					ns_eastvc_handler <= wait_state;
+				else
+					--Start Shifting
+					e_vc_circEn <= '1';
+					ns_eastvc_handler <= shift_start2;
+				end if;
+			when shift_start2 =>
+				e_vc_deq <= '0';
+				e_vc_directEnq <= '1';
+				ns_eastvc_handler <= shift_start3;
+			when shift_start3 =>
+				e_vc_directEnq <= '0';
+				e_vc_deq <= '1';
+				ns_eastvc_handler <= shift_start4;
+			when shift_start4 =>
+				e_vc_deq <= '0';
+				--Shift contents in table down by 1
+				for i in vcc_lut'range loop
+					if(vcc_lut(i) = 0) then
+						case e_vcm_which_vcell_to_shift(1 downto 0) is
+							when "00" =>
+								vcc_lut(i) := countCell0 - 1;				-- send to the back of the queue
+							when "01" =>
+								vcc_lut(i) := countCell1 - 1;				-- send to the back of the queue
+							when "10" =>
+								vcc_lut(i) := countCell2 - 1;				-- send to the back of the queue
+							when "11" =>
+								vcc_lut(i) := countCell3 - 1;				-- send to the back of the queue
+							when others =>
+								null;
+						end case;
+					else
+						vcc_lut(i) := vcc_lut(i) - 1;				-- everyone else...
+					end if;
+				end loop;
+				ns_eastvc_handler <= shift_start1;
+			when others =>
+				ns_eastvc_handler <= start;
+			end case;
+	end process;
+	
+	--************************************************************************
+	--south_vcm_handler: Manages VCC enqueues and dequeues made along with shifting
+	--************************************************************************
+	south_vcm_handler:process(state_southvc_handler)
+	variable countCell0: natural range 0 to 63 := 0;
+	variable countCell1: natural range 0 to 63 := 0;
+	variable countCell2: natural range 0 to 63 := 0;
+	variable countCell3: natural range 0 to 63 := 0;
+	variable shift: natural range 0 to 63 := 0;
+	type lut_type is array(0 to 2**address_size-1) of
+		natural range 0 to 63;
+	type arrival_type is array(0 to 2**address_size-1) of
+		std_logic_vector(4 downto 0);
+	variable vcc_lut: lut_type;
+	variable vcc_arrived : arrival_type;
+	
+	begin
+		case state_southvc_handler is
+			when start =>
+				s_vcm_req_complete_set <= '0';
+				s_vcm_enq_complete_set <= '0';
+				s_vc_circEn <= '0';
+				s_vc_directEnq <= '0';
+				s_vc_deq <= '0';
+				s_vcm_enq_rst <= '0';
+				s_vcm_deq_rst <= '0';
+				s_vcm_shift_rst <= '0';
+				
+				ns_southvc_handler <= wait_state;
+			when wait_state =>
+				s_vc_deq <= '0';
+				s_vc_circEn <= '0';
+				ns_southvc_handler <= vcc_output_request1;
+			when vcc_output_request1 =>
+				if(s_vcm_request_vcc = '1') then
+					s_vcm_request_vcc_rst <= '1', '0' after 1 ns;
+					case s_vcm_which_vcc_deq(2 downto 0) is
+						when "000" =>
+							s_vc_rnaSelO <= "00";					--North
+						when "001" =>
+							s_vc_rnaSelO <= "01";					--East
+						when "011" =>
+							s_vc_rnaSelO <= "10";					--West
+						when "111" =>
+							s_vc_rnaSelO <= "11";					--Ejection
+						when others =>
+							null;
+					end case;
+					s_vcm_request_vcc_done_set <= '1', '0' after 1 ns;
+				end if;
+				ns_southvc_handler <= enqueue_occurred1;
+			when enqueue_occurred1 =>
+				if(s_vcm_enq = '1') then
+					--Reset
+					s_vcm_enq_rst <= '1', '0' after 1 ns;
+					
+					--Update Count
+					case s_vcm_which_vcell_enq is
+						when "00" =>
+							countCell0 := countCell0 + 1;
+							vcc_lut(s_vcm_pkt_pidgid) := countCell0 - 1;
+							vcc_arrived(s_vcm_pkt_pidgid) := '1' & s_vcm_pkt_priority & s_vcm_which_vcc_enq;
+						when "01" =>
+							countCell1 := countCell1 + 1;
+							vcc_lut(s_vcm_pkt_pidgid) := countCell1 - 1;
+							vcc_arrived(s_vcm_pkt_pidgid) := '1' & s_vcm_pkt_priority & s_vcm_which_vcc_enq;
+						when "10" =>
+							countCell2 := countCell2 + 1;
+							vcc_lut(s_vcm_pkt_pidgid) := countCell2 - 1;
+							vcc_arrived(s_vcm_pkt_pidgid) := '1' & s_vcm_pkt_priority & s_vcm_which_vcc_enq;
+						when "11" =>
+							countCell3 := countCell3 + 1;
+							vcc_lut(s_vcm_pkt_pidgid) := countCell3 - 1;
+							vcc_arrived(s_vcm_pkt_pidgid) := '1' & s_vcm_pkt_priority & s_vcm_which_vcc_enq;
+						when others =>
+							null;
+					end case;
+					
+					s_vcm_enq_complete_set <= '1', '0' after 1 ns;
+				end if;
+				ns_southvc_handler <= dequeue_occurred1;
+			when dequeue_occurred1 =>
+				if(s_vcm_deq = '1') then
+					--Dequeue
+					s_vc_deq <= '1', '0' after 1 ns;
+					
+					--Reset signals
+					s_vcm_deq_rst <= '1', '0' after 1 ns;
+					
+					--Update Count
+					case s_vcm_which_vcell_deq(1 downto 0) is
+						when "00" =>
+							countCell0 := countCell0 - 1;
+						when "01" =>
+							countCell1 := countCell1 - 1;
+						when "10" =>
+							countCell2 := countCell2 - 1;
+						when "11" =>
+							countCell3 := countCell3 - 1;
+						when others =>
+							null;
+					end case;
+					ns_southvc_handler <= dequeue_occurred2;
+				else
+					ns_southvc_handler <= packet_status1;
+				end if;
+			when dequeue_occurred2 =>
+				for i in vcc_lut'range loop
+					if(vcc_lut(i) = 0) then
+						vcc_arrived(i) := "00000";				-- Remove
+					else
+						vcc_lut(i) := vcc_lut(i) - 1;
+					end if;
+				end loop;
+				ns_southvc_handler <= packet_status1;
+			when packet_status1 =>
+				if(s_vcm_req_pkt_status = '1') then
+					s_vcm_req_pkt_arrived <= vcc_arrived(s_vcm_req_pkt)(4);
+					s_vcm_shift_cell <= vcc_arrived(s_vcm_req_pkt)(2 downto 0);
+					s_vcm_req_complete_set <= '1', '0' after 1 ns;
+					ns_southvc_handler <= shift_request1;
+				else
+					ns_southvc_handler <= shift_request1;
+				end if;
+			when shift_request1 =>
+				if(s_vcm_shift = '1') then
+					s_vc_rnaSelO <=  s_vcm_which_vcell_to_shift(1 downto 0);
+					s_vcm_shift_rst <= '1', '0' after 1 ns;
+					ns_southvc_handler <= shift_start1;
+				else
+					ns_southvc_handler <= wait_state;
+				end if;
+			when shift_start1 =>	
+				if(vcc_lut(s_vcm_req_pkt) = 0) then
+					s_vcm_shift_complete_set <= '1', '0' after 1 ns;
+					ns_southvc_handler <= wait_state;
+				else
+					--Start Shifting
+					s_vc_circEn <= '1';
+					ns_southvc_handler <= shift_start2;
+				end if;
+			when shift_start2 =>
+				s_vc_deq <= '0';
+				s_vc_directEnq <= '1';
+				ns_southvc_handler <= shift_start3;
+			when shift_start3 =>
+				s_vc_directEnq <= '0';
+				s_vc_deq <= '1';
+				ns_southvc_handler <= shift_start4;
+			when shift_start4 =>
+				s_vc_deq <= '0';
+				--Shift contents in table down by 1
+				for i in vcc_lut'range loop
+					if(vcc_lut(i) = 0) then
+						case s_vcm_which_vcell_to_shift(1 downto 0) is
+							when "00" =>
+								vcc_lut(i) := countCell0 - 1;				-- send to the back of the queue
+							when "01" =>
+								vcc_lut(i) := countCell1 - 1;				-- send to the back of the queue
+							when "10" =>
+								vcc_lut(i) := countCell2 - 1;				-- send to the back of the queue
+							when "11" =>
+								vcc_lut(i) := countCell3 - 1;				-- send to the back of the queue
+							when others =>
+								null;
+						end case;
+					else
+						vcc_lut(i) := vcc_lut(i) - 1;				-- everyone else...
+					end if;
+				end loop;
+				ns_southvc_handler <= shift_start1;
+			when others =>
+				ns_southvc_handler <= start;
+			end case;
+	end process;
+	
+	
+	--************************************************************************
 	--west_vcm_handler: Manages VCC enqueues and dequeues made along with shifting
 	--************************************************************************
 	west_vcm_handler:process(state_westvc_handler)
@@ -3542,6 +4071,408 @@ begin
 			end case;
 	end process;
 	
+	--************************************************************************************
+	--north_vcm_enq_signals: Handles VCC enqueue signals from VCM (Virtual Channel Manager)
+	--************************************************************************************
+	north_vcm_enq_signals:process(n_vcm_enq_rst, n_vcm_enq_set)
+	begin
+		if(n_vcm_enq_rst = '1') then
+			n_vcm_enq <= '0';
+		end if;
+		
+		--An item has been enqueued from the VCC buffer (update the global count)
+		if(n_vcm_enq_set = '1') then
+			n_vcm_enq <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--north_vcm_enq_complete: Notifies listeners that enqueue is complete from (Virtual Channel Manager)
+	--************************************************************************************
+	north_vcm_enq_complete:process(n_vcm_enq_complete_rst, n_vcm_enq_complete_set)
+	begin
+		if(n_vcm_enq_complete_rst = '1') then
+			n_vcm_enq_complete <= '0';
+		end if;
+		
+		--Enqueue has completed.
+		if(n_vcm_enq_complete_set = '1') then
+			n_vcm_enq_complete <= '1';
+		end if;
+	end process;
+
+	--************************************************************************************
+	--north_vcm_deq_signals: Handles VCC dequeue signals from VCM (Virtual Channel Manager)
+	--************************************************************************************
+	north_vcm_deq_signals:process(n_vcm_deq_rst, n_vcm_deq_set)
+	begin
+		if(n_vcm_deq_rst = '1') then
+			n_vcm_deq <= '0';
+		end if;
+				
+		--An item has been dequeued from the VCC buffer (update the global count)
+		if(n_vcm_deq_set = '1') then
+			n_vcm_deq <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--north_vcm_request_vcc: Handles setting the VCC output signals
+	--************************************************************************************
+	north_vcm_request_vcc:process(n_vcm_request_vcc_rst, n_vcm_request_vcc_set)
+	begin
+		if(n_vcm_request_vcc_rst = '1') then
+			n_vcm_request_vcc <= '0';
+		end if;
+		
+		if(n_vcm_request_vcc_set = '1') then
+			n_vcm_request_vcc <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--north_vcm_request_vcc_done: Handles setting the VCC output completion signals
+	--************************************************************************************
+	north_vcm_request_vcc_done:process(n_vcm_request_vcc_done_set, n_vcm_request_vcc_done_set)
+	begin
+		if(n_vcm_request_vcc_done_rst = '1') then
+			n_vcm_request_vcc_done <= '0';
+		end if;
+		
+		if(n_vcm_request_vcc_done_set = '1') then
+			n_vcm_request_vcc_done <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************************
+	--north_vcm_signal_shift_start: Handles VCC start shift signals from VCM (Virtual Channel Manager)
+	--***********************************************************************************************
+	north_vcm_signal_shift_start:process(n_vcm_shift_rst, n_vcm_shift_set)
+	begin
+		if(n_vcm_shift_rst = '1') then
+			n_vcm_shift <= '0';
+		end if;
+		
+		--Shifting Request
+		if(n_vcm_shift_set = '1') then
+			n_vcm_shift <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************
+	--north_vcm_signal_shift_complete: Manages packet information request from VCC manager
+	--***********************************************************************************
+	north_vcm_shift_complete:process(n_vcm_shift_complete_rst, n_vcm_shift_complete_set)
+	begin
+		if(n_vcm_shift_complete_rst = '1') then
+			n_vcm_shift_complete <= '0';
+		end if;
+		
+		--Determine if the data packet has arrived...
+		if(n_vcm_shift_complete_set = '1') then
+			n_vcm_shift_complete <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************
+	--north_vcm_signal_req_pkt_status: Manages packet information request from VCC manager
+	--***********************************************************************************
+	north_vcm_signal_req_pkt_status:process(n_vcm_req_pkt_status_rst, n_vcm_req_pkt_status_set)
+	begin
+		if(n_vcm_req_pkt_status_rst = '1') then
+			n_vcm_req_pkt_status <= '0';
+		end if;
+		
+		--Determine if the data packet has arrived...
+		if(n_vcm_req_pkt_status_set = '1') then
+			n_vcm_req_pkt_status <= '1';
+		end if;
+	end process;
+	
+	
+	--***********************************************************************************
+	--north_vcm_signal_req_pkt_complete: Informs if a packet status request has completed
+	--***********************************************************************************
+	north_vcm_signal_req_pkt_complete:process(n_vcm_req_complete_rst, n_vcm_req_complete_set)
+	begin
+		if(n_vcm_req_complete_rst = '1') then
+			n_vcm_req_complete <= '0';
+		end if;
+		
+		if(n_vcm_req_complete_set = '1') then
+			n_vcm_req_complete <= '1';
+		end if;
+	end process;
+
+--EAST
+	--************************************************************************************
+	--east_vcm_enq_signals: Handles VCC enqueue signals from VCM (Virtual Channel Manager)
+	--************************************************************************************
+	east_vcm_enq_signals:process(e_vcm_enq_rst, e_vcm_enq_set)
+	begin
+		if(e_vcm_enq_rst = '1') then
+			e_vcm_enq <= '0';
+		end if;
+		
+		--An item has been enqueued from the VCC buffer (update the global count)
+		if(e_vcm_enq_set = '1') then
+			e_vcm_enq <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--east_vcm_enq_complete: Notifies listeners that enqueue is complete from (Virtual Channel Manager)
+	--************************************************************************************
+	east_vcm_enq_complete:process(e_vcm_enq_complete_rst, e_vcm_enq_complete_set)
+	begin
+		if(e_vcm_enq_complete_rst = '1') then
+			e_vcm_enq_complete <= '0';
+		end if;
+		
+		--Enqueue has completed.
+		if(e_vcm_enq_complete_set = '1') then
+			e_vcm_enq_complete <= '1';
+		end if;
+	end process;
+
+	--************************************************************************************
+	--east_vcm_deq_signals: Handles VCC dequeue signals from VCM (Virtual Channel Manager)
+	--************************************************************************************
+	east_vcm_deq_signals:process(e_vcm_deq_rst, e_vcm_deq_set)
+	begin
+		if(e_vcm_deq_rst = '1') then
+			e_vcm_deq <= '0';
+		end if;
+				
+		--An item has been dequeued from the VCC buffer (update the global count)
+		if(e_vcm_deq_set = '1') then
+			e_vcm_deq <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--east_vcm_request_vcc: Handles setting the VCC output signals
+	--************************************************************************************
+	east_vcm_request_vcc:process(e_vcm_request_vcc_rst, e_vcm_request_vcc_set)
+	begin
+		if(e_vcm_request_vcc_rst = '1') then
+			e_vcm_request_vcc <= '0';
+		end if;
+		
+		if(e_vcm_request_vcc_set = '1') then
+			e_vcm_request_vcc <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--east_vcm_request_vcc_done: Handles setting the VCC output completion signals
+	--************************************************************************************
+	east_vcm_request_vcc_done:process(e_vcm_request_vcc_done_set, e_vcm_request_vcc_done_set)
+	begin
+		if(e_vcm_request_vcc_done_rst = '1') then
+			e_vcm_request_vcc_done <= '0';
+		end if;
+		
+		if(e_vcm_request_vcc_done_set = '1') then
+			e_vcm_request_vcc_done <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************************
+	--east_vcm_signal_shift_start: Handles VCC start shift signals from VCM (Virtual Channel Manager)
+	--***********************************************************************************************
+	east_vcm_signal_shift_start:process(e_vcm_shift_rst, e_vcm_shift_set)
+	begin
+		if(e_vcm_shift_rst = '1') then
+			e_vcm_shift <= '0';
+		end if;
+		
+		--Shifting Request
+		if(e_vcm_shift_set = '1') then
+			e_vcm_shift <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************
+	--east_vcm_signal_shift_complete: Manages packet information request from VCC manager
+	--***********************************************************************************
+	east_vcm_shift_complete:process(e_vcm_shift_complete_rst, e_vcm_shift_complete_set)
+	begin
+		if(e_vcm_shift_complete_rst = '1') then
+			e_vcm_shift_complete <= '0';
+		end if;
+		
+		--Determine if the data packet has arrived...
+		if(e_vcm_shift_complete_set = '1') then
+			e_vcm_shift_complete <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************
+	--east_vcm_signal_req_pkt_status: Manages packet information request from VCC manager
+	--***********************************************************************************
+	east_vcm_signal_req_pkt_status:process(e_vcm_req_pkt_status_rst, e_vcm_req_pkt_status_set)
+	begin
+		if(e_vcm_req_pkt_status_rst = '1') then
+			e_vcm_req_pkt_status <= '0';
+		end if;
+		
+		--Determine if the data packet has arrived...
+		if(e_vcm_req_pkt_status_set = '1') then
+			e_vcm_req_pkt_status <= '1';
+		end if;
+	end process;
+	
+	
+	--***********************************************************************************
+	--east_vcm_signal_req_pkt_complete: Informs if a packet status request has completed
+	--***********************************************************************************
+	east_vcm_signal_req_pkt_complete:process(e_vcm_req_complete_rst, e_vcm_req_complete_set)
+	begin
+		if(e_vcm_req_complete_rst = '1') then
+			e_vcm_req_complete <= '0';
+		end if;
+		
+		if(e_vcm_req_complete_set = '1') then
+			e_vcm_req_complete <= '1';
+		end if;
+	end process;	
+	
+--SOUTH
+	--************************************************************************************
+	--south_vcm_enq_signals: Handles VCC enqueue signals from VCM (Virtual Channel Manager)
+	--************************************************************************************
+	south_vcm_enq_signals:process(s_vcm_enq_rst, s_vcm_enq_set)
+	begin
+		if(s_vcm_enq_rst = '1') then
+			s_vcm_enq <= '0';
+		end if;
+		
+		--An item has been enqueued from the VCC buffer (update the global count)
+		if(s_vcm_enq_set = '1') then
+			s_vcm_enq <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--south_vcm_enq_complete: Notifies listeners that enqueue is complete from (Virtual Channel Manager)
+	--************************************************************************************
+	south_vcm_enq_complete:process(s_vcm_enq_complete_rst, s_vcm_enq_complete_set)
+	begin
+		if(s_vcm_enq_complete_rst = '1') then
+			s_vcm_enq_complete <= '0';
+		end if;
+		
+		--Enqueue has completed.
+		if(s_vcm_enq_complete_set = '1') then
+			s_vcm_enq_complete <= '1';
+		end if;
+	end process;
+
+	--************************************************************************************
+	--south_vcm_deq_signals: Handles VCC dequeue signals from VCM (Virtual Channel Manager)
+	--************************************************************************************
+	south_vcm_deq_signals:process(s_vcm_deq_rst, s_vcm_deq_set)
+	begin
+		if(s_vcm_deq_rst = '1') then
+			s_vcm_deq <= '0';
+		end if;
+				
+		--An item has been dequeued from the VCC buffer (update the global count)
+		if(s_vcm_deq_set = '1') then
+			s_vcm_deq <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--south_vcm_request_vcc: Handles setting the VCC output signals
+	--************************************************************************************
+	south_vcm_request_vcc:process(s_vcm_request_vcc_rst, s_vcm_request_vcc_set)
+	begin
+		if(s_vcm_request_vcc_rst = '1') then
+			s_vcm_request_vcc <= '0';
+		end if;
+		
+		if(s_vcm_request_vcc_set = '1') then
+			s_vcm_request_vcc <= '1';
+		end if;
+	end process;
+	
+	--************************************************************************************
+	--south_vcm_request_vcc_done: Handles setting the VCC output completion signals
+	--************************************************************************************
+	south_vcm_request_vcc_done:process(s_vcm_request_vcc_done_set, s_vcm_request_vcc_done_set)
+	begin
+		if(s_vcm_request_vcc_done_rst = '1') then
+			s_vcm_request_vcc_done <= '0';
+		end if;
+		
+		if(s_vcm_request_vcc_done_set = '1') then
+			s_vcm_request_vcc_done <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************************
+	--south_vcm_signal_shift_start: Handles VCC start shift signals from VCM (Virtual Channel Manager)
+	--***********************************************************************************************
+	south_vcm_signal_shift_start:process(s_vcm_shift_rst, s_vcm_shift_set)
+	begin
+		if(s_vcm_shift_rst = '1') then
+			s_vcm_shift <= '0';
+		end if;
+		
+		--Shifting Request
+		if(s_vcm_shift_set = '1') then
+			s_vcm_shift <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************
+	--south_vcm_signal_shift_complete: Manages packet information request from VCC manager
+	--***********************************************************************************
+	south_vcm_shift_complete:process(s_vcm_shift_complete_rst, s_vcm_shift_complete_set)
+	begin
+		if(s_vcm_shift_complete_rst = '1') then
+			s_vcm_shift_complete <= '0';
+		end if;
+		
+		--Determine if the data packet has arrived...
+		if(s_vcm_shift_complete_set = '1') then
+			s_vcm_shift_complete <= '1';
+		end if;
+	end process;
+	
+	--***********************************************************************************
+	--south_vcm_signal_req_pkt_status: Manages packet information request from VCC manager
+	--***********************************************************************************
+	south_vcm_signal_req_pkt_status:process(s_vcm_req_pkt_status_rst, s_vcm_req_pkt_status_set)
+	begin
+		if(s_vcm_req_pkt_status_rst = '1') then
+			s_vcm_req_pkt_status <= '0';
+		end if;
+		
+		--Determine if the data packet has arrived...
+		if(s_vcm_req_pkt_status_set = '1') then
+			s_vcm_req_pkt_status <= '1';
+		end if;
+	end process;
+	
+	
+	--***********************************************************************************
+	--south_vcm_signal_req_pkt_complete: Informs if a packet status request has completed
+	--***********************************************************************************
+	south_vcm_signal_req_pkt_complete:process(s_vcm_req_complete_rst, s_vcm_req_complete_set)
+	begin
+		if(s_vcm_req_complete_rst = '1') then
+			s_vcm_req_complete <= '0';
+		end if;
+		
+		if(s_vcm_req_complete_set = '1') then
+			s_vcm_req_complete <= '1';
+		end if;
+	end process;
+	
+--WEST
 	--************************************************************************************
 	--west_vcm_enq_signals: Handles VCC enqueue signals from VCM (Virtual Channel Manager)
 	--************************************************************************************

@@ -31,11 +31,10 @@ use ieee.numeric_std.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 use work.router_library.all;
+
+use std.textio.all;
  
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
- 
+
 ENTITY BlazeNoC_QoS_TB IS
 END BlazeNoC_QoS_TB;
  
@@ -60,10 +59,10 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
          done_PE1 : OUT  std_logic;
          done_PE2 : OUT  std_logic;
          done_PE3 : OUT  std_logic;
-         data_inject_PE0 : IN  std_logic_vector(WIDTH downto 0);
-         data_inject_PE1 : IN  std_logic_vector(WIDTH downto 0);
-         data_inject_PE2 : IN  std_logic_vector(WIDTH downto 0);
-         data_inject_PE3 : IN  std_logic_vector(WIDTH downto 0)
+         data_inject_PE0 : IN  std_logic_vector(57 downto 0);
+         data_inject_PE1 : IN  std_logic_vector(57 downto 0);
+         data_inject_PE2 : IN  std_logic_vector(57 downto 0);
+         data_inject_PE3 : IN  std_logic_vector(57 downto 0)
         );
     END COMPONENT;
     
@@ -76,10 +75,10 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
    signal sm_triggerPE1 : std_logic := '0';
    signal sm_triggerPE2 : std_logic := '0';
    signal sm_triggerPE3 : std_logic := '0';
-   signal data_inject_PE0 : std_logic_vector(WIDTH downto 0) := (others => '0');
-   signal data_inject_PE1 : std_logic_vector(WIDTH downto 0) := (others => '0');
-   signal data_inject_PE2 : std_logic_vector(WIDTH downto 0) := (others => '0');
-   signal data_inject_PE3 : std_logic_vector(WIDTH downto 0) := (others => '0');
+   signal data_inject_PE0 : std_logic_vector(57 downto 0) := (others => '0');
+   signal data_inject_PE1 : std_logic_vector(57 downto 0) := (others => '0');
+   signal data_inject_PE2 : std_logic_vector(57 downto 0) := (others => '0');
+   signal data_inject_PE3 : std_logic_vector(57 downto 0) := (others => '0');
 
  	--Outputs
    signal full_PE0 : std_logic;
@@ -263,207 +262,207 @@ BEGIN
 	
 		if(router_start = '1') then
 			
-			--Send a control packet	
-			tid_RT0 <= "00000000000000000000001100000011";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000000";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-				
-			wait for clk_period_pe*5;
-			
-			--Send a control packet
-			tid_RT0 <= "00000000000000001100000110000011";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000001";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*10;
-						
-			-- Resets Internal Counters			
-			reset_RT0 <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-			
-			--Send its data packet (Low Priority)
-			tid_RT0 <= "00000000000000000000000000000000";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000000";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_dp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-			
-			--Send its data packet (Low Priority)
-			tid_RT0 <= "00000100000000000000000000000000";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000001";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_dp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-			
-			--Send control packet
-			tid_RT0 <= "00000000000000000000011110001000";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000010";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-				
-			--Send control packet
-			tid_RT0 <= "00000000000000000000000111110000";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000011";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-
-			--Send its data packet (Low Priority)
-			tid_RT0 <= "00001000000000000000000000000000";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000010";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_dp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-			
-			--Send its data packet (High Priority)
-			tid_RT0 <= "00001100000000000000000000000111";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000011";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '1';
-			trigger_0_dp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-
-			--Send control packet
-			tid_RT0 <= "00000000000000000110000000011000";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000100";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-			
-			--Send control packet
-			tid_RT0 <= "00000000000000000100000010001111";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "001000";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_cp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-			
-			--Send its data packet (Low Priority)
-			tid_RT0 <= "00100100000000000000000000000000";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "001000";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '1';
-			trigger_0_dp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*10;
-			
-			--Send its data packet (Low Priority)
-			tid_RT0 <= "00100100000000000000000000000000";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000100";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '1';
-			trigger_0_dp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
-			
-			--Send control packet
-			tid_RT0 <= "00000000000000000000001101100001";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000111";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '0';
-			trigger_0_cp <= '1', '0' after 1 ns;
-		
-			wait for clk_period_pe*40;
-			
-			--Send its data packet (High Priority)
-			tid_RT0 <= "10000000000000000000000000000001";
-			dir_3_RT0 <= "000";		--Not used
-			dir_2_RT0 <= "111";		--Eject
-			dir_1_RT0 <= "010";		--South
-			dir_0_RT0 <= "001";		--East
-			count_RT0 <= "00";		--Default
-			pid_RT0 <= "000111";		--Packet ID
-			packet_type_RT0 <= "00";
-			priority_RT0 <= '1';
-			trigger_0_dp <= '1', '0' after 1 ns;
-			
-			wait for clk_period_pe*20;
+--			--Send a control packet	
+--			tid_RT0 <= "00000000000000000000001100000011";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000000";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_cp <= '1', '0' after 1 ns;
+--			
+--				
+--			wait for clk_period_pe*5;
+--			
+--			--Send a control packet
+--			tid_RT0 <= "00000000000000001100000110000011";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000001";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_cp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*10;
+--						
+--			-- Resets Internal Counters			
+--			reset_RT0 <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--			
+--			--Send its data packet (Low Priority)
+--			tid_RT0 <= "00000000000000000000000000000000";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000000";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_dp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--			
+--			--Send its data packet (Low Priority)
+--			tid_RT0 <= "00000100000000000000000000000000";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000001";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_dp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--			
+--			--Send control packet
+--			tid_RT0 <= "00000000000000000000011110001000";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000010";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_cp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--				
+--			--Send control packet
+--			tid_RT0 <= "00000000000000000000000111110000";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000011";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_cp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--
+--			--Send its data packet (Low Priority)
+--			tid_RT0 <= "00001000000000000000000000000000";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000010";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_dp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--			
+--			--Send its data packet (High Priority)
+--			tid_RT0 <= "00001100000000000000000000000111";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000011";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '1';
+--			trigger_0_dp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--
+--			--Send control packet
+--			tid_RT0 <= "00000000000000000110000000011000";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000100";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_cp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--			
+--			--Send control packet
+--			tid_RT0 <= "00000000000000000100000010001111";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "001000";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_cp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--			
+--			--Send its data packet (Low Priority)
+--			tid_RT0 <= "00100100000000000000000000000000";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "001000";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '1';
+--			trigger_0_dp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*10;
+--			
+--			--Send its data packet (Low Priority)
+--			tid_RT0 <= "00100100000000000000000000000000";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000100";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '1';
+--			trigger_0_dp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
+--			
+--			--Send control packet
+--			tid_RT0 <= "00000000000000000000001101100001";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000111";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '0';
+--			trigger_0_cp <= '1', '0' after 1 ns;
+--		
+--			wait for clk_period_pe*40;
+--			
+--			--Send its data packet (High Priority)
+--			tid_RT0 <= "10000000000000000000000000000001";
+--			dir_3_RT0 <= "000";		--Not used
+--			dir_2_RT0 <= "111";		--Eject
+--			dir_1_RT0 <= "010";		--South
+--			dir_0_RT0 <= "001";		--East
+--			count_RT0 <= "00";		--Default
+--			pid_RT0 <= "000111";		--Packet ID
+--			packet_type_RT0 <= "00";
+--			priority_RT0 <= '1';
+--			trigger_0_dp <= '1', '0' after 1 ns;
+--			
+--			wait for clk_period_pe*20;
 			
 			--Done
 			router_start := '0';	
@@ -480,6 +479,7 @@ BEGIN
 	main_proc_RT1: process
 		variable router_start		: std_logic;
 		variable my_pid : std_logic_vector(5 downto 0) := "000000";
+		variable buf_out : line;
 	begin
 		if(router_setup = '1') then
 			trigger_1_cp <= '0';
@@ -519,6 +519,8 @@ BEGIN
 			wait for clk_period_pe*2;
 			
 			loop
+				write(buf_out, string'("Inside Router 1 Loop..."));
+				writeline(output, buf_out);
 				--Send GARBAGE data to Router 3
 				--Send control packet
 				tid_RT1 <= "00000000000000000000000000001110";
@@ -547,12 +549,14 @@ BEGIN
 				trigger_1_dp <= '1', '0' after 1 ns;
 				
 				wait for clk_period_pe*20;
-								
-				wait until pe1_Ready = '1';
 				
-				reset_RT1 <= '1', '0' after 1 ns;
+				--write(buf_out, string'(CONV_STRING(my_pid)));
+				--writeline(output, buf_out);
+				--wait until pe1_Ready = '1';
 				
-				wait for clk_period_pe*40;
+				--reset_RT1 <= '1', '0' after 1 ns;
+				
+				wait for clk_period_pe*750;
 				
 				my_pid := my_pid + 1;
 			end loop;

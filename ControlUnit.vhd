@@ -622,6 +622,7 @@ begin
 			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			n_sch_job_expired <= '0';
 			
+			
 		elsif rising_edge(clk) then
 			if(n_sch_start_timer = '1' and n_sch_job_expired = '0') then
 				timeunit := timeunit + "00000000000000000000000000000001";
@@ -853,7 +854,7 @@ begin
 					
 					n_sync_rst <= '1', '0' after 1 ns;
 					n_vcm_enq_complete_rst <= '1', '0' after 1 ns;
-
+					
 					ns_north_handler <= north1;
 				when wait_state =>
 					ns_north_handler <= north1;
@@ -2023,7 +2024,7 @@ begin
 				--Reset Signals
 				ns_north_sorting_handler <= wait_state;
 			when sort3 =>
-				if(n_sch_table_count > 0) then
+				if((n_sch_table_count > 0) and (n_sort_index /= 256)) then
 					n_sch_addr_b <= n_sort_index;
 					ns_north_sorting_handler <= sort4;
 				else
@@ -2031,16 +2032,18 @@ begin
 					ns_north_sorting_handler <= wait_state;
 				end if;
 			when sort4 =>
-				--Take first item
-				n_sort_next_job_time := n_sch_data_in_b; -- Temporary bin
-				n_sort_next_job_midpid := n_sort_index;  -- Temporary bin	  
-				n_sort_index <= n_sort_index + 1;
 				if(n_sch_data_in_b(31 downto 0) > 0 and (n_last_scheduled /= n_sort_index)) then
+					--Take first valid item
+					n_sort_next_job_time := n_sch_data_in_b; -- Temporary bin
+					n_sort_next_job_midpid := n_sort_index;  -- Temporary bin	  
+					n_sort_index <= n_sort_index + 1;
 					n_sch_job_valid <= '1';
+					ns_north_sorting_handler <= sort5;
 				else
+					n_sort_index <= n_sort_index + 1;
 					n_sch_job_valid <= '0';
+					ns_north_sorting_handler <= sort3;			--Go back and try next value...
 				end if;
-				ns_north_sorting_handler <= sort5;
 			when sort5 =>
 				if(n_sort_index /= 256) then
 					n_sch_addr_b <= n_sort_index;
@@ -2114,7 +2117,7 @@ begin
 				--Reset Signals
 				ns_east_sorting_handler <= wait_state;
 			when sort3 =>
-				if(e_sch_table_count > 0) then
+				if((e_sch_table_count > 0) and (e_sort_index /= 256)) then
 					e_sch_addr_b <= e_sort_index;
 					ns_east_sorting_handler <= sort4;
 				else
@@ -2122,16 +2125,18 @@ begin
 					ns_east_sorting_handler <= wait_state;
 				end if;
 			when sort4 =>
-				--Take first item
-				e_sort_next_job_time := e_sch_data_in_b; -- Temporary bin
-				e_sort_next_job_midpid := e_sort_index;  -- Temporary bin	  
-				e_sort_index <= e_sort_index + 1;
 				if(e_sch_data_in_b(31 downto 0) > 0 and (e_last_scheduled /= e_sort_index)) then
+					--Take first valid item
+					e_sort_next_job_time := e_sch_data_in_b; -- Temporary bin
+					e_sort_next_job_midpid := e_sort_index;  -- Temporary bin	  
+					e_sort_index <= e_sort_index + 1;
 					e_sch_job_valid <= '1';
+					ns_east_sorting_handler <= sort5;
 				else
+					e_sort_index <= e_sort_index + 1;
 					e_sch_job_valid <= '0';
+					ns_east_sorting_handler <= sort3;			--Go back and try next value...
 				end if;
-				ns_east_sorting_handler <= sort5;
 			when sort5 =>
 				if(e_sort_index /= 256) then
 					e_sch_addr_b <= e_sort_index;
@@ -2205,7 +2210,7 @@ begin
 				--Reset Signals
 				ns_south_sorting_handler <= wait_state;
 			when sort3 =>
-				if(s_sch_table_count > 0) then
+				if((s_sch_table_count > 0) and (s_sort_index /= 256)) then
 					s_sch_addr_b <= s_sort_index;
 					ns_south_sorting_handler <= sort4;
 				else
@@ -2213,16 +2218,18 @@ begin
 					ns_south_sorting_handler <= wait_state;
 				end if;
 			when sort4 =>
-				--Take first item
-				s_sort_next_job_time := s_sch_data_in_b; -- Temporary bin
-				s_sort_next_job_midpid := s_sort_index;  -- Temporary bin	  
-				s_sort_index <= s_sort_index + 1;
 				if(s_sch_data_in_b(31 downto 0) > 0 and (s_last_scheduled /= s_sort_index)) then
+					--Take first item
+					s_sort_next_job_time := s_sch_data_in_b; -- Temporary bin
+					s_sort_next_job_midpid := s_sort_index;  -- Temporary bin	  
+					s_sort_index <= s_sort_index + 1;
 					s_sch_job_valid <= '1';
+					ns_south_sorting_handler <= sort5;
 				else
+					s_sort_index <= s_sort_index + 1;
 					s_sch_job_valid <= '0';
+					ns_south_sorting_handler <= sort3;			--Go back and try next value...
 				end if;
-				ns_south_sorting_handler <= sort5;
 			when sort5 =>
 				if(s_sort_index /= 256) then
 					s_sch_addr_b <= s_sort_index;
@@ -2297,7 +2304,7 @@ begin
 				--Reset Signals
 				ns_west_sorting_handler <= wait_state;
 			when sort3 =>
-				if(w_sch_table_count > 0) then
+				if((w_sch_table_count > 0) and (w_sort_index /= 256)) then
 					w_sch_addr_b <= w_sort_index;
 					ns_west_sorting_handler <= sort4;
 				else
@@ -2305,16 +2312,18 @@ begin
 					ns_west_sorting_handler <= wait_state;
 				end if;
 			when sort4 =>
-				--Take first item
-				w_sort_next_job_time := w_sch_data_in_b; -- Temporary bin
-				w_sort_next_job_midpid := w_sort_index;  -- Temporary bin	  
-				w_sort_index <= w_sort_index + 1;
 				if(w_sch_data_in_b(31 downto 0) > 0 and (w_last_scheduled /= w_sort_index)) then
+					--Take first item
+					w_sort_next_job_time := w_sch_data_in_b; -- Temporary bin
+					w_sort_next_job_midpid := w_sort_index;  -- Temporary bin	  
+					w_sort_index <= w_sort_index + 1;
 					w_sch_job_valid <= '1';
+					ns_west_sorting_handler <= sort5;
 				else
 					w_sch_job_valid <= '0';
+					w_sort_index <= w_sort_index + 1;
+					ns_west_sorting_handler <= sort3;		--Go back and try next value...
 				end if;
-				ns_west_sorting_handler <= sort5;
 			when sort5 =>
 				if(w_sort_index /= 256) then
 					w_sch_addr_b <= w_sort_index;
@@ -2865,7 +2874,7 @@ begin
 						n_vcm_which_vcell_deq <= "10";
 						sw_wSel <= "000";							--West
 					when "111" =>
-						w_vcm_which_vcell_deq <= "11";
+						n_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "000";					--Ejection
 					when others =>
 						null;

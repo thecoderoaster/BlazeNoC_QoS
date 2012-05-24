@@ -137,6 +137,7 @@ entity Arbiter is
 				sw_ejectSel			: out std_logic_vector(2 downto 0);										
 				sw_rnaCtFl			: in std_logic;										-- Flag from Switch for injection packet
 				sw_rnaCtDeq			: out std_logic;										-- Signal to dequeue injection FIFO.
+				sw_rnaCtEnq			: out std_logic; 										-- Signal to enqueue ejection FIFO.
 				rna_ctrlPkt			: out std_logic_vector (WIDTH downto 0);		-- Control packet generator output				
 				injt_ctrlPkt		: in std_logic_vector (WIDTH downto 0);			-- coming from switch control packet from PE	
 				injt_dataGood		: out std_logic -- data good control for injection										-- data good control for injection
@@ -359,6 +360,7 @@ architecture rtl of Arbiter is
 			sw_ejectSel			: out std_logic_vector(2 downto 0);
 			sw_rnaCtFl			: in 	std_logic;
 			sw_rnaCtDeq			: out std_logic;
+			sw_rnaCtEnq			: out std_logic;
 			rna_ctrlPkt			: out std_logic_vector(pkt_size downto 0);
 			injt_ctrlPkt		: in 	std_logic_vector (pkt_size downto 0);
 			injt_dataGood		: out std_logic
@@ -533,7 +535,7 @@ begin
 					 s_CTRinFlg, s_CTRFlg, s_CtrlFlg, s_DataFlg, s_arbEnq, s_rnaCtrl,
 					 w_CTRinFlg, w_CTRFlg, w_CtrlFlg, w_DataFlg, w_arbEnq, w_rnaCtrl, 
 					 sw_nSel, sw_eSel, sw_sSel, sw_wSel, sw_ejectSel, sw_rnaCtFl, 
-					 sw_rnaCtDeq, rna_ctrlPkt, injt_ctrlPkt, injt_dataGood);
+					 sw_rnaCtDeq, sw_rnaCtEnq, rna_ctrlPkt, injt_ctrlPkt, injt_dataGood);
 	
 	
 end rtl;

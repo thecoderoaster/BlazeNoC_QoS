@@ -211,6 +211,7 @@ entity ControlUnit is
 			sw_ejectSel			: out std_logic_vector(2 downto 0);
 			sw_rnaCtFl			: in 	std_logic;
 			sw_rnaCtDeq			: out std_logic;
+			sw_rnaCtEnq			: out std_logic;
 			rna_ctrlPkt			: out std_logic_vector(pkt_size downto 0);
 			injt_ctrlPkt		: in 	std_logic_vector (pkt_size downto 0);
 			injt_dataGood		: out std_logic
@@ -2867,19 +2868,23 @@ begin
 					when "001" =>
 						n_vcm_which_vcell_deq <= "00";
 						sw_eSel <= "000"; 						--East
+						ns_switch_handler <= depart_n_sw6;
 					when "010" =>
 						n_vcm_which_vcell_deq <= "01";
 						sw_sSel <= "000";							--South
+						ns_switch_handler <= depart_n_sw6;
 					when "011" =>
 						n_vcm_which_vcell_deq <= "10";
 						sw_wSel <= "000";							--West
+						ns_switch_handler <= depart_n_sw6;
 					when "111" =>
 						n_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "000";					--Ejection
+						sw_rnaCtEnq <= '1';
+						ns_switch_handler <= depart_n_sw8;
 					when others =>
 						null;
 				end case;
-				ns_switch_handler <= depart_n_sw6;
 			when depart_n_sw6 =>
 				--Wait state
 				ns_switch_handler <= depart_n_sw7;
@@ -2906,7 +2911,7 @@ begin
 			when depart_n_sw8 =>
 				--Dequeue
 				n_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
-				
+				sw_rnaCtEnq <= '0';
 				ns_switch_handler <= depart_e_sw1;	
 --EAST
 			when depart_e_sw1 =>
@@ -2938,19 +2943,23 @@ begin
 					when "000" =>
 						e_vcm_which_vcell_deq <= "00";
 						sw_nSel <= "001"; 						--North
+						ns_switch_handler <= depart_e_sw6;
 					when "010" =>
 						e_vcm_which_vcell_deq <= "01";
 						sw_sSel <= "001";							--South
+						ns_switch_handler <= depart_e_sw6;
 					when "011" =>
 						e_vcm_which_vcell_deq <= "10";
 						sw_wSel <= "001";							--West
+						ns_switch_handler <= depart_e_sw6;
 					when "111" =>
 						e_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "001";					--Ejection
+						sw_rnaCtEnq <= '1';
+						ns_switch_handler <= depart_e_sw8;
 					when others =>
 						null;
 				end case;
-				ns_switch_handler <= depart_e_sw6;
 			when depart_e_sw6 =>
 				--Wait state
 				ns_switch_handler <= depart_e_sw7;
@@ -2977,7 +2986,7 @@ begin
 			when depart_e_sw8 =>
 				--Dequeue
 				e_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
-				
+				sw_rnaCtEnq <= '0';
 				ns_switch_handler <= depart_s_sw1;	
 --SOUTH
 			when depart_s_sw1 =>
@@ -3009,19 +3018,23 @@ begin
 					when "000" =>
 						s_vcm_which_vcell_deq <= "00";
 						sw_nSel <= "010"; 						--North
+						ns_switch_handler <= depart_s_sw6;
 					when "001" =>
 						s_vcm_which_vcell_deq <= "01";
 						sw_eSel <= "010";							--East
+						ns_switch_handler <= depart_s_sw6;
 					when "011" =>
 						s_vcm_which_vcell_deq <= "10";
 						sw_wSel <= "010";							--West
+						ns_switch_handler <= depart_s_sw6;
 					when "111" =>
 						s_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "010";					--Ejection
+						sw_rnaCtEnq <= '1';
+						ns_switch_handler <= depart_s_sw8;
 					when others =>
 						null;
 				end case;
-				ns_switch_handler <= depart_s_sw6;
 			when depart_s_sw6 =>
 				--Wait state
 				ns_switch_handler <= depart_s_sw7;
@@ -3048,6 +3061,7 @@ begin
 			when depart_s_sw8 =>
 				--Dequeue
 				s_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				sw_rnaCtEnq <= '0';
 				
 				ns_switch_handler <= depart_w_sw1;
 --WEST
@@ -3080,19 +3094,23 @@ begin
 					when "000" =>
 						w_vcm_which_vcell_deq <= "00";
 						sw_nSel <= "011"; 						--North
+						ns_switch_handler <= depart_w_sw6;
 					when "001" =>
 						w_vcm_which_vcell_deq <= "01";
 						sw_eSel <= "011";							--East
+						ns_switch_handler <= depart_w_sw6;
 					when "010" =>
 						w_vcm_which_vcell_deq <= "10";
 						sw_sSel <= "011";							--South
+						ns_switch_handler <= depart_w_sw6;
 					when "111" =>
 						w_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "011";					--Ejection
+						sw_rnaCtEnq <= '1';
+						ns_switch_handler <= depart_w_sw8;
 					when others =>
 						null;
 				end case;
-				ns_switch_handler <= depart_w_sw6;
 			when depart_w_sw6 =>
 				--Wait state
 				ns_switch_handler <= depart_w_sw7;
@@ -3113,17 +3131,18 @@ begin
 					s_rst <= '1', '0' after 1 ns;
 					sw_sSel <= "000";
 					ns_switch_handler <= depart_w_sw8;
-				elsif(w_pkt_in_flg_set = '1') then
-					w_sch_departed_ack <= '1';
-					w_rst <= '1', '0' after 1 ns;
-					sw_wSel <= "000";
-					ns_switch_handler <= depart_w_sw8;
+--				elsif(w_pkt_in_flg_set = '1') then
+--					w_sch_departed_ack <= '1';
+--					w_rst <= '1', '0' after 1 ns;
+--					sw_wSel <= "000";
+--					ns_switch_handler <= depart_w_sw8;
 				else
 					ns_switch_handler <= depart_w_sw6;
 				end if;
 			when depart_w_sw8 =>
 				--Dequeue
 				w_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				sw_rnaCtEnq <= '0';
 				
 				ns_switch_handler <= north_sw1;
 			when others =>

@@ -2395,6 +2395,7 @@ begin
 				
 				injt_dataGood <= '0';
 				sw_rnaCtDeq <= '0';
+				sw_rnaCtEnq <= '0';
 				
 				n_sch_departed_ack <= '0';
 				n_vcm_request_vcc_set <= '0';
@@ -2880,7 +2881,7 @@ begin
 					when "111" =>
 						n_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "000";					--Ejection
-						sw_rnaCtEnq <= '1';
+						sw_rnaCtEnq <= '1', '0' after 1 ns;
 						ns_switch_handler <= depart_n_sw8;
 					when others =>
 						null;
@@ -2891,17 +2892,14 @@ begin
 			when depart_n_sw7 =>
 				--Check for ack
 				if(e_pkt_in_flg_set = '1') then
-					n_sch_departed_ack <= '1';
 					e_rst <= '1', '0' after 1 ns;
 					sw_eSel <= "000";								--CHANGE TO AN UNDEFINED VALUE
 					ns_switch_handler <= depart_n_sw8;
 				elsif(s_pkt_in_flg_set = '1') then
-					n_sch_departed_ack <= '1';
 					s_rst <= '1', '0' after 1 ns;
 					sw_sSel <= "000";
 					ns_switch_handler <= depart_n_sw8;
 				elsif(w_pkt_in_flg_set = '1') then
-					n_sch_departed_ack <= '1';
 					w_rst <= '1', '0' after 1 ns;
 					sw_wSel <= "000";
 					ns_switch_handler <= depart_n_sw8;
@@ -2910,6 +2908,7 @@ begin
 				end if;
 			when depart_n_sw8 =>
 				--Dequeue
+				n_sch_departed_ack <= '1';
 				n_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				sw_rnaCtEnq <= '0';
 				ns_switch_handler <= depart_e_sw1;	
@@ -2955,7 +2954,7 @@ begin
 					when "111" =>
 						e_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "001";					--Ejection
-						sw_rnaCtEnq <= '1';
+						sw_rnaCtEnq <= '1', '0' after 1 ns;
 						ns_switch_handler <= depart_e_sw8;
 					when others =>
 						null;
@@ -2966,17 +2965,14 @@ begin
 			when depart_e_sw7 =>
 				--Check for ack
 				if(n_pkt_in_flg_set = '1') then
-					e_sch_departed_ack <= '1';
 					n_rst <= '1', '0' after 1 ns;
 					sw_nSel <= "000";
 					ns_switch_handler <= depart_e_sw8;
 				elsif(s_pkt_in_flg_set = '1') then
-					e_sch_departed_ack <= '1';
 					s_rst <= '1', '0' after 1 ns;
 					sw_sSel <= "000";
 					ns_switch_handler <= depart_e_sw8;
 				elsif(w_pkt_in_flg_set = '1') then
-					e_sch_departed_ack <= '1';
 					w_rst <= '1', '0' after 1 ns;
 					sw_wSel <= "000";
 					ns_switch_handler <= depart_e_sw8;
@@ -2985,6 +2981,7 @@ begin
 				end if;
 			when depart_e_sw8 =>
 				--Dequeue
+				e_sch_departed_ack <= '1';
 				e_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				sw_rnaCtEnq <= '0';
 				ns_switch_handler <= depart_s_sw1;	
@@ -3030,7 +3027,7 @@ begin
 					when "111" =>
 						s_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "010";					--Ejection
-						sw_rnaCtEnq <= '1';
+						sw_rnaCtEnq <= '1', '0' after 1 ns;
 						ns_switch_handler <= depart_s_sw8;
 					when others =>
 						null;
@@ -3041,17 +3038,14 @@ begin
 			when depart_s_sw7 =>
 				--Check for ack
 				if(n_pkt_in_flg_set = '1') then
-					s_sch_departed_ack <= '1';
 					n_rst <= '1', '0' after 1 ns;
 					sw_nSel <= "000";
 					ns_switch_handler <= depart_s_sw8;
 				elsif(e_pkt_in_flg_set = '1') then
-					s_sch_departed_ack <= '1';
 					e_rst <= '1', '0' after 1 ns;
 					sw_eSel <= "000";
 					ns_switch_handler <= depart_s_sw8;
 				elsif(w_pkt_in_flg_set = '1') then
-					s_sch_departed_ack <= '1';
 					w_rst <= '1', '0' after 1 ns;
 					sw_wSel <= "000";
 					ns_switch_handler <= depart_s_sw8;
@@ -3060,9 +3054,9 @@ begin
 				end if;
 			when depart_s_sw8 =>
 				--Dequeue
+				s_sch_departed_ack <= '1';
 				s_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				sw_rnaCtEnq <= '0';
-				
 				ns_switch_handler <= depart_w_sw1;
 --WEST
 			when depart_w_sw1 =>
@@ -3106,7 +3100,7 @@ begin
 					when "111" =>
 						w_vcm_which_vcell_deq <= "11";
 						sw_ejectSel <= "011";					--Ejection
-						sw_rnaCtEnq <= '1';
+						sw_rnaCtEnq <= '1', '0' after 1 ns;
 						ns_switch_handler <= depart_w_sw8;
 					when others =>
 						null;
@@ -3117,33 +3111,25 @@ begin
 			when depart_w_sw7 =>
 				--Check for ack
 				if(n_pkt_in_flg_set = '1') then
-					w_sch_departed_ack <= '1';
 					n_rst <= '1', '0' after 1 ns;
 					sw_nSel <= "000";
 					ns_switch_handler <= depart_w_sw8;
 				elsif(e_pkt_in_flg_set = '1') then
-					w_sch_departed_ack <= '1';
 					e_rst <= '1', '0' after 1 ns;
 					sw_eSel <= "000";
 					ns_switch_handler <= depart_w_sw8;
 				elsif(s_pkt_in_flg_set = '1') then
-					w_sch_departed_ack <= '1';
 					s_rst <= '1', '0' after 1 ns;
 					sw_sSel <= "000";
 					ns_switch_handler <= depart_w_sw8;
---				elsif(w_pkt_in_flg_set = '1') then
---					w_sch_departed_ack <= '1';
---					w_rst <= '1', '0' after 1 ns;
---					sw_wSel <= "000";
---					ns_switch_handler <= depart_w_sw8;
 				else
 					ns_switch_handler <= depart_w_sw6;
 				end if;
 			when depart_w_sw8 =>
 				--Dequeue
+				w_sch_departed_ack <= '1';
 				w_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
 				sw_rnaCtEnq <= '0';
-				
 				ns_switch_handler <= north_sw1;
 			when others =>
 				ns_switch_handler <= north_sw1;

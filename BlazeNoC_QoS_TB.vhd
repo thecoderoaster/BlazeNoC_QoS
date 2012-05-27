@@ -66,6 +66,23 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
         );
     END COMPONENT;
     
+	-- function to convert vector to string
+	FUNCTION vec2str(vec : std_logic_vector) RETURN string IS
+		VARIABLE stmp : string(vec'LEFT+1 DOWNTO 1); 
+	BEGIN
+		FOR i IN vec'REVERSE_RANGE LOOP 
+			IF vec(i) = '1' THEN
+				stmp(i+1) := '1';
+			ELSIF vec(i) = '0' THEN
+				stmp(i+1) := '0';
+			ELSE
+				stmp(i+1) := 'X';
+			END IF;
+		END LOOP;
+		RETURN stmp;
+	END vec2str;
+
+
 
    --Inputs
    signal clk_rte : std_logic := '0';
@@ -153,6 +170,12 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal packet_type_RT3	: std_logic_vector(1 downto 0);
 	signal priority_RT3		: std_logic;
 	
+	--Result Files for each Router
+	--file rt0_results_file : text open write_mode is "rt0_results_file.txt";
+	file rt1_results_file : text open write_mode is "rt1_results_file.txt";
+	--file rt2_results_file : text open write_mode is "rt2_results_file.txt";
+	--file rt3_results_file : text open write_mode is "rt3_results_file.txt";
+	
    -- Clock period definitions
    constant clk_period : time := 10 ns;
 	constant clk_period_pe : time := 20 ns;
@@ -233,7 +256,11 @@ BEGIN
 		if(router_setup = '1') then
 			trigger_0_cp <= '0';
 			trigger_0_dp <= '0';
+			reset_RT0 <= '0';
 			router_start := '0';
+			
+			--Wait
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT0 <= '1', '0' after 1 ns;
@@ -480,11 +507,16 @@ BEGIN
 		variable router_start		: std_logic;
 		variable my_pid : std_logic_vector(5 downto 0) := "000000";
 		variable buf_out : line;
+		variable buf_file : line;
 	begin
 		if(router_setup = '1') then
 			trigger_1_cp <= '0';
 			trigger_1_dp <= '0';
+			reset_RT1 <= '0';
 			router_start := '0';
+			
+			--Wait
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT1 <= '1', '0' after 1 ns;
@@ -509,6 +541,26 @@ BEGIN
 --			wait for clk_period_pe*4;
 			
 			
+			--Write to file
+			write(buf_out, string'("--------------------------------------------------------------------"));
+			write(buf_file, string'("--------------------------------------------------------------------"));
+			writeline(output, buf_out);
+			writeline(rt1_results_file, buf_file);
+			write(buf_out, string'("Router 1 Testbench"));
+			write(buf_file, string'("Router 1 Testbench"));
+			writeline(output, buf_out);
+			writeline(rt1_results_file, buf_file);
+			write(buf_out, string'("Setup completed @ T = "));
+			write(buf_out, now);
+			write(buf_file, string'("Setup completed @ T = "));
+			write(buf_file, now);
+			writeline(output, buf_out);
+			writeline(rt1_results_file, buf_file);
+			write(buf_out, string'("--------------------------------------------------------------------"));
+			write(buf_file, string'("--------------------------------------------------------------------"));
+			writeline(output, buf_out);
+			writeline(rt1_results_file, buf_file);
+			
 			router_start := '1';
 		end if;
 	
@@ -520,8 +572,6 @@ BEGIN
 			
 			loop
 				if(full_PE1 = '0') then
-					write(buf_out, string'("Inside Router 1 Loop..."));
-					writeline(output, buf_out);
 					--Send GARBAGE data to Router 3
 					--Send control packet
 					tid_RT1 <= "00000000000000000000000000001110";
@@ -551,8 +601,6 @@ BEGIN
 					
 					wait for clk_period_pe*20;
 					
-					--write(buf_out, string'(CONV_STRING(my_pid)));
-					--writeline(output, buf_out);
 					--wait until pe1_Ready = '1';
 					
 					--reset_RT1 <= '1', '0' after 1 ns;
@@ -585,7 +633,11 @@ BEGIN
 		if(router_setup = '1') then
 			trigger_2_cp <= '0';
 			trigger_2_dp <= '0';
+			reset_RT2 <= '0';
 			router_start := '0';
+			
+			--Wait
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT2 <= '1', '0' after 1 ns;
@@ -641,7 +693,11 @@ BEGIN
 		if(router_setup = '1') then
 			trigger_3_cp <= '0';
 			trigger_3_dp <= '0';
+			reset_RT2 <= '0';
 			router_start := '0';
+			
+			--Wait
+			wait for clk_period_pe*2;
 			
 			-- Resets Internal Counters			
 			reset_RT3 <= '1', '0' after 1 ns;
@@ -742,6 +798,9 @@ end process;
 --**ROUTER 1 STIMULUS PROCESS**--
 --*****************************--
    router1_stim_proc: process (reset_RT1, trigger_1_cp, trigger_1_dp, done_PE1, full_PE1)
+		variable buf_out : line;
+		variable buf_file : line;
+		variable injected_data : std_logic_vector(57 downto 0) := (others => '0');
 	begin		
      	
 		
@@ -764,6 +823,20 @@ end process;
 			data_inject_PE1 <= tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & "01" & pid_RT1 & packet_type_RT1 & priority_RT1 & "1";
 			sm_triggerPE1 <= '1';
 			
+			--Test: Display to console/file
+			injected_data := tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & "01" & pid_RT1 & packet_type_RT1 & priority_RT1 & "1";
+			write(buf_out, string'("@ T = "));
+			write(buf_out, now);
+			write(buf_out, string'(" RT1 sending CP:" & vec2str(injected_data)));
+			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT1) & vec2str(packet_type_RT1)));
+			writeline(output, buf_out);
+			
+			write(buf_file, string'("@ T = "));
+			write(buf_file, now);
+			write(buf_file, string'(" RT1 sending CP:" & vec2str(injected_data)));
+			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT1) & vec2str(packet_type_RT1)));
+			writeline(rt1_results_file, buf_file);
+			
 		end if;
 		
 		if (trigger_1_dp = '1' and done_PE1 = '0' and full_PE1 = '0') then
@@ -774,6 +847,19 @@ end process;
 			data_inject_PE1 <= tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & "01" & pid_RT1 & packet_type_RT1 & priority_RT1 & "0";
 			sm_triggerPE1 <= '1';
 			
+			--Test: Display to console/file
+			injected_data := tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & "01" & pid_RT1 & packet_type_RT1 & priority_RT1 & "0";
+			write(buf_out, string'("@ T = "));
+			write(buf_out, now);
+			write(buf_out, string'(" RT1 sending DP:" & vec2str(injected_data)));
+			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT1) & vec2str(packet_type_RT1)));
+			writeline(output, buf_out);
+			
+			write(buf_file, string'("@ T = "));
+			write(buf_file, now);
+			write(buf_file, string'(" RT1 sending DP:" & vec2str(injected_data)));
+			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT1) & vec2str(packet_type_RT1)));
+			writeline(rt1_results_file, buf_file);
 			
 		end if;			
 end process;

@@ -849,7 +849,6 @@ begin
 					n_arbEnq <= '0';
 					
 					n_rsv_wen_a <= '0';
-					n_rsv_table_purge <= '0';
 					n_sch_wen_a	<= '0';
 					sw_n_rna_toggle <= '0';
 					
@@ -1005,7 +1004,6 @@ begin
 					e_arbEnq <= '0';
 					
 					e_rsv_wen_a <= '0';
-					e_rsv_table_purge <= '0';
 					e_sch_wen_a	<= '0';
 					sw_e_rna_toggle <= '0';
 					
@@ -1161,7 +1159,6 @@ begin
 					s_arbEnq <= '0';
 					
 					s_rsv_wen_a <= '0';
-					s_rsv_table_purge <= '0';
 					s_sch_wen_a	<= '0';
 					sw_s_rna_toggle <= '0';
 					
@@ -1317,7 +1314,6 @@ begin
 					w_arbEnq <= '0';
 					
 					w_rsv_wen_a <= '0';
-					w_rsv_table_purge <= '0';
 					w_sch_wen_a	<= '0';
 					sw_w_rna_toggle <= '0';
 					
@@ -2064,7 +2060,7 @@ begin
 				ns_north_sorting_handler <= sort5;
 			when sort7 =>
 				--Is there a new job request? Issue it, if so.
-				if(n_sch_req_next_job = '1' and n_sch_job_valid = '1') then
+				if(n_sch_req_next_job = '1' and n_sch_job_valid = '1' and n_sort_next_job_time /= "11111111111111111111111111111111") then
 					n_sch_next_job_time <= n_sort_next_job_time;
 					n_sch_next_job_midpid <= n_sort_next_job_midpid;
 					n_last_scheduled := n_sort_next_job_midpid;
@@ -2387,6 +2383,11 @@ begin
 				e_rst <= '1', '0' after 1 ns;
 				s_rst <= '1', '0' after 1 ns;
 				w_rst <= '1', '0' after 1 ns;
+				
+				n_rsv_table_purge <= '0';
+				e_rsv_table_purge <= '0';
+				s_rsv_table_purge <= '0';
+				w_rsv_table_purge <= '0';
 				
 				n_invld_out <= '0';
 				e_invld_out <= '0';
@@ -2909,7 +2910,8 @@ begin
 			when depart_n_sw8 =>
 				--Dequeue
 				n_sch_departed_ack <= '1';
-				n_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				n_vcm_deq_set <= '1', '0' after 1 ns;			-- Dequeue from VCC
+				n_rsv_table_purge	<= '1', '0' after 1 ns;		-- Purge from Reservation Table
 				sw_rnaCtEnq <= '0';
 				ns_switch_handler <= depart_e_sw1;	
 --EAST
@@ -2982,7 +2984,8 @@ begin
 			when depart_e_sw8 =>
 				--Dequeue
 				e_sch_departed_ack <= '1';
-				e_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				e_vcm_deq_set <= '1', '0' after 1 ns;			-- Dequeue from VCC
+				e_rsv_table_purge	<= '1', '0' after 1 ns;		-- Purge from Reservation Table
 				sw_rnaCtEnq <= '0';
 				ns_switch_handler <= depart_s_sw1;	
 --SOUTH
@@ -3055,7 +3058,8 @@ begin
 			when depart_s_sw8 =>
 				--Dequeue
 				s_sch_departed_ack <= '1';
-				s_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				s_vcm_deq_set <= '1', '0' after 1 ns;			-- Dequeue from VCC
+				s_rsv_table_purge	<= '1', '0' after 1 ns;		-- Purge from Reservation Table
 				sw_rnaCtEnq <= '0';
 				ns_switch_handler <= depart_w_sw1;
 --WEST
@@ -3128,7 +3132,8 @@ begin
 			when depart_w_sw8 =>
 				--Dequeue
 				w_sch_departed_ack <= '1';
-				w_vcm_deq_set <= '1', '0' after 1 ns;		-- Dequeue from VCC
+				w_vcm_deq_set <= '1', '0' after 1 ns;			-- Dequeue from VCC
+				w_rsv_table_purge	<= '1', '0' after 1 ns;		-- Purge from Reservation Table
 				sw_rnaCtEnq <= '0';
 				ns_switch_handler <= north_sw1;
 			when others =>

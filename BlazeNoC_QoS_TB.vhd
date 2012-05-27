@@ -519,47 +519,53 @@ BEGIN
 			wait for clk_period_pe*2;
 			
 			loop
-				write(buf_out, string'("Inside Router 1 Loop..."));
-				writeline(output, buf_out);
-				--Send GARBAGE data to Router 3
-				--Send control packet
-				tid_RT1 <= "00000000000000000000000000001110";
-				dir_3_RT1 <= "000";		--Not used
-				dir_2_RT1 <= "000";		--Not used
-				dir_1_RT1 <= "111";		--Eject
-				dir_0_RT1 <= "010";		--South
-				count_RT1 <= "00";		--Default
-				pid_RT1 <= my_pid;		--Packet ID
-				packet_type_RT1 <= "01";
-				priority_RT1 <= '0';
-				trigger_1_cp <= '1', '0' after 1 ns;
-			
-				wait for clk_period_pe*20;
+				if(full_PE1 = '0') then
+					write(buf_out, string'("Inside Router 1 Loop..."));
+					writeline(output, buf_out);
+					--Send GARBAGE data to Router 3
+					--Send control packet
+					tid_RT1 <= "00000000000000000000000000001110";
+					dir_3_RT1 <= "000";		--Not used
+					dir_2_RT1 <= "000";		--Not used
+					dir_1_RT1 <= "111";		--Eject
+					dir_0_RT1 <= "010";		--South
+					count_RT1 <= "00";		--Default
+					pid_RT1 <= my_pid;		--Packet ID
+					packet_type_RT1 <= "01";
+					priority_RT1 <= '0';
+					trigger_1_cp <= '1', '0' after 1 ns;
+				
+					wait for clk_period_pe*20;
 
-				--Send its data packet (Low Priority)
-				tid_RT1 <= "00001000000000000000000000000000";
-				dir_3_RT1 <= "000";		--Not used
-				dir_2_RT1 <= "000";		--Not used
-				dir_1_RT1 <= "111";		--Eject
-				dir_0_RT1 <= "010";		--South
-				count_RT1 <= "00";		--Default
-				pid_RT1 <= my_pid;		--Packet ID
-				packet_type_RT1 <= "01";
-				priority_RT1 <= '0';
-				trigger_1_dp <= '1', '0' after 1 ns;
-				
-				wait for clk_period_pe*20;
-				
-				--write(buf_out, string'(CONV_STRING(my_pid)));
-				--writeline(output, buf_out);
-				--wait until pe1_Ready = '1';
-				
-				--reset_RT1 <= '1', '0' after 1 ns;
-				
-				wait for clk_period_pe*750;
-				
-				my_pid := my_pid + 1;
-			end loop;
+					--Send its data packet (Low Priority)
+					tid_RT1 <= "00001000000000000000000000000000";
+					dir_3_RT1 <= "000";		--Not used
+					dir_2_RT1 <= "000";		--Not used
+					dir_1_RT1 <= "111";		--Eject
+					dir_0_RT1 <= "010";		--South
+					count_RT1 <= "00";		--Default
+					pid_RT1 <= my_pid;		--Packet ID
+					packet_type_RT1 <= "01";
+					priority_RT1 <= '0';
+					trigger_1_dp <= '1', '0' after 1 ns;
+					
+					wait for clk_period_pe*20;
+					
+					--write(buf_out, string'(CONV_STRING(my_pid)));
+					--writeline(output, buf_out);
+					--wait until pe1_Ready = '1';
+					
+					--reset_RT1 <= '1', '0' after 1 ns;
+					
+					wait for clk_period_pe*750;
+					
+					my_pid := my_pid + 1;
+				else
+					write(buf_out, string'("Router 1 Loop (BLOCKED): PE1 reports FULL BUFFER!"));
+					writeline(output, buf_out);
+					wait for clk_period_pe*20;
+				end if;
+				end loop;
 			--Done
 			router_start := '0';	
 			

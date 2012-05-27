@@ -95,12 +95,12 @@ begin
 				end if;
 			when ctr_state =>
 				--Dequeue a packet from the FIFO
-				ejection_deq <= '1', '0' after 1 ns;
+				ejection_deq <= '1';
 				next_state1 <= receive_state;
 			when receive_state =>
 				--Read in the data and notify the FCU that it's good
 				ram_data_rcvd <= ejection_data;
-				next_state1 <= wait_state;
+				next_state1 <= start;
 			when others =>
 				next_state1 <= start;
 		end case;

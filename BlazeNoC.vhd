@@ -50,10 +50,18 @@ entity BlazeNoC is
 			 done_PE1				: out std_logic;
 			 done_PE2				: out std_logic;
 			 done_PE3				: out std_logic;
+			 ej_readyPE0 			: out std_logic;
+			 ej_readyPE1 			: out std_logic;
+			 ej_readyPE2 			: out std_logic;
+			 ej_readyPE3 			: out std_logic;
 			 data_inject_PE0		: in std_logic_vector (WIDTH downto 0);
 			 data_inject_PE1		: in std_logic_vector (WIDTH downto 0);
 			 data_inject_PE2		: in std_logic_vector (WIDTH downto 0);
-			 data_inject_PE3		: in std_logic_vector (WIDTH downto 0));
+			 data_inject_PE3		: in std_logic_vector (WIDTH downto 0);
+			 data_eject_PE0	 : out std_logic_vector(57 downto 0);
+			 data_eject_PE1	 : out std_logic_vector(57 downto 0);
+			 data_eject_PE2	 : out std_logic_vector(57 downto 0);
+			 data_eject_PE3	 : out std_logic_vector(57 downto 0));
 end BlazeNoC;
 
 architecture rtl of BlazeNoC is
@@ -114,7 +122,9 @@ architecture rtl of BlazeNoC is
 				trigger 				: in  std_logic;
 				full					: out std_logic;
 				done					: out std_logic;
+				eject_ready			: out std_logic;
 				tb_data_out			: in 	std_logic_vector (WIDTH downto 0);
+				tb_data_in			: out std_logic_vector (WIDTH downto 0);
 				injection_data 	: out std_logic_vector (WIDTH downto 0);
 				injection_enq 		: out std_logic;
 				injection_status 	: in  std_logic_vector (1 downto 0);	  	-- Buffer status to PE;
@@ -502,7 +512,9 @@ begin
 					sm_triggerPE0,
 					full_PE0,
 					done_PE0,
+					ej_readyPE0,
 					data_inject_PE0,
+					data_eject_PE0,
 					router0_injection_data,
 					router0_injection_enq,
 					router0_injection_status,
@@ -516,7 +528,9 @@ begin
 					sm_triggerPE1,
 					full_PE1,
 					done_PE1,
+					ej_readyPE1,
 					data_inject_PE1,
+					data_eject_PE1,
 					router1_injection_data,
 					router1_injection_enq,
 					router1_injection_status,
@@ -530,7 +544,9 @@ begin
 					sm_triggerPE2,
 					full_PE2,
 					done_PE2,
+					ej_readyPE2,
 					data_inject_PE2,
+					data_eject_PE2,
 					router2_injection_data,
 					router2_injection_enq,
 					router2_injection_status,
@@ -544,7 +560,9 @@ begin
 					sm_triggerPE3,
 					full_PE3,
 					done_PE3,
+					ej_readyPE3,
 					data_inject_PE3,
+					data_eject_PE3,
 					router3_injection_data,
 					router3_injection_enq,
 					router3_injection_status,

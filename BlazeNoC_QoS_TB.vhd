@@ -59,10 +59,18 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
          done_PE1 : OUT  std_logic;
          done_PE2 : OUT  std_logic;
          done_PE3 : OUT  std_logic;
+			ej_readyPE0 : OUT std_logic;
+			ej_readyPE1 : OUT std_logic;
+			ej_readyPE2 : OUT std_logic;
+			ej_readyPE3 : OUT std_logic;
          data_inject_PE0 : IN  std_logic_vector(57 downto 0);
          data_inject_PE1 : IN  std_logic_vector(57 downto 0);
          data_inject_PE2 : IN  std_logic_vector(57 downto 0);
-         data_inject_PE3 : IN  std_logic_vector(57 downto 0)
+         data_inject_PE3 : IN  std_logic_vector(57 downto 0);
+			data_eject_PE0	 : OUT std_logic_vector(57 downto 0);
+			data_eject_PE1	 : OUT std_logic_vector(57 downto 0);
+			data_eject_PE2	 : OUT std_logic_vector(57 downto 0);
+			data_eject_PE3	 : OUT std_logic_vector(57 downto 0)
         );
     END COMPONENT;
     
@@ -106,6 +114,14 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
    signal done_PE1 : std_logic;
    signal done_PE2 : std_logic;
    signal done_PE3 : std_logic;
+	signal ej_readyPE0 : std_logic;
+	signal ej_readyPE1 : std_logic;
+	signal ej_readyPE2 : std_logic;
+	signal ej_readyPE3 : std_logic;
+	signal data_eject_PE0 : std_logic_vector(57 downto 0);
+   signal data_eject_PE1 : std_logic_vector(57 downto 0);
+   signal data_eject_PE2 : std_logic_vector(57 downto 0);
+   signal data_eject_PE3 : std_logic_vector(57 downto 0);
 	
 	--Signals for Testing
 	signal router_setup 		: std_logic;
@@ -174,7 +190,7 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	--file rt0_results_file : text open write_mode is "rt0_results_file.txt";
 	file rt1_results_file : text open write_mode is "rt1_results_file.txt";
 	--file rt2_results_file : text open write_mode is "rt2_results_file.txt";
-	--file rt3_results_file : text open write_mode is "rt3_results_file.txt";
+	file rt3_results_file : text open write_mode is "rt3_results_file.txt";
 	
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -199,10 +215,18 @@ BEGIN
           done_PE1 => done_PE1,
           done_PE2 => done_PE2,
           done_PE3 => done_PE3,
+			 ej_readyPE0 => ej_readyPE0,
+			 ej_readyPE1 => ej_readyPE1,
+			 ej_readyPE2 => ej_readyPE2,
+			 ej_readyPE3 => ej_readyPE3,
           data_inject_PE0 => data_inject_PE0,
           data_inject_PE1 => data_inject_PE1,
           data_inject_PE2 => data_inject_PE2,
-          data_inject_PE3 => data_inject_PE3
+          data_inject_PE3 => data_inject_PE3,
+			 data_eject_PE0 => data_eject_PE0,
+          data_eject_PE1 => data_eject_PE1,
+          data_eject_PE2 => data_eject_PE2,
+          data_eject_PE3 => data_eject_PE3
         );
 		  
 	
@@ -689,6 +713,8 @@ BEGIN
 --**********************-- 
 	main_proc_RT3: process
 		variable router_start		: std_logic;
+		variable buf_out : line;
+		variable buf_file : line;
 	begin
 		if(router_setup = '1') then
 			trigger_3_cp <= '0';
@@ -720,6 +746,27 @@ BEGIN
 --			reset_RT3 <= '1', '0' after 1 ns;
 --			
 --			wait for clk_period_pe*4;
+			
+			--Write to file
+			write(buf_out, string'("--------------------------------------------------------------------"));
+			write(buf_file, string'("--------------------------------------------------------------------"));
+			writeline(output, buf_out);
+			writeline(rt3_results_file, buf_file);
+			write(buf_out, string'("Router 3 Testbench"));
+			write(buf_file, string'("Router 3 Testbench"));
+			writeline(output, buf_out);
+			writeline(rt3_results_file, buf_file);
+			write(buf_out, string'("Setup completed @ T = "));
+			write(buf_out, now);
+			write(buf_file, string'("Setup completed @ T = "));
+			write(buf_file, now);
+			writeline(output, buf_out);
+			writeline(rt3_results_file, buf_file);
+			write(buf_out, string'("--------------------------------------------------------------------"));
+			write(buf_file, string'("--------------------------------------------------------------------"));
+			writeline(output, buf_out);
+			writeline(rt3_results_file, buf_file);
+			
 			
 			router_start := '1';
 		end if;
@@ -943,7 +990,37 @@ end process;
 			
 			
 		end if;	
-		
+	
 		
 end process;
+
+--*****************************--
+--**ROUTER 3 EJECTION PROCESS**--
+--*****************************--
+   router3_eject_proc: process (ej_readyPE3)
+		variable buf_out : line;
+		variable buf_file : line;
+	begin		
+     	
+		
+		--Reset Condition
+		if (ej_readyPE3 = '1') then
+			
+			if(data_eject_PE3(0) = '1') then
+				write(buf_out, string'("@ T = "));
+				write(buf_out, now);
+				write(buf_out, string'(" RT3 ejected CP:" & vec2str(data_eject_PE3)));
+				write(buf_out, string'(" :: PIDMID = " & vec2str(data_eject_PE3(9 downto 2))));
+				writeline(output, buf_out);
+			else
+				write(buf_file, string'("@ T = "));
+				write(buf_file, now);
+				write(buf_file, string'(" RT3 ejected DP:" & vec2str(data_eject_PE3)));
+				write(buf_file, string'(" :: PIDMID = " & vec2str(data_eject_PE3(9 downto 2))));
+				writeline(rt3_results_file, buf_file);
+			end if;
+		end if;
+		
+end process;
+
 END;

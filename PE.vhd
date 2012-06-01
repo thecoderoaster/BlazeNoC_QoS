@@ -39,7 +39,9 @@ entity PE is
 			  trigger 				: in  std_logic;									-- From Traffic Generator
 			  full					: out std_logic;									-- To Traffic Generator
 			  done					: out std_logic;									-- To Traffic Generator
-			  tb_data_out			: in 	std_logic_vector (WIDTH downto 0);
+			  eject_ready			: out std_logic;									-- To Traffic Generator
+			  tb_data_out			: in 	std_logic_vector (WIDTH downto 0);	-- From Traffic Generator
+			  tb_data_in			: out std_logic_vector (WIDTH downto 0);	-- To Traffic Generator
            injection_data 		: out std_logic_vector (WIDTH downto 0);
            injection_enq 		: out std_logic;
            injection_status 	: in  std_logic_vector (1 downto 0);	  	-- Buffer status to PE;
@@ -95,11 +97,13 @@ begin
 				end if;
 			when ctr_state =>
 				--Dequeue a packet from the FIFO
-				ejection_deq <= '1';
+				--ejection_deq <= '1';
+				ejection_deq <= '1', '0' after 1 ns;
+				tb_data_in <= ejection_data;
 				next_state1 <= receive_state;
 			when receive_state =>
 				--Read in the data and notify the FCU that it's good
-				ram_data_rcvd <= ejection_data;
+				eject_ready <= '1', '0' after 1 ns;
 				next_state1 <= start;
 			when others =>
 				next_state1 <= start;

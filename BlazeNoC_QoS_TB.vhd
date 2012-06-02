@@ -187,9 +187,9 @@ ARCHITECTURE behavior OF BlazeNoC_QoS_TB IS
 	signal priority_RT3		: std_logic;
 	
 	--Result Files for each Router
-	--file rt0_results_file : text open write_mode is "rt0_results_file.txt";
+	file rt0_results_file : text open write_mode is "rt0_results_file.txt";
 	file rt1_results_file : text open write_mode is "rt1_results_file.txt";
-	--file rt2_results_file : text open write_mode is "rt2_results_file.txt";
+	file rt2_results_file : text open write_mode is "rt2_results_file.txt";
 	file rt3_results_file : text open write_mode is "rt3_results_file.txt";
 	
    -- Clock period definitions
@@ -276,6 +276,9 @@ BEGIN
 --**********************-- 
 	main_proc_RT0: process
 		variable router_start		: std_logic;
+		variable my_pid : std_logic_vector(5 downto 0) := "000000";
+		variable buf_out : line;
+		variable buf_file : line;
 	begin
 		if(router_setup = '1') then
 			trigger_0_cp <= '0';
@@ -308,212 +311,233 @@ BEGIN
 --			
 --			wait for clk_period_pe*4;
 			
+			--Write to file
+			write(buf_out, string'("--------------------------------------------------------------------"));
+			write(buf_file, string'("--------------------------------------------------------------------"));
+			writeline(output, buf_out);
+			writeline(rt0_results_file, buf_file);
+			write(buf_out, string'("Router 0 Testbench Results"));
+			write(buf_file, string'("Router 0 Testbench Results"));
+			writeline(output, buf_out);
+			writeline(rt0_results_file, buf_file);
+			write(buf_out, string'("Setup completed @ t = "));
+			write(buf_out, now);
+			write(buf_file, string'("Setup completed @ t = "));
+			write(buf_file, now);
+			writeline(output, buf_out);
+			writeline(rt0_results_file, buf_file);
+			write(buf_out, string'("--------------------------------------------------------------------"));
+			write(buf_file, string'("--------------------------------------------------------------------"));
+			writeline(output, buf_out);
+			writeline(rt0_results_file, buf_file);
+			
+			
 			router_start := '1';
 		end if;
 	
 		if(router_start = '1') then
 			
---			--Send a control packet	
---			tid_RT0 <= "00000000000000000000001100000011";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000000";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_cp <= '1', '0' after 1 ns;
---			
---				
---			wait for clk_period_pe*5;
---			
---			--Send a control packet
---			tid_RT0 <= "00000000000000001100000110000011";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000001";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_cp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*10;
---						
---			-- Resets Internal Counters			
---			reset_RT0 <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---			
---			--Send its data packet (Low Priority)
---			tid_RT0 <= "00000000000000000000000000000000";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000000";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_dp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---			
---			--Send its data packet (Low Priority)
---			tid_RT0 <= "00000100000000000000000000000000";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000001";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_dp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---			
---			--Send control packet
---			tid_RT0 <= "00000000000000000000011110001000";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000010";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_cp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---				
---			--Send control packet
---			tid_RT0 <= "00000000000000000000000111110000";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000011";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_cp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---
---			--Send its data packet (Low Priority)
---			tid_RT0 <= "00001000000000000000000000000000";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000010";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_dp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---			
---			--Send its data packet (High Priority)
---			tid_RT0 <= "00001100000000000000000000000111";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000011";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '1';
---			trigger_0_dp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---
---			--Send control packet
---			tid_RT0 <= "00000000000000000110000000011000";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000100";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_cp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---			
---			--Send control packet
---			tid_RT0 <= "00000000000000000100000010001111";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "001000";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_cp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---			
---			--Send its data packet (Low Priority)
---			tid_RT0 <= "00100100000000000000000000000000";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "001000";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '1';
---			trigger_0_dp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*10;
---			
---			--Send its data packet (Low Priority)
---			tid_RT0 <= "00100100000000000000000000000000";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000100";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '1';
---			trigger_0_dp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
---			
---			--Send control packet
---			tid_RT0 <= "00000000000000000000001101100001";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000111";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '0';
---			trigger_0_cp <= '1', '0' after 1 ns;
---		
---			wait for clk_period_pe*40;
---			
---			--Send its data packet (High Priority)
---			tid_RT0 <= "10000000000000000000000000000001";
---			dir_3_RT0 <= "000";		--Not used
---			dir_2_RT0 <= "111";		--Eject
---			dir_1_RT0 <= "010";		--South
---			dir_0_RT0 <= "001";		--East
---			count_RT0 <= "00";		--Default
---			pid_RT0 <= "000111";		--Packet ID
---			packet_type_RT0 <= "00";
---			priority_RT0 <= '1';
---			trigger_0_dp <= '1', '0' after 1 ns;
---			
---			wait for clk_period_pe*20;
+			--Send a control packet	
+			tid_RT0 <= "00000000000000000000000010000011";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000000";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_cp <= '1', '0' after 1 ns;
+			
+				
+			wait for clk_period_pe*5;
+			
+			--Send a control packet
+			tid_RT0 <= "00000000000000000000000010011011";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000001";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_cp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*10;
+						
+			-- Resets Internal Counters			
+			reset_RT0 <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+			
+			--Send its data packet (Low Priority)
+			tid_RT0 <= "00000000000000000000000000000000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000000";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_dp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+			
+			--Send its data packet (Low Priority)
+			tid_RT0 <= "00000100000000000000000000000000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000001";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_dp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+			
+			--Send control packet
+			tid_RT0 <= "00000000000000000000011110001000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000010";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_cp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+				
+			--Send control packet
+			tid_RT0 <= "00000000000000000000000111110000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000011";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_cp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+
+			--Send its data packet (Low Priority)
+			tid_RT0 <= "00001000000000000000000000000000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000010";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_dp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+			
+			--Send its data packet (High Priority)
+			tid_RT0 <= "00001100000000000000000000000111";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000011";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '1';
+			trigger_0_dp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+
+			--Send control packet
+			tid_RT0 <= "00000000000000000000000111111000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000100";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_cp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+			
+			--Send control packet
+			tid_RT0 <= "00000000000000000000111010001111";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "001000";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_cp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+			
+			--Send its data packet (Low Priority)
+			tid_RT0 <= "00100100000000000000000000000000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "001000";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '1';
+			trigger_0_dp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*10;
+			
+			--Send its data packet (Low Priority)
+			tid_RT0 <= "00100100000000000000000000000000";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000100";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '1';
+			trigger_0_dp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
+			
+			--Send control packet
+			tid_RT0 <= "00000000000000000000001101100001";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000111";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '0';
+			trigger_0_cp <= '1', '0' after 1 ns;
+		
+			wait for clk_period_pe*40;
+			
+			--Send its data packet (High Priority)
+			tid_RT0 <= "10000000000000000000000000000001";
+			dir_3_RT0 <= "000";		--Not used
+			dir_2_RT0 <= "111";		--Eject
+			dir_1_RT0 <= "010";		--South
+			dir_0_RT0 <= "001";		--East
+			count_RT0 <= "00";		--Default
+			pid_RT0 <= "000111";		--Packet ID
+			packet_type_RT0 <= "00";
+			priority_RT0 <= '1';
+			trigger_0_dp <= '1', '0' after 1 ns;
+			
+			wait for clk_period_pe*20;
 			
 			--Done
 			router_start := '0';	
@@ -570,13 +594,13 @@ BEGIN
 			write(buf_file, string'("--------------------------------------------------------------------"));
 			writeline(output, buf_out);
 			writeline(rt1_results_file, buf_file);
-			write(buf_out, string'("Router 1 Testbench"));
-			write(buf_file, string'("Router 1 Testbench"));
+			write(buf_out, string'("Router 1 Testbench Results"));
+			write(buf_file, string'("Router 1 Testbench Results"));
 			writeline(output, buf_out);
 			writeline(rt1_results_file, buf_file);
-			write(buf_out, string'("Setup completed @ T = "));
+			write(buf_out, string'("Setup completed @ t = "));
 			write(buf_out, now);
-			write(buf_file, string'("Setup completed @ T = "));
+			write(buf_file, string'("Setup completed @ t = "));
 			write(buf_file, now);
 			writeline(output, buf_out);
 			writeline(rt1_results_file, buf_file);
@@ -598,7 +622,7 @@ BEGIN
 				if(full_PE1 = '0') then
 					--Send GARBAGE data to Router 3
 					--Send control packet
-					tid_RT1 <= "00000000000000000000000000001110";
+					tid_RT1 <= "00000000000000100000000000001110";
 					dir_3_RT1 <= "000";		--Not used
 					dir_2_RT1 <= "000";		--Not used
 					dir_1_RT1 <= "111";		--Eject
@@ -609,7 +633,7 @@ BEGIN
 					priority_RT1 <= '0';
 					trigger_1_cp <= '1', '0' after 1 ns;
 				
-					wait for clk_period_pe*20;
+					wait for clk_period_pe*20000;
 
 					--Send its data packet (Low Priority)
 					tid_RT1 <= "00001000000000000000000000000000";
@@ -653,6 +677,8 @@ BEGIN
 --**********************-- 
 	main_proc_RT2: process
 		variable router_start		: std_logic;
+		variable buf_out : line;
+		variable buf_file : line;
 	begin
 		if(router_setup = '1') then
 			trigger_2_cp <= '0';
@@ -684,6 +710,26 @@ BEGIN
 --			reset_RT2 <= '1', '0' after 1 ns;
 --			
 --			wait for clk_period_pe*4;
+	
+			--Write to file
+			write(buf_out, string'("--------------------------------------------------------------------"));
+			write(buf_file, string'("--------------------------------------------------------------------"));
+			writeline(output, buf_out);
+			writeline(rt2_results_file, buf_file);
+			write(buf_out, string'("Router 2 Testbench Results"));
+			write(buf_file, string'("Router 2 Testbench Results"));
+			writeline(output, buf_out);
+			writeline(rt2_results_file, buf_file);
+			write(buf_out, string'("Setup completed @ t = "));
+			write(buf_out, now);
+			write(buf_file, string'("Setup completed @ t = "));
+			write(buf_file, now);
+			writeline(output, buf_out);
+			writeline(rt2_results_file, buf_file);
+			write(buf_out, string'("--------------------------------------------------------------------"));
+			write(buf_file, string'("--------------------------------------------------------------------"));
+			writeline(output, buf_out);
+			writeline(rt2_results_file, buf_file);
 			
 			router_start := '1';
 		end if;
@@ -752,13 +798,13 @@ BEGIN
 			write(buf_file, string'("--------------------------------------------------------------------"));
 			writeline(output, buf_out);
 			writeline(rt3_results_file, buf_file);
-			write(buf_out, string'("Router 3 Testbench"));
-			write(buf_file, string'("Router 3 Testbench"));
+			write(buf_out, string'("Router 3 Testbench Results"));
+			write(buf_file, string'("Router 3 Testbench Results"));
 			writeline(output, buf_out);
 			writeline(rt3_results_file, buf_file);
-			write(buf_out, string'("Setup completed @ T = "));
+			write(buf_out, string'("Setup completed @ t = "));
 			write(buf_out, now);
-			write(buf_file, string'("Setup completed @ T = "));
+			write(buf_file, string'("Setup completed @ t = "));
 			write(buf_file, now);
 			writeline(output, buf_out);
 			writeline(rt3_results_file, buf_file);
@@ -803,6 +849,9 @@ BEGIN
 --**ROUTER 0 STIMULUS PROCESS**--
 --*****************************--
    router0_stim_proc: process (reset_RT0, trigger_0_cp, trigger_0_dp, done_PE0, full_PE0)
+		variable buf_out : line;
+		variable buf_file : line;
+		variable injected_data : std_logic_vector(57 downto 0) := (others => '0');
 	begin		
      	
 		
@@ -825,6 +874,24 @@ BEGIN
 			data_inject_PE0 <= tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & "00" & pid_RT0 & packet_type_RT0 & priority_RT0 & "1";
 			sm_triggerPE0 <= '1';
 			
+			--Test: Display to console/file
+			injected_data := tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & "00" & pid_RT0 & packet_type_RT0 & priority_RT0 & "1";
+			write(buf_out, string'("@ t = "));
+			write(buf_out, now);
+			write(buf_out, string'(" RT0 sending CP:" & vec2str(injected_data)));
+			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT0) & vec2str(packet_type_RT0)));
+			write(buf_out, string'(" :: TID = "));
+			write(buf_out, conv_integer(injected_data(57 downto 26)));
+			writeline(output, buf_out);
+			
+			write(buf_file, string'("@ t = "));
+			write(buf_file, now);
+			write(buf_file, string'(" RT0 sending CP:" & vec2str(injected_data)));
+			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT0) & vec2str(packet_type_RT0)));
+			write(buf_file, string'(" :: TID = "));
+			write(buf_file, conv_integer(injected_data(57 downto 26)));
+			writeline(rt0_results_file, buf_file);
+			
 		end if;
 		
 		if (trigger_0_dp = '1' and done_PE0 = '0' and full_PE0 = '0') then
@@ -835,7 +902,20 @@ BEGIN
 			data_inject_PE0 <= tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & "00" & pid_RT0 & packet_type_RT0 & priority_RT0 & "0";
 			sm_triggerPE0 <= '1';
 			
+			--Test: Display to console/file
+			injected_data := tid_RT0 & dir_3_RT0 & dir_2_RT0 & dir_1_RT0 & dir_0_RT0 & count_RT0 & "00" & pid_RT0 & packet_type_RT0 & priority_RT0 & "0";
+			write(buf_out, string'("@ t = "));
+			write(buf_out, now);
+			write(buf_out, string'(" RT0 sending DP:" & vec2str(injected_data)));
+			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT0) & vec2str(packet_type_RT0)));
+			writeline(output, buf_out);
 			
+			write(buf_file, string'("@ t = "));
+			write(buf_file, now);
+			write(buf_file, string'(" RT0 sending DP:" & vec2str(injected_data)));
+			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT0) & vec2str(packet_type_RT0)));
+			writeline(rt0_results_file, buf_file);
+		
 		end if;	
 		
 end process;
@@ -872,16 +952,20 @@ end process;
 			
 			--Test: Display to console/file
 			injected_data := tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & "01" & pid_RT1 & packet_type_RT1 & priority_RT1 & "1";
-			write(buf_out, string'("@ T = "));
+			write(buf_out, string'("@ t = "));
 			write(buf_out, now);
 			write(buf_out, string'(" RT1 sending CP:" & vec2str(injected_data)));
 			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT1) & vec2str(packet_type_RT1)));
+			write(buf_out, string'(" :: TID = "));
+			write(buf_out, conv_integer(injected_data(57 downto 26)));
 			writeline(output, buf_out);
 			
-			write(buf_file, string'("@ T = "));
+			write(buf_file, string'("@ t = "));
 			write(buf_file, now);
 			write(buf_file, string'(" RT1 sending CP:" & vec2str(injected_data)));
 			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT1) & vec2str(packet_type_RT1)));
+			write(buf_file, string'(" :: TID = "));
+			write(buf_file, conv_integer(injected_data(57 downto 26)));
 			writeline(rt1_results_file, buf_file);
 			
 		end if;
@@ -896,13 +980,13 @@ end process;
 			
 			--Test: Display to console/file
 			injected_data := tid_RT1 & dir_3_RT1 & dir_2_RT1 & dir_1_RT1 & dir_0_RT1 & count_RT1 & "01" & pid_RT1 & packet_type_RT1 & priority_RT1 & "0";
-			write(buf_out, string'("@ T = "));
+			write(buf_out, string'("@ t = "));
 			write(buf_out, now);
 			write(buf_out, string'(" RT1 sending DP:" & vec2str(injected_data)));
 			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT1) & vec2str(packet_type_RT1)));
 			writeline(output, buf_out);
 			
-			write(buf_file, string'("@ T = "));
+			write(buf_file, string'("@ t = "));
 			write(buf_file, now);
 			write(buf_file, string'(" RT1 sending DP:" & vec2str(injected_data)));
 			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT1) & vec2str(packet_type_RT1)));
@@ -915,6 +999,9 @@ end process;
 --**ROUTER 2 STIMULUS PROCESS**--
 --*****************************--
    router2_stim_proc: process (reset_RT2, trigger_2_cp, trigger_2_dp, done_PE2, full_PE2)
+		variable buf_out : line;
+		variable buf_file : line;
+		variable injected_data : std_logic_vector(57 downto 0) := (others => '0');
 	begin		
      	
 		
@@ -937,6 +1024,24 @@ end process;
 			data_inject_PE2 <= tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & "10" & pid_RT2 & packet_type_RT2 & priority_RT2 & "1";
 			sm_triggerPE2 <= '1';
 			
+			--Test: Display to console/file
+			injected_data := tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & "10" & pid_RT2 & packet_type_RT2 & priority_RT2 & "1";
+			write(buf_out, string'("@ t = "));
+			write(buf_out, now);
+			write(buf_out, string'(" RT2 sending CP:" & vec2str(injected_data)));
+			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT2) & vec2str(packet_type_RT2)));
+			write(buf_out, string'(" :: TID = "));
+			write(buf_out, conv_integer(injected_data(57 downto 26)));
+			writeline(output, buf_out);
+			
+			write(buf_file, string'("@ t = "));
+			write(buf_file, now);
+			write(buf_file, string'(" RT2 sending CP:" & vec2str(injected_data)));
+			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT2) & vec2str(packet_type_RT2)));
+			write(buf_file, string'(" :: TID = "));
+			write(buf_file, conv_integer(injected_data(57 downto 26)));
+			writeline(rt2_results_file, buf_file);
+			
 		end if;
 		
 		if (trigger_2_dp = '1' and done_PE2 = '0' and full_PE2 = '0') then
@@ -947,6 +1052,19 @@ end process;
 			data_inject_PE2 <= tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & "10" & pid_RT2 & packet_type_RT2 & priority_RT2 & "0";
 			sm_triggerPE2 <= '1';
 			
+			--Test: Display to console/file
+			injected_data := tid_RT2 & dir_3_RT2 & dir_2_RT2 & dir_1_RT2 & dir_0_RT2 & count_RT2 & "10" & pid_RT2 & packet_type_RT2 & priority_RT2 & "0";
+			write(buf_out, string'("@ t = "));
+			write(buf_out, now);
+			write(buf_out, string'(" RT2 sending DP:" & vec2str(injected_data)));
+			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT2) & vec2str(packet_type_RT2)));
+			writeline(output, buf_out);
+			
+			write(buf_file, string'("@ t = "));
+			write(buf_file, now);
+			write(buf_file, string'(" RT2 sending DP:" & vec2str(injected_data)));
+			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT2) & vec2str(packet_type_RT2)));
+			writeline(rt1_results_file, buf_file);
 			
 		end if;	
 		
@@ -956,6 +1074,9 @@ end process;
 --**ROUTER 3 STIMULUS PROCESS**--
 --*****************************--
    router3_stim_proc: process (reset_RT3, trigger_3_cp, trigger_3_dp, done_PE3, full_PE3)
+		variable buf_out : line;
+		variable buf_file : line;
+		variable injected_data : std_logic_vector(57 downto 0) := (others => '0');
 	begin		
      	
 		
@@ -978,6 +1099,24 @@ end process;
 			data_inject_PE3 <= tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & "11" & pid_RT3 & packet_type_RT3 & priority_RT3 & "1";
 			sm_triggerPE3 <= '1';
 			
+			--Test: Display to console/file
+			injected_data := tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & "11" & pid_RT3 & packet_type_RT3 & priority_RT3 & "1";
+			write(buf_out, string'("@ t = "));
+			write(buf_out, now);
+			write(buf_out, string'(" RT3 sending CP:" & vec2str(injected_data)));
+			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT3) & vec2str(packet_type_RT3)));
+			write(buf_out, string'(" :: TID = "));
+			write(buf_out, conv_integer(injected_data(57 downto 26)));
+			writeline(output, buf_out);
+			
+			write(buf_file, string'("@ t = "));
+			write(buf_file, now);
+			write(buf_file, string'(" RT3 sending CP:" & vec2str(injected_data)));
+			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT3) & vec2str(packet_type_RT3)));
+			write(buf_file, string'(" :: TID = "));
+			write(buf_file, conv_integer(injected_data(57 downto 26)));
+			writeline(rt3_results_file, buf_file);
+			
 		end if;
 		
 		if (trigger_3_dp = '1' and done_PE3 = '0' and full_PE3 = '0') then
@@ -988,6 +1127,19 @@ end process;
 			data_inject_PE3 <= tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & "11" & pid_RT3 & packet_type_RT3 & priority_RT3 & "0";
 			sm_triggerPE3 <= '1';
 			
+			--Test: Display to console/file
+			injected_data := tid_RT3 & dir_3_RT3 & dir_2_RT3 & dir_1_RT3 & dir_0_RT3 & count_RT3 & "11" & pid_RT3 & packet_type_RT3 & priority_RT3 & "0";
+			write(buf_out, string'("@ t = "));
+			write(buf_out, now);
+			write(buf_out, string'(" RT3 sending DP:" & vec2str(injected_data)));
+			write(buf_out, string'(" :: PIDMID = " & vec2str(pid_RT3) & vec2str(packet_type_RT3)));
+			writeline(output, buf_out);
+			
+			write(buf_file, string'("@ t = "));
+			write(buf_file, now);
+			write(buf_file, string'(" RT3 sending DP:" & vec2str(injected_data)));
+			write(buf_file, string'(" :: PIDMID = " & vec2str(pid_RT3) & vec2str(packet_type_RT3)));
+			writeline(rt3_results_file, buf_file);
 			
 		end if;	
 	
@@ -1007,16 +1159,30 @@ end process;
 		if (ej_readyPE3 = '1') then
 			
 			if(data_eject_PE3(0) = '1') then
-				write(buf_out, string'("@ T = "));
-				write(buf_out, now);
-				write(buf_out, string'(" RT3 ejected CP:" & vec2str(data_eject_PE3)));
-				write(buf_out, string'(" :: PIDMID = " & vec2str(data_eject_PE3(9 downto 2))));
-				writeline(output, buf_out);
+				write(buf_file, string'("@ t = "));
+				write(buf_file, now);
+				write(buf_file, string'(" RT3 ejected CP:" & vec2str(data_eject_PE3)));
+				write(buf_file, string'(" :: PIDMID = " & vec2str(data_eject_PE3(9 downto 2))));
+				if(data_eject_PE3(11 downto 10) = "00") then
+					write(buf_file, string'(" :: Source = RT0"));
+				elsif(data_eject_PE3(11 downto 10) = "01") then
+					write(buf_file, string'(" :: Source = RT1"));
+				elsif(data_eject_PE3(11 downto 10) = "10") then
+					write(buf_file, string'(" :: Source = RT2"));
+				end if;
+				writeline(rt3_results_file, buf_file);
 			else
-				write(buf_file, string'("@ T = "));
+				write(buf_file, string'("@ t = "));
 				write(buf_file, now);
 				write(buf_file, string'(" RT3 ejected DP:" & vec2str(data_eject_PE3)));
 				write(buf_file, string'(" :: PIDMID = " & vec2str(data_eject_PE3(9 downto 2))));
+				if(data_eject_PE3(11 downto 10) = "00") then
+					write(buf_file, string'(" :: Source = RT0"));
+				elsif(data_eject_PE3(11 downto 10) = "01") then
+					write(buf_file, string'(" :: Source = RT1"));
+				elsif(data_eject_PE3(11 downto 10) = "10") then
+					write(buf_file, string'(" :: Source = RT2"));
+				end if;
 				writeline(rt3_results_file, buf_file);
 			end if;
 		end if;

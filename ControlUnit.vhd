@@ -619,7 +619,8 @@ begin
 	begin
 	
 		if rst = '1' then
-			counter := std_logic_vector(to_unsigned(0, counter'length));
+			--counter := std_logic_vector(to_unsigned(0, counter'length));
+			counter := globaltime;
 			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			n_sch_job_expired <= '0';
 			
@@ -630,7 +631,8 @@ begin
 				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
 					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
 					if(counter = n_sch_next_job_time) then
-						counter := "00000000000000000000000000000000";
+						--counter := "00000000000000000000000000000000";
+						counter := globaltime;
 						n_sch_job_expired <= '1';
 					else
 						timeunit := "00000000000000000000000000000000";
@@ -640,7 +642,8 @@ begin
 				n_sch_job_expired <= '0';
 			elsif(n_sch_start_timer = '0' and n_sch_job_expired = '0') then
 				n_sch_job_expired <= '0';
-				counter := std_logic_vector(to_unsigned(0, counter'length));
+				--counter := std_logic_vector(to_unsigned(0, counter'length));
+				counter := globaltime;
 				timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			end if;
 		end if;
@@ -657,7 +660,8 @@ begin
 	begin
 	
 		if rst = '1' then
-			counter := std_logic_vector(to_unsigned(0, counter'length));
+			--counter := std_logic_vector(to_unsigned(0, counter'length));
+			counter := globaltime;
 			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			e_sch_job_expired <= '0';
 			
@@ -667,7 +671,8 @@ begin
 				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
 					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
 					if(counter = e_sch_next_job_time) then
-						counter := "00000000000000000000000000000000";
+						--counter := "00000000000000000000000000000000";
+						counter := globaltime;
 						e_sch_job_expired <= '1';
 					else
 						timeunit := "00000000000000000000000000000000";
@@ -677,7 +682,8 @@ begin
 				e_sch_job_expired <= '0';
 			elsif(e_sch_start_timer = '0' and e_sch_job_expired = '0') then
 				e_sch_job_expired <= '0';
-				counter := std_logic_vector(to_unsigned(0, counter'length));
+				--counter := std_logic_vector(to_unsigned(0, counter'length));
+				counter := globaltime;
 				timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			end if;
 		end if;
@@ -694,7 +700,8 @@ begin
 	begin
 	
 		if rst = '1' then
-			counter := std_logic_vector(to_unsigned(0, counter'length));
+			--counter := std_logic_vector(to_unsigned(0, counter'length));
+			counter := globaltime;
 			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			s_sch_job_expired <= '0';
 			
@@ -704,7 +711,8 @@ begin
 				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
 					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
 					if(counter = s_sch_next_job_time) then
-						counter := "00000000000000000000000000000000";
+						--counter := "00000000000000000000000000000000";
+						counter := globaltime;
 						s_sch_job_expired <= '1';
 					else
 						timeunit := "00000000000000000000000000000000";
@@ -714,7 +722,8 @@ begin
 				s_sch_job_expired <= '0';
 			elsif(s_sch_start_timer = '0' and s_sch_job_expired = '0') then
 				s_sch_job_expired <= '0';
-				counter := std_logic_vector(to_unsigned(0, counter'length));
+				--counter := std_logic_vector(to_unsigned(0, counter'length));
+				counter := globaltime;
 				timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			end if;
 		end if;
@@ -733,7 +742,8 @@ begin
 	begin
 	
 		if rst = '1' then
-			counter := std_logic_vector(to_unsigned(0, counter'length));
+			--counter := std_logic_vector(to_unsigned(0, counter'length));
+			counter := globaltime;
 			timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			w_sch_job_expired <= '0';
 			
@@ -743,7 +753,8 @@ begin
 				if(timeunit = "00000000000000000000000000000110") then								-- was 1000 cycles 0000000000111110
 					counter := counter + "00000000000000000000000000000001";		--increment the counter by 1 tick
 					if(counter = w_sch_next_job_time) then
-						counter := "00000000000000000000000000000000";
+						--counter := "00000000000000000000000000000000";
+						counter := globaltime;
 						w_sch_job_expired <= '1';
 					else
 						timeunit := "00000000000000000000000000000000";
@@ -753,7 +764,8 @@ begin
 				w_sch_job_expired <= '0';
 			elsif(w_sch_start_timer = '0' and w_sch_job_expired = '0') then
 				w_sch_job_expired <= '0';
-				counter := std_logic_vector(to_unsigned(0, counter'length));
+				--counter := std_logic_vector(to_unsigned(0, counter'length));
+				counter := globaltime;
 				timeunit := std_logic_vector(to_unsigned(0, timeunit'length));
 			end if;
 		end if;
@@ -1510,6 +1522,7 @@ begin
 				n_sch_job_ready_rst <= '0';
 				n_vcm_shift_complete_rst <= '1', '0' after 1 ns;
 				n_vcm_req_complete_rst <= '1', '0' after 1 ns;
+				n_sch_start_timer <= '0';
 				
 				ns_n_scheduler_handler <= schedule1;
 			when wait_state =>
@@ -1631,6 +1644,7 @@ begin
 				e_sch_job_ready_rst <= '0';
 				e_vcm_shift_complete_rst <= '1', '0' after 1 ns;
 				e_vcm_req_complete_rst <= '1', '0' after 1 ns;
+				e_sch_start_timer <= '0';
 				
 				ns_e_scheduler_handler <= schedule1;
 			when wait_state =>
@@ -1752,6 +1766,7 @@ begin
 				s_sch_job_ready_rst <= '0';
 				s_vcm_shift_complete_rst <= '1', '0' after 1 ns;
 				s_vcm_req_complete_rst <= '1', '0' after 1 ns;
+				s_sch_start_timer <= '0';
 				
 				ns_s_scheduler_handler <= schedule1;
 			when wait_state =>
@@ -1873,6 +1888,7 @@ begin
 				w_sch_job_ready_rst <= '0';
 				w_vcm_shift_complete_rst <= '1', '0' after 1 ns;
 				w_vcm_req_complete_rst <= '1', '0' after 1 ns;
+				w_sch_start_timer <= '0';
 				
 				ns_w_scheduler_handler <= schedule1;
 			when wait_state =>
@@ -2153,7 +2169,7 @@ begin
 				ns_east_sorting_handler <= sort5;
 			when sort7 =>
 				--Is there a new job request? Issue it, if so.
-				if(e_sch_req_next_job = '1' and e_sch_job_valid = '1') then
+				if(e_sch_req_next_job = '1' and e_sch_job_valid = '1' and e_sort_next_job_time /= "11111111111111111111111111111111") then
 					e_sch_next_job_time <= e_sort_next_job_time;
 					e_sch_next_job_midpid <= e_sort_next_job_midpid;
 					e_last_scheduled := e_sort_next_job_midpid;
@@ -2246,7 +2262,7 @@ begin
 				ns_south_sorting_handler <= sort5;
 			when sort7 =>
 				--Is there a new job request? Issue it, if so.
-				if(s_sch_req_next_job = '1' and s_sch_job_valid = '1') then
+				if(s_sch_req_next_job = '1' and s_sch_job_valid = '1' and s_sort_next_job_time /= "11111111111111111111111111111111") then
 					s_sch_next_job_time <= s_sort_next_job_time;
 					s_sch_next_job_midpid <= s_sort_next_job_midpid;
 					s_last_scheduled := s_sort_next_job_midpid;
@@ -2340,7 +2356,7 @@ begin
 				ns_west_sorting_handler <= sort5;
 			when sort7 =>
 				--Is there a new job request? Issue it, if so.
-				if(w_sch_req_next_job = '1' and w_sch_job_valid = '1') then
+				if(w_sch_req_next_job = '1' and w_sch_job_valid = '1' and w_sort_next_job_time /= "11111111111111111111111111111111") then
 					w_sch_next_job_time <= w_sort_next_job_time;
 					w_sch_next_job_midpid <= w_sort_next_job_midpid;
 					w_last_scheduled := w_sort_next_job_midpid;
